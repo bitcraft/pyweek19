@@ -8,7 +8,8 @@ from collections import defaultdict
 __all__ = ['HexMapModel',
            'Graph',
            'Cell',
-           'oddr_to_axial']
+           'oddr_to_axial',
+           'pixel_to_axial']
 
 
 def pixel_to_axial(coords, size):
@@ -157,12 +158,12 @@ class HexMapModel(object):
 
     @staticmethod
     def get_neighbors(cell):
-        return HexMap.neighbor_mat + cell
+        return HexMapModel.neighbor_mat + cell
 
     @staticmethod
     def get_facing(cell, facing):
-        return (cell[0] + HexMap.neighbor_mat[facing],
-                cell[1] + HexMap.neighbor_mat[facing])
+        return (cell[0] + HexMapModel.neighbor_mat[facing],
+                cell[1] + HexMapModel.neighbor_mat[facing])
 
     @staticmethod
     def dist(cell0, cell1):

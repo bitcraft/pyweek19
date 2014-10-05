@@ -55,7 +55,7 @@ class HexMapView(pygame.sprite.Group):
 
     def point_from_surface(self, point):
         if self._rect is None:
-            raise Exception
+            return None
         return point[0] - self._hw, point[1] - self._hh
 
     def point_from_local(self, point):
@@ -63,8 +63,9 @@ class HexMapView(pygame.sprite.Group):
             raise Exception
         return point[0] + self._hw, point[1] + self._hh
 
-    def render(self, surface, rect):
-        self._rect = rect
+    def draw(self, surface):
+        self._rect = surface.get_clip()
+        rect = self._rect
         size_sqrt3 = self.hex_radius * sqrt(3)
         size_ratio = self.hex_radius * (3. / 2.)
         border_color = 61, 42, 42
