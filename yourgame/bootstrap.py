@@ -3,6 +3,7 @@ from pygame.display import set_mode
 
 from scenes import Game
 from title import TitleScene
+from level import LevelScene
 
 TARGETFPS = 60
 SCREENSIZE = (800, 600)
@@ -13,6 +14,7 @@ def bootstrap_game():
     main_surface = set_mode(SCREENSIZE)
     game = Game(TARGETFPS, main_surface)
     game.register_scene(TitleScene(game))
-    game.push_scene("title")
+    game.register_scene(LevelScene(game))
+    game.push_scene("level")
     return game
 
