@@ -1,4 +1,8 @@
+import sys
+
 from pygame.time import Clock
+from pygame import event
+from pygame import QUIT
 
 
 class Game(object):
@@ -27,8 +31,16 @@ class Game(object):
 
     def loop(self):
         while len(self.scene_stack) > 0:
+            event.pump()
+            events = event.get()
+            for e in events:
+                if e.type == QUIT:
+                    while len(self.scene_stack) > 0:
+                        self.pop_scene()
+                    sys.exit()
+            
             delta = self.clock.tick(self.target_fps)
-            self.current_scene.update(delta)
+            self.current_scene.update(delta, events)
             self.current_scene.draw(self.main_surface)
 
 
