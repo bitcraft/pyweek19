@@ -1,3 +1,6 @@
-import yourgameshortname.__main__
+from yourgame.bootstrap import bootstrap_game
+
+
 if __name__ == "__main__":
-    yourgameshortname.__main__.main()
+    game = bootstrap_game()
+    game.loop()
