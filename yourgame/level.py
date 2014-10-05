@@ -17,8 +17,8 @@ class LevelScene(Scene):
     def __init__(self, game):
         super(LevelScene, self).__init__("level", game)
         tiles = pygame.image.load(tileset_path)
-        self.model = LevelModel((20, 20), None)
-        self.view = LevelView(self.model, 32, tiles)
+        self.model = LevelModel((5, 5), None)
+        self.view = LevelView(self.model, 128, tiles)
 
     def setup(self):
         print("Setting up level scene")

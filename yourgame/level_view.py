@@ -30,6 +30,7 @@ class LevelView(pygame.sprite.Group):
         self.inv_prj = None
         self.tile_size = None
         self.tile_images = None
+        self.tile_anchor = None
         self_size = None
 
         self.set_tileset(tile_size, tile_image)
@@ -40,25 +41,43 @@ class LevelView(pygame.sprite.Group):
         self.tile_images = list()
 
         # required for smoothscale
-        ts = (int(tile_size), int(tile_size))
+        d = int(self.tile_size * 1.67)
+        ts = (d, d)
 
         iw, ih = surface.get_size()
         tw = iw // 3
         th = ih // 2
 
+        self.tile_anchor = tw // 2, th // 2
+
         p = product(range(0, iw, tw), range(0, ih, th))
         for index, (x, y) in enumerate(p):
             rect = (x, y, tw, th)
-            tile = smoothscale(surface.subsurface(rect), ts)
+            _tile = smoothscale(surface.subsurface(rect), ts)
+            tile = pygame.Surface(_tile.get_size())
+            tile.fill((255, 0, 255))
+            tile.blit(_tile, (0, 0))
             self.tile_images.append(tile)
 
     def center(self, (x, y)):
         pass
 
+    @staticmethod
+    def cart_iso(self, pos):
+        x, y = pos
+        return x - y, (x + y) / 2
+
+    @staticmethod
+    def iso_cart(self, pos):
+        x, y = pos
+        return (2 * y + x) / 2, (2 * y - x) / 2
+
     def reproject(self, rot):
         self.prj = Matrix4()
         self.prj.scale(self.tile_size, self.tile_size, 1.0)
-        self.prj.rotate_axis(math.radians(60), Vector3(1, 0, 0))
+
+        # NOTE: this 67 value needs tweaking!
+        self.prj.rotate_axis(math.radians(67), Vector3(1, 0, 0))
         self.prj.rotate_axis(rot, Vector3(0, 0, 1))
 
         self.inv_prj = Matrix4()
@@ -88,7 +107,7 @@ class LevelView(pygame.sprite.Group):
 
         if self.surface is None:
             w, h = self._size
-            self.screen_offset = Vector3(w // 2, h // 2, 0)
+            self.screen_offset = Vector3(w // 2, h *1.5, 0)
             self.surface = pygame.Surface(self._size)
 
         if len(self.queue) == 0:
@@ -136,6 +155,25 @@ class LevelView(pygame.sprite.Group):
     def mark_changed(self, position):
         self.queue.add((position[0], position[1], 0))
 
+    def draw_tile(self, surface, pos):
+        x, y, z = pos
+
+        ax, ay, az = self.project_point(Vector3(x, y, z))
+        bx, by, bz = self.project_point(Vector3(x + 1, y, z))
+        cx, cy, cz = self.project_point(Vector3(x + 1, y + 1, z))
+        dx, dy, dz = self.project_point(Vector3(x, y + 1, z))
+
+        points = ((ax, ay), (bx, by), (cx, cy), (dx, dy))
+        color = (255, 128, 255)
+        index = 5
+
+        print ax - bx
+
+        ox, oy = self.tile_anchor
+
+        surface.blit(self.tile_images[index], (ax - ox, ay - oy))
+        pygame.draw.polygon(surface, color, points, 1)
+
     def paint_tile(self, surface, pos, width=0, color=None, outline=False):
         x, y, z = pos
 
@@ -160,9 +198,7 @@ class LevelView(pygame.sprite.Group):
         return self.inv_prj * (point - self.screen_offset) + self.world_offset
 
     def flush_queue(self):
-        self.surface.lock()
-        [self.paint_tile(self.surface, i) for i in self.queue]
-        self.surface.unlock()
+        [self.draw_tile(self.surface, i) for i in self.queue]
         self.queue = set()
 
     def redraw(self):
