@@ -1,9 +1,10 @@
+import itertools
 import pygame
 from pygame import locals
 
 from scenes import Scene
-from level_model import *
-from level_view import *
+from yourgame import hex_model
+from yourgame import hex_view
 import os
 
 __all__ = ['LevelScene']
@@ -16,9 +17,15 @@ class LevelScene(Scene):
 
     def __init__(self, game):
         super(LevelScene, self).__init__("level", game)
-        tiles = pygame.image.load(tileset_path)
-        self.model = LevelModel((5, 5), None)
-        self.view = LevelView(self.model, 128, tiles)
+
+        self.model = hex_model.HexMapModel()
+        for coords in itertools.product(range(20), range(20)):
+            coords = hex_model.oddr_to_axial(coords)
+            self.model.add_cell(coords, hex_model.Cell())
+
+        #tiles = pygame.image.load(tileset_path)
+        tiles = None
+        self.view = hex_view.HexMapView(self.model, 128, tiles)
 
     def setup(self):
         print("Setting up level scene")

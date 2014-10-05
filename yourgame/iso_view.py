@@ -40,19 +40,24 @@ class LevelView(pygame.sprite.Group):
         self.tile_size = float(tile_size)
         self.tile_images = list()
 
-        # required for smoothscale
-        d = int(self.tile_size * 1.67)
-        ts = (d, d)
+        # specific to the tileset
+        spacing = 25, 1
 
         iw, ih = surface.get_size()
         tw = iw // 3
         th = ih // 2
 
+        # required for smoothscale
+        w = 90.0
+        ts = (int(w), int(th * (float(tw) / th)))
+        print ts
+
         self.tile_anchor = tw // 2, th // 2
 
         p = product(range(0, iw, tw), range(0, ih, th))
         for index, (x, y) in enumerate(p):
-            rect = (x, y, tw, th)
+            rect = (x + spacing[0], y + spacing[1],
+                    tw - spacing[0] * 2, th - spacing[1] * 2)
             _tile = smoothscale(surface.subsurface(rect), ts)
             tile = pygame.Surface(_tile.get_size())
             tile.fill((255, 0, 255))
@@ -107,7 +112,7 @@ class LevelView(pygame.sprite.Group):
 
         if self.surface is None:
             w, h = self._size
-            self.screen_offset = Vector3(w // 2, h *1.5, 0)
+            self.screen_offset = Vector3(w // 2, h * 1.5, 0)
             self.surface = pygame.Surface(self._size)
 
         if len(self.queue) == 0:
@@ -166,8 +171,6 @@ class LevelView(pygame.sprite.Group):
         points = ((ax, ay), (bx, by), (cx, cy), (dx, dy))
         color = (255, 128, 255)
         index = 5
-
-        print ax - bx
 
         ox, oy = self.tile_anchor
 
