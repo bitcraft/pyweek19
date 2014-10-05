@@ -23,12 +23,6 @@ class Game(object):
         self.scene_stack.push(scene)
         scene.setup()
 
-    def __getitem__(self, key):
-        return self.states[self.current_scene.name][self.current_index][key]
-
-    def __setitem__(self, key, value):
-        pass
-
     def loop(self):
         while len(self.scene_stack) > 0:
             event.pump()
