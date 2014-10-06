@@ -1,4 +1,3 @@
-import numpy as np
 from math import sqrt
 from itertools import chain
 from collections import defaultdict
@@ -84,7 +83,7 @@ class Cell(object):
 class HexMapModel(object):
 
     ### AXIAL
-    neighbor_mat = np.array((
+    neighbor_mat = ((
         (1, 0),  (1, -1), (0, -1),
         (-1, 0), (-1, 1), (0, 1)
     ))

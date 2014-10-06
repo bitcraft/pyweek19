@@ -42,8 +42,6 @@ class Game(object):
                         self.pop_scene()
                     sys.exit()
 
-                self.current_scene.handle_event(e)
-
             delta = self.clock.tick(self.target_fps)
             self.current_scene.update(delta, events)
             self.current_scene.draw(self.main_surface)
@@ -72,5 +70,3 @@ class Scene(object):
     def update(self, delta, events):
         return True
 
-    def handle_event(self, event):
-        pass

@@ -44,23 +44,21 @@ class LevelScene(Scene):
 
         return cell
 
-    def handle_event(self, event):
-        if event.type == MOUSEMOTION:
-            cell = self.get_nearest_cell(event.pos)
-            if cell:
-                self.view.highlight_cell(cell)
-
-        elif event.type == MOUSEBUTTONUP:
-            cell = self.get_nearest_cell(event.pos)
-            if cell:
-                self.view.select_cell(cell)
-
     def draw(self, surface):
         surface.fill((0, 0, 0))
         self.view.draw(surface)
 
     def update(self, delta, events):
-        pass
+        for event in events:
+            if event.type == MOUSEMOTION:
+                cell = self.get_nearest_cell(event.pos)
+                if cell:
+                    self.view.highlight_cell(cell)
+
+            elif event.type == MOUSEBUTTONUP:
+                cell = self.get_nearest_cell(event.pos)
+                if cell:
+                    self.view.select_cell(cell)
 
     def resume(self):
         print("Resuming level scene")
