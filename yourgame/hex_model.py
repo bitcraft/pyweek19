@@ -55,7 +55,7 @@ def oddr_to_axial(coords):
 def evenr_to_axial(coords):
     # even-r => cube
     q, r = coords
-    x = q - (r + (r & 1)) / 2
+    x = q - (r + (int(round(r, 0)) & 1)) / 2
     z = r
     #y = -x-z
 
@@ -66,13 +66,13 @@ def evenr_to_axial(coords):
     return q, r
 
 
-
 class Cell(object):
 
     def __init__(self):
         self.kind = None
         self.cost = None
         self.filename = None
+        self.raised = False
 
 
 class HexMapModel(object):

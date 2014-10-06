@@ -2,7 +2,7 @@ import pygame
 from pygame.locals import *
 
 import resources
-from euclid import Point3
+from euclid import Point2, Point3
 
 
 class GameEntity(pygame.sprite.Sprite):
@@ -12,3 +12,6 @@ class GameEntity(pygame.sprite.Sprite):
         self.position = Point3(0, 0, 0)
         self.image = resources.tiles['alienBlue.png']
         self.rect = self.image.get_rect()
+
+        w, h = self.image.get_size()
+        self.anchor = Point2(16, 57)
