@@ -25,7 +25,7 @@ class LevelScene(Scene):
             cell.filename = 'tileDirt.png'
             self.model.add_cell(coords, cell)
 
-        self.view = hex_view.HexMapView(self.model, 65)
+        self.view = hex_view.HexMapView(self.model, 32)
 
     def setup(self):
         print("Setting up level scene")
