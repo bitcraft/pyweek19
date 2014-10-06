@@ -78,6 +78,7 @@ class Cell(object):
     def __init__(self):
         self.kind = None
         self.cost = None
+        self.filename = None
 
 
 class HexMapModel(object):

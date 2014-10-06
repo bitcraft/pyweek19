@@ -21,11 +21,11 @@ class LevelScene(Scene):
         self.model = hex_model.HexMapModel()
         for coords in itertools.product(range(20), range(20)):
             coords = hex_model.oddr_to_axial(coords)
-            self.model.add_cell(coords, hex_model.Cell())
+            cell = hex_model.Cell()
+            cell.filename = 'tileDirt.png'
+            self.model.add_cell(coords, cell)
 
-        #tiles = pygame.image.load(tileset_path)
-        tiles = None
-        self.view = hex_view.HexMapView(self.model, 32, tiles)
+        self.view = hex_view.HexMapView(self.model, 32)
 
     def setup(self):
         print("Setting up level scene")
