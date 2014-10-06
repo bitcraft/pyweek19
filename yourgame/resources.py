@@ -43,7 +43,6 @@ def get_text(heading):
         line = fh.readline().strip()
         if not line:
             continue
-        print line
         yield line
 
 

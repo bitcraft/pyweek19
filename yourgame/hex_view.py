@@ -304,7 +304,6 @@ class HexMapView(pygame.sprite.Group):
             pos = project(pos)
             rect = draw_hex(surface, pos, self.border_color, fill)
             _sprite_dirty.append(rect)
-            print rect
         surface.unlock()
 
         # # draw sprites to the surface, not the buffer
