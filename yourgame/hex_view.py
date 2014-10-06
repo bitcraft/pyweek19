@@ -68,12 +68,13 @@ class HexMapView(pygame.sprite.Group):
         self.hex_radius = None
         self.prj = None
         self.inv_prj = None
-        self.reproject()
+        self.tilt = 0
+        self.reproject(self.tilt)
         self.set_radius(radius)
 
-    def reproject(self):
+    def reproject(self, tilt):
         self.prj = Matrix4()
-        self.prj.rotate_axis(radians(45), Vector3(1, 0, 0))
+        self.prj.rotate_axis(radians(tilt), Vector3(1, 0, 0))
         self.inv_prj = self.prj.inverse()
 
     def set_radius(self, radius):
@@ -120,8 +121,10 @@ class HexMapView(pygame.sprite.Group):
         return point[0] + self._hw, point[1] + self._hh
 
     def draw(self, surface):
+        self.reproject(self.tilt)
+        print self.tilt
         self.draw_tiles(surface)
-        #self.draw_grid(surface)
+        self.draw_grid(surface)
 
     def draw_tiles(self, surface):
         self._rect = surface.get_clip()
@@ -143,16 +146,13 @@ class HexMapView(pygame.sprite.Group):
         # render cells
         _clip = surface.get_clip()
         surface.set_clip(rect)
-        for coords in product(range(10), range(10)):
-            q, r = oddr_to_axial(coords)
+        for q, r in product(range(10), range(10)):
+            q, r = evenr_to_axial((r, q))
             cell = self.data.get_cell((q, r))
             pos = size_sqrt3 * (q + r / 2.) + hw, size_ratio * r + hh
             pos = self.prj * Vector3(*pos)
 
             draw_tile(surface, cell.filename, pos)
-            pygame.display.flip()
-            time.sleep(.25)
-
 
         surface.set_clip(_clip)
 
@@ -184,7 +184,7 @@ class HexMapView(pygame.sprite.Group):
         surface.lock()
         for (q, r), cell in self.data.cells:
             pos = size_sqrt3 * (q + r / 2.) + hw, size_ratio * r + hh
-            pos = self.project(pos)
+            pos = self.prj * Vector3(*pos)
 
             if cell in self._selected:
                 fill = select_color

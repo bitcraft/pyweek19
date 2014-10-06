@@ -19,8 +19,8 @@ class LevelScene(Scene):
         super(LevelScene, self).__init__("level", game)
 
         self.model = hex_model.HexMapModel()
-        for coords in itertools.product(range(10), range(10)):
-            coords = hex_model.oddr_to_axial(coords)
+        for q, r in itertools.product(range(10), range(10)):
+            coords = hex_model.evenr_to_axial((r, q))
             cell = hex_model.Cell()
             cell.filename = 'tileDirt.png'
             self.model.add_cell(coords, cell)
@@ -49,10 +49,8 @@ class LevelScene(Scene):
                 if cell:
                     self.view.highlight_cell(cell)
 
-            elif event.type == MOUSEBUTTONUP:
-                cell = self.get_nearest_cell(event.pos)
-                if cell:
-                    self.view.select_cell(cell)
+                if event.buttons[0]:
+                    self.view.tilt = 90 - (event.pos[1] / 540.0 * 90)
 
     def resume(self):
         print("Resuming level scene")

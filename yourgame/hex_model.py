@@ -4,11 +4,11 @@ from collections import defaultdict
 
 from euclid import Vector3
 
-# odd-r : 'pointy top'
+# even-r : 'pointy top'
 
 __all__ = ['HexMapModel',
            'Cell',
-           'oddr_to_axial',
+           'evenr_to_axial',
            'pixel_to_axial']
 
 
@@ -50,6 +50,21 @@ def oddr_to_axial(coords):
     r = z
 
     return q, r
+
+
+def evenr_to_axial(coords):
+    # even-r => cube
+    q, r = coords
+    x = q - (r + (r & 1)) / 2
+    z = r
+    #y = -x-z
+
+    # cube => axial
+    q = x
+    r = z
+
+    return q, r
+
 
 
 class Cell(object):
