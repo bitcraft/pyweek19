@@ -80,7 +80,7 @@ def load():
         image.fill(transparent)
         image.blit(_image, (0, 0))
         image.set_colorkey(transparent, pygame.RLEACCEL)
-        tiles[os.path.basename(filename)] = image
+        tiles[os.path.basename(filename)] = _image
         yield path, image
 
     for name, filename in config.items('font-files'):

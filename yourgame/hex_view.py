@@ -50,6 +50,15 @@ def get_hex_draw(mat, size):
         if fill_color:
             fill(surface, new_points, fill_color)
         outline(surface, new_points, border_color)
+        x1 = x2 = y1 = y2 = 0
+        for x, y in new_points:
+            if x < x1: x1 = x
+            if x > x2: x2 = x
+            if y < y1: y1 = y
+            if y > y2: y2 = y
+        width = abs(x1) + abs(x2)
+        height = abs(y1) + abs(y2)
+        return pygame.Rect(x1, y1, width, height).inflate(1,1)
 
     points = list()
     temp = 2 * pi / 6.
@@ -182,15 +191,12 @@ class HexMapView(pygame.sprite.Group):
     def select_cell(self, cell):
         # when clicked
         self._selected.append(cell)
-        self.dirty = True
-        self.refresh_map = True
 
     def highlight_cell(self, cell):
         # hightlight cell (like for picking with mouse)
         if self._old_hovered is not cell:
             self._old_hovered = self._hovered
             self._hovered = cell
-            self.refresh_map = True
 
     def point_from_surface(self, point):
         # # return a point in map space from the surface (broken!)
@@ -237,8 +243,8 @@ class HexMapView(pygame.sprite.Group):
 
         if self._thread is None:
             self._queue = queue.Queue()
-            self.thread = BlitThread(self._queue, self._buffer.blit)
-            self.thread.start()
+            self._thread = BlitThread(self._queue, self._buffer.blit)
+            self._thread.start()
 
         if self._project is None:
             self._map_rect, \
@@ -280,8 +286,10 @@ class HexMapView(pygame.sprite.Group):
             self.refresh_map = False
             _dirty = [self._rect]
 
+        _sprite_dirty = list()
+
         # draw cell lines (outlines and highlights)
-        _buffer.lock()
+        surface.lock()
         for pos, cell in self.data.cells:
             if cell in self._selected:
                 fill = self.select_color
@@ -294,13 +302,10 @@ class HexMapView(pygame.sprite.Group):
 
             # convert => screen
             pos = project(pos)
-            draw_hex(_buffer, pos, self.border_color, fill)
-        _buffer.unlock()
-
-        for rect in _dirty:
-            surface.blit(_buffer, rect.topleft, rect)
-
-        _sprite_dirty = list()
+            rect = draw_hex(surface, pos, self.border_color, fill)
+            _sprite_dirty.append(rect)
+            print rect
+        surface.unlock()
 
         # # draw sprites to the surface, not the buffer
         for sprite in self.sprites():
