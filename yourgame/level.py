@@ -20,16 +20,21 @@ class LevelScene(Scene):
         super(LevelScene, self).__init__("level", game)
 
         # these coordinates are a bit wonky, the draw order hack messes it up
-        raised = ((2, 3), (4, 5), (1, 7))
         self.model = hex_model.HexMapModel()
         for q, r in itertools.product(range(10), range(10)):
             coords = hex_model.evenr_to_axial((r, q))
             cell = hex_model.Cell()
             cell.filename = 'tileDirt.png'
-            if coords in raised:
-                cell.raised = True
-                cell.filename = 'tileRock_full.png'
+            #if coords in raised:
+            #    cell.raised = True
+            #    cell.filename = 'tileRock_full.png'
             self.model.add_cell(coords, cell)
+        print(self.model._data)
+        for c in (i for i in self.model.pathfind((0, 0), (5, 5))[0]):
+            print(c, self.model._data[c])
+            #print(self.model._data[c])
+
+            self.model._data[hex_model.evenr_to_axial(c)].raised = True
 
         self.view = hex_view.HexMapView(self.model, 32)
 
