@@ -2,7 +2,7 @@ import itertools
 import pygame
 from pygame.locals import *
 
-from scenes import Scene
+from yourgame.scenes import Scene
 from yourgame import hex_model
 from yourgame import hex_view
 import os

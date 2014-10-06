@@ -4,12 +4,12 @@ import pygame
 from pygame import init
 from pygame.display import set_mode
 
-from . import config
-from scenes import Game
-from title import TitleScene
-from level import LevelScene
-#from dialog import DialogScene
-import resources
+from yourgame import config
+from yourgame.scenes import Game
+from yourgame.title import TitleScene
+from yourgame.level import LevelScene
+#from yourgame.dialog import DialogScene
+from yourgame import resources
 
 logger = logging.getLogger('yourgame.bootstrap')
 filename = os.path.join(os.path.dirname(__file__), '..', 'data', 'yourgame.ini')

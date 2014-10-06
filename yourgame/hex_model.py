@@ -2,7 +2,7 @@ from math import sqrt
 from itertools import chain
 from collections import defaultdict
 
-from euclid import Vector3
+from yourgame.euclid import Vector3
 
 # odd-r : 'pointy top'
 
