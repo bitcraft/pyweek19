@@ -9,7 +9,8 @@ from yourgame.euclid import Vector3
 __all__ = ['HexMapModel',
            'Cell',
            'evenr_to_axial',
-           'pixel_to_axial']
+           'pixel_to_axial',
+           'sprites_to_axial']
 
 
 def pixel_to_axial(coords, size):
@@ -66,6 +67,19 @@ def evenr_to_axial(coords):
     return q, r
 
 
+def sprites_to_axial(coords):
+    q, r = coords
+    x = q - (r + (int(round(r, 0)) & 1)) / 2
+    z = r
+    #y = -x-z
+
+    # cube => axial
+    q = x
+    r = z
+
+    return q, r
+
+
 class Cell(object):
 
     def __init__(self):
@@ -73,6 +87,7 @@ class Cell(object):
         self.cost = None
         self.filename = None
         self.raised = False
+        self.height = 0.0
 
 
 class HexMapModel(object):

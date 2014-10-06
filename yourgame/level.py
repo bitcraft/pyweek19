@@ -8,6 +8,7 @@ import gui
 import hex_model
 import hex_view
 import entity
+from . import config
 import os
 
 __all__ = ['LevelScene']
@@ -19,7 +20,7 @@ class LevelSceneMode(object):
     def __init__(self):
         pass
 
-    def handle_click(self, view, cell):
+    def handle_click(self, button, view, cell):
         pass
 
     def draw(self, surface):
@@ -47,18 +48,25 @@ class EditMode(LevelSceneMode):
 
         self.sprite = scene.sprite
 
-    def handle_click(self, view, cell):
-        if self.state == 0:
-            self.change_state(1)
+    def handle_click(self, button, view, cell):
 
-        elif self.state == 1:
-            self.change_state(2)
+        # left click
+        if button == 1:
+            if self.state == 0:
+                self.change_state(1)
 
-        cell.raised = not cell.raised
-        if cell.raised:
-            cell.filename = 'tileRock_full.png'
-        else:
-            cell.filename = 'tileGrass.png'
+            elif self.state == 1:
+                self.change_state(2)
+
+            cell.raised = not cell.raised
+            if cell.raised:
+                cell.height = 1
+                cell.filename = 'tileRock_full.png'
+                #view.dirty = True
+            else:
+                cell.height = 0
+                cell.filename = 'tileGrass.png'
+                #view.dirty = True
 
     def change_state(self, state):
         change = False
@@ -95,8 +103,8 @@ class EditMode(LevelSceneMode):
             raise ValueError('cannot change state without video')
 
         sw, sh = self._rect.size
-        tmp = pygame.Surface((sw, sh), pygame.SRCALPHA)
         rect = pygame.Rect(((0, 5), (sw, sh * .15))).inflate(-10, 0)
+        tmp = pygame.Surface(rect.inflate(10, 10).size, pygame.SRCALPHA)
         self.border.draw(tmp, rect)
         gui.draw_text(tmp, text,
                       (255, 255, 255), rect.inflate(-20, -20),
@@ -146,10 +154,12 @@ class LevelScene(Scene):
             cell.filename = 'tileGrass.png'
             if coords in raised:
                 cell.raised = True
+                cell.height = 1
                 cell.filename = 'tileRock_full.png'
             self.model.add_cell(coords, cell)
 
-        self.view = hex_view.HexMapView(self.model, 32)
+        self.view = hex_view.HexMapView(self.model,
+                                        config.getint('display', 'tile_size'))
 
         sprite = entity.GameEntity()
         sprite.position.x = 0
@@ -193,8 +203,8 @@ class LevelScene(Scene):
         self.view.draw(surface)
         self.mode.draw(surface)
 
-    def handle_click(self, cell):
-        self.mode.handle_click(self.view, cell)
+    def handle_click(self, button, cell):
+        self.mode.handle_click(button, self.view, cell)
 
     def update(self, delta, events):
         for event in events:
@@ -203,13 +213,10 @@ class LevelScene(Scene):
                 if cell:
                     self.view.highlight_cell(cell)
 
-                #if event.buttons[0]:
-                #    self.view.tilt = 90 - (event.pos[1] / 540.0 * 90)
-
             if event.type == MOUSEBUTTONUP:
                 cell = self.get_nearest_cell(event.pos)
                 if cell:
-                    self.handle_click(cell)
+                    self.handle_click(event.button, cell)
 
         self.mode.update(delta, events)
 

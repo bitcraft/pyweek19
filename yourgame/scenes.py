@@ -33,8 +33,9 @@ class Game(object):
             self.current_scene.resume()
 
     def loop(self):
+        draw_interval = 1 / float(self.target_fps)
+        draw_timer = 0
         while len(self.scene_stack) > 0:
-            event.pump()
             events = event.get()
             for e in events:
                 if e.type == QUIT:
@@ -42,10 +43,16 @@ class Game(object):
                         self.pop_scene()
                     sys.exit()
 
-            delta = self.clock.tick(self.target_fps)
+            delta = self.clock.tick()
             self.current_scene.update(delta, events)
-            self.current_scene.draw(self.main_surface)
-            flip()
+
+            print 'update'
+            draw_timer += delta
+            if draw_timer >= draw_interval:
+                print 'draw'
+                draw_timer -= draw_interval
+                self.current_scene.draw(self.main_surface)
+                flip()
 
 
 class Scene(object):

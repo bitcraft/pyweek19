@@ -11,7 +11,6 @@ __all__ = ['load', 'sounds', 'images', 'music', 'maps', 'tiles', 'play_music',
 
 # because i am lazy
 _jpath = os.path.join
-
 resource_path = None
 sounds = None
 images = None
