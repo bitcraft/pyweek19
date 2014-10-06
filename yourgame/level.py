@@ -2,10 +2,10 @@ import itertools
 import pygame
 from pygame.locals import *
 
-from scenes import Scene
-import hex_model
-import hex_view
-import entity
+from yourgame.scenes import Scene
+from yourgame import hex_model
+from yourgame import hex_view
+from yourgame import entity
 import os
 
 __all__ = ['LevelScene']

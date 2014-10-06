@@ -1,8 +1,8 @@
 import pygame
 from pygame.locals import *
 
-import resources
-from euclid import Point2, Point3
+from yourgame import resources
+from yourgame.euclid import Point2, Point3
 
 
 class GameEntity(pygame.sprite.Sprite):
