@@ -2,17 +2,18 @@ from math import sqrt
 from itertools import chain
 from collections import defaultdict
 
+from euclid import Vector3
+
 # odd-r : 'pointy top'
 
 __all__ = ['HexMapModel',
-           'Graph',
            'Cell',
            'oddr_to_axial',
            'pixel_to_axial']
 
 
 def pixel_to_axial(coords, size):
-    x, y = coords
+    x, y, z = coords
     return (1. / 3. * sqrt(3) * x - 1. / 3. * y) / size, (2. / 3.) * y / size
 
 
@@ -49,28 +50,6 @@ def oddr_to_axial(coords):
     r = z
 
     return q, r
-
-
-class Graph(object):
-
-    def __init__(self):
-        self._data = defaultdict(list)
-
-    def edges(self):
-        for key, value in self._data.items():
-            yield chain([key], value)
-
-    def nodes(self):
-        for key, value in self._data.items():
-            yield key
-            for i in value:
-                yield i
-
-    def add_node(self, node):
-        self._data[node] = list()
-
-    def add_edge(self, node0, node1):
-        self._data[node0].append(node1)
 
 
 class Cell(object):
