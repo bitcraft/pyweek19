@@ -1,6 +1,6 @@
 import itertools
 import pygame
-from pygame import locals
+from pygame.locals import *
 
 from scenes import Scene
 from yourgame import hex_model
@@ -21,11 +21,11 @@ class LevelScene(Scene):
         self.model = hex_model.HexMapModel()
         for coords in itertools.product(range(20), range(20)):
             coords = hex_model.oddr_to_axial(coords)
-            self.model.add_cell(coords, hex_model.Cell())
+            cell = hex_model.Cell()
+            cell.filename = 'tileDirt.png'
+            self.model.add_cell(coords, cell)
 
-        #tiles = pygame.image.load(tileset_path)
-        tiles = None
-        self.view = hex_view.HexMapView(self.model, 128, tiles)
+        self.view = hex_view.HexMapView(self.model, 32)
 
     def setup(self):
         print("Setting up level scene")
@@ -33,11 +33,32 @@ class LevelScene(Scene):
     def teardown(self):
         print("Tearing down level scene")
 
+    def get_nearest_cell(self, coords):
+        pt = self.view.point_from_surface(coords)
+        if pt:
+            coords = hex_model.pixel_to_axial(pt, self.view.hex_radius)
+
+        cell = None
+        if coords:
+            cell = self.view.data.get_nearest_cell(coords)
+
+        return cell
+
     def draw(self, surface):
+        surface.fill((0, 0, 0))
         self.view.draw(surface)
 
     def update(self, delta, events):
-        pass
+        for event in events:
+            if event.type == MOUSEMOTION:
+                cell = self.get_nearest_cell(event.pos)
+                if cell:
+                    self.view.highlight_cell(cell)
+
+            elif event.type == MOUSEBUTTONUP:
+                cell = self.get_nearest_cell(event.pos)
+                if cell:
+                    self.view.select_cell(cell)
 
     def resume(self):
         print("Resuming level scene")

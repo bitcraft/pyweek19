@@ -1,8 +1,11 @@
 from math import ceil
 from itertools import product
-
 from pygame import Surface, Rect, RLEACCEL
 import pygame
+
+__all__ = ['GraphicBox',
+           'draw_text',
+           'render_outline_text']
 
 
 class GraphicBox(object):
@@ -14,7 +17,7 @@ class GraphicBox(object):
     def __init__(self, filename, hollow=False):
         self.hollow = hollow
 
-        image = res.loadImage(filename, 0, 0, 1)
+        image = pygame.image.load(filename)
         iw, self.th = image.get_size()
         self.tw = iw / 9
         names = "nw ne sw se n e s w c".split()
@@ -60,19 +63,17 @@ def draw_text(surface, text, color, rect, font=None, aa=False, bkg=None):
     """
     rect = Rect(rect)
     y = rect.top
-    lineSpacing = -2
-    maxWidth = 0
-    maxHeight = 0
+    line_spacing = -2
 
-    if font == None:
-        fullpath = pygame.font.get_default_font()
-        font = pygame.font.Font(fullpath, 12)
+    if font is None:
+        full_path = pygame.font.get_default_font()
+        font = pygame.font.Font(full_path, 16)
 
     # get the height of the font
-    fontHeight = font.size("Tg")[1]
+    font_height = font.size("Tg")[1]
 
     # for very small fonts, turn off antialiasing
-    if fontHeight < 16:
+    if font_height < 16:
         aa = 0
         bkg = None
 
@@ -80,7 +81,7 @@ def draw_text(surface, text, color, rect, font=None, aa=False, bkg=None):
         i = 1
 
         # determine if the row of text will be outside our area
-        if y + fontHeight > rect.bottom:
+        if y + font_height > rect.bottom:
             break
 
         # determine maximum width of line
@@ -104,7 +105,7 @@ def draw_text(surface, text, color, rect, font=None, aa=False, bkg=None):
 
             surface.blit(image, (rect.left, y))
 
-        y += fontHeight + lineSpacing
+        y += font_height + line_spacing
 
         # remove the text we just blitted
         text = text[i:]
