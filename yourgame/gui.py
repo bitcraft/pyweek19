@@ -34,6 +34,12 @@ class GraphicBox(object):
     def draw(self, surface, rect):
         ox, oy, w, h = Rect(rect)
 
+        if not self.hollow:
+            p = product(range(self.tw + ox, w - self.tw + ox, self.tw),
+                        range(self.th + oy, h - self.th + oy, self.th))
+
+            [surface.blit(self.tiles['c'], (x, y)) for x, y in p]
+
         for x in range(self.tw + ox, w - self.tw + ox, self.tw):
             surface.blit(self.tiles['n'], (x, oy))
             surface.blit(self.tiles['s'], (x, h - self.th + oy))
@@ -42,11 +48,6 @@ class GraphicBox(object):
             surface.blit(self.tiles['w'], (w - self.tw + ox, y))
             surface.blit(self.tiles['e'], (ox, y))
 
-        if not self.hollow:
-            p = product(range(self.tw + ox, w - self.tw + ox, self.tw),
-                        range(self.th + oy, h - self.th + oy, self.th))
-
-            [surface.blit(self.tiles['c'], (x, y)) for x, y in p]
 
         surface.blit(self.tiles['nw'], (ox, oy))
         surface.blit(self.tiles['ne'], (w - self.tw + ox, oy))

@@ -1,0 +1,5 @@
+editor mode intro
+=================
+
+Welcome to the edit mode!  Click a hex tile to toggle the raised state.
+Good!  Now use the arrow keys to move around.

@@ -4,24 +4,59 @@ import logging
 import glob
 logger = logging.getLogger('yourgame.resources')
 
-__all__ = ['load', 'sounds', 'images', 'music', 'maps', 'tiles', 'play_music']
+import gui
+
+__all__ = ['load', 'sounds', 'images', 'music', 'maps', 'tiles', 'play_music',
+           'border']
 
 # because i am lazy
 _jpath = os.path.join
 
+resource_path = None
 sounds = None
 images = None
 music = None
 fonts = None
 maps = None
 tiles = None
+border_path = None
+border = None
+
+
+def get_text(heading):
+    fh = open(_jpath(resource_path, 'dialogs.txt'))
+
+    found = False
+    while 1:
+        line = fh.readline().strip()
+        if line.lower() == heading.lower():
+            found = True
+            break
+
+    if not found:
+        raise ValueError('heading not found: {}'.format(heading))
+
+    line = fh.readline()
+    if not line.startswith('='):
+        raise ValueError('improperly formatted header: {}'.format(heading))
+
+    while 1:
+        line = fh.readline().strip()
+        if not line:
+            continue
+        print line
+        yield line
 
 
 def load():
+    pygame.font.init()
+
     logger.info("loading")
     from yourgame import config
 
+    global resource_path
     global sounds, images, music, fonts, maps, tiles
+    global border, border_path
 
     tiles = dict()
     sounds = dict()
@@ -33,11 +68,14 @@ def load():
     resource_path = config.get('paths', 'resource-path')
     resource_path = os.path.abspath(resource_path)
 
+    border_path = _jpath(resource_path, 'dialog.png')
+
     # load the tiles
     tile_path = _jpath(resource_path, 'tiles', '*png')
     for filename in glob.glob(tile_path):
         path = _jpath(resource_path, 'tiles', filename)
         image = pygame.image.load(path).convert_alpha()
+
         tiles[os.path.basename(filename)] = image
         yield path, image
 

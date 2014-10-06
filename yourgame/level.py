@@ -3,6 +3,8 @@ import pygame
 from pygame.locals import *
 
 from scenes import Scene
+import resources
+import gui
 import hex_model
 import hex_view
 import entity
@@ -10,8 +12,124 @@ import os
 
 __all__ = ['LevelScene']
 
-tileset_path = os.path.join(os.path.dirname(__file__),
-                            '..', 'data', 'tileset00.png')
+
+class LevelSceneMode(object):
+    """ provides various handlers to abstract gameplay into modes
+    """
+    def __init__(self):
+        pass
+
+    def handle_click(self, view, cell):
+        pass
+
+    def draw(self, surface):
+        pass
+
+    def update(self, delta, events):
+        pass
+
+class EditMode(LevelSceneMode):
+    """
+    states
+    ======
+
+    0 - show intro
+    1 - no intro dialog
+    """
+    def __init__(self, scene):
+        super(EditMode, self).__init__()
+        self.border = gui.GraphicBox(resources.border_path, False)
+        self.state = None
+        self._font = pygame.font.Font(resources.fonts['rez'], 24)
+        self._surface = None
+        self._rect = None
+        self._dialog = None
+
+        self.sprite = scene.sprite
+
+    def handle_click(self, view, cell):
+        if self.state == 0:
+            self.change_state(1)
+
+        elif self.state == 1:
+            self.change_state(2)
+
+        cell.raised = not cell.raised
+        if cell.raised:
+            cell.filename = 'tileRock_full.png'
+        else:
+            cell.filename = 'tileGrass.png'
+
+    def change_state(self, state):
+        change = False
+        if self.state is None and state == 0:
+            self.state = state
+            self._dialog = resources.get_text('editor mode intro')
+            text = next(self._dialog)
+            self.render_dialog(text)
+            change = True
+
+        elif self.state == 0 and state == 1:
+            self.state = state
+            self._surface = None
+            change = True
+
+        elif self.state == 1 and state == 2:
+            self.state = state
+            text = next(self._dialog)
+            self.render_dialog(text)
+            change = True
+
+        elif self.state == 2 and state == 3:
+            self.state = state
+            self._surface = None
+            self._dialog = None
+            change = True
+
+        if not change:
+            raise ValueError("change to undefined state {} {}".format(
+                self.state, state))
+
+    def render_dialog(self, text):
+        if self._rect is None:
+            raise ValueError('cannot change state without video')
+
+        sw, sh = self._rect.size
+        tmp = pygame.Surface((sw, sh), pygame.SRCALPHA)
+        rect = pygame.Rect(((0, 5), (sw, sh * .15))).inflate(-10, 0)
+        self.border.draw(tmp, rect)
+        gui.draw_text(tmp, text,
+                      (255, 255, 255), rect.inflate(-20, -20),
+                      self._font, True)
+        self._surface = tmp
+
+    def draw(self, surface):
+        self._rect = surface.get_rect()
+
+        if self.state is None:
+            self.change_state(0)
+
+        if self._surface:
+            surface.blit(self._surface, (0, 0))
+
+    def update(self, delta, events):
+        moved = False
+        pressed = pygame.key.get_pressed()
+        if pressed[K_DOWN]:
+            self.sprite.position.y += .1
+            moved = True
+        elif pressed[K_UP]:
+            self.sprite.position.y -= .1
+            moved = True
+        if pressed[K_LEFT]:
+            self.sprite.position.x -= .1
+            moved = True
+        elif pressed[K_RIGHT]:
+            self.sprite.position.x += .1
+            moved = True
+
+        if moved and self.state == 2:
+            self.change_state(3)
 
 
 class LevelScene(Scene):
@@ -25,7 +143,7 @@ class LevelScene(Scene):
         for q, r in itertools.product(range(10), range(10)):
             coords = hex_model.evenr_to_axial((r, q))
             cell = hex_model.Cell()
-            cell.filename = 'tileDirt.png'
+            cell.filename = 'tileGrass.png'
             if coords in raised:
                 cell.raised = True
                 cell.filename = 'tileRock_full.png'
@@ -56,6 +174,9 @@ class LevelScene(Scene):
 
         self.sprite = sprite
 
+        # this must come last
+        self.mode = EditMode(self)
+
     def setup(self):
         print("Setting up level scene")
 
@@ -70,13 +191,10 @@ class LevelScene(Scene):
     def draw(self, surface):
         surface.fill((0, 0, 0))
         self.view.draw(surface)
+        self.mode.draw(surface)
 
     def handle_click(self, cell):
-        cell.raised = not cell.raised
-        if cell.raised:
-            cell.filename = 'tileRock_full.png'
-        else:
-            cell.filename = 'tileDirt.png'
+        self.mode.handle_click(self.view, cell)
 
     def update(self, delta, events):
         for event in events:
@@ -93,15 +211,7 @@ class LevelScene(Scene):
                 if cell:
                     self.handle_click(cell)
 
-        pressed = pygame.key.get_pressed()
-        if pressed[K_DOWN]:
-            self.sprite.position.y += .1
-        elif pressed[K_UP]:
-            self.sprite.position.y -= .1
-        if pressed[K_LEFT]:
-            self.sprite.position.x -= .1
-        elif pressed[K_RIGHT]:
-            self.sprite.position.x += .1
+        self.mode.update(delta, events)
 
     def resume(self):
         print("Resuming level scene")
