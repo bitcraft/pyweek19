@@ -177,14 +177,14 @@ class HexMapModel(object):
 
         def surrounding_clip(coord, limit):
             x, y = coord
-            return {clip(i, (0, 0), limit) for i in
+            return (clip(i, (0, 0), limit) for i in
                     ((x - 1, y - 1), (x - 1, y), (x - 1, y + 1), (x, y - 1),
-                     (x, y + 1), (x + 1, y - 1), (x + 1, y), (x + 1, y + 1))}
+                     (x, y + 1), (x + 1, y)))
 
         def surrounding_noclip(coord, limit):
             x, y = coord
-            return (x - 1, y - 1), (x - 1, y), (x - 1, y + 1), (x, y - 1), \
-                   (x, y + 1), (x + 1, y - 1), (x + 1, y), (x + 1, y + 1)
+            return ((x - 1, y - 1), (x - 1, y), (x - 1, y + 1), (x, y - 1),
+                   (x, y + 1), (x + 1, y))
 
         def retrace_path(c):
             path = [c]

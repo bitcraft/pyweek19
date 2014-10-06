@@ -30,11 +30,8 @@ class LevelScene(Scene):
             #    cell.filename = 'tileRock_full.png'
             self.model.add_cell(coords, cell)
         print(self.model._data)
-        for c in (i for i in self.model.pathfind((0, 0), (5, 5))[0]):
-            print(c, self.model._data[c])
-            #print(self.model._data[c])
-
-            self.model._data[hex_model.evenr_to_axial(c)].raised = True
+        for c in (i for i in self.model.pathfind((0, 0), (5, 8))[0]):
+            self.model._data[c].raised = True
 
         self.view = hex_view.HexMapView(self.model, 32)
 
