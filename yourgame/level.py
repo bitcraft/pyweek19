@@ -19,7 +19,7 @@ class LevelScene(Scene):
         super(LevelScene, self).__init__("level", game)
 
         self.model = hex_model.HexMapModel()
-        for coords in itertools.product(range(20), range(20)):
+        for coords in itertools.product(range(10), range(10)):
             coords = hex_model.oddr_to_axial(coords)
             cell = hex_model.Cell()
             cell.filename = 'tileDirt.png'
@@ -34,15 +34,9 @@ class LevelScene(Scene):
         print("Tearing down level scene")
 
     def get_nearest_cell(self, coords):
-        pt = self.view.point_from_surface(coords)
-        if pt:
-            coords = hex_model.pixel_to_axial(pt, self.view.hex_radius)
-
-        cell = None
-        if coords:
-            cell = self.view.data.get_nearest_cell(coords)
-
-        return cell
+        point = self.view.point_from_surface(coords)
+        if point:
+            return self.view.data.get_nearest_cell(point)
 
     def draw(self, surface):
         surface.fill((0, 0, 0))
