@@ -48,7 +48,8 @@ def get_hex_tile(mat, radius):
     tile_dict = dict()
     for filename, image in resources.tiles.items():
         if filename.startswith('tile'):
-            image = smoothscale(image, size)
+            if not size[0] == image.get_width():
+                image = smoothscale(image, size)
         tile_dict[filename] = image
     return draw_tile
 
@@ -122,9 +123,8 @@ class HexMapView(pygame.sprite.Group):
 
     def draw(self, surface):
         self.reproject(self.tilt)
-        print self.tilt
         self.draw_tiles(surface)
-        self.draw_grid(surface)
+        #self.draw_grid(surface)
 
     def draw_tiles(self, surface):
         self._rect = surface.get_clip()

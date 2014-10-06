@@ -37,7 +37,7 @@ def load():
     tile_path = _jpath(resource_path, 'tiles', '*png')
     for filename in glob.glob(tile_path):
         path = _jpath(resource_path, 'tiles', filename)
-        image = pygame.image.load(path)
+        image = pygame.image.load(path).convert_alpha()
         tiles[os.path.basename(filename)] = image
         yield path, image
 
