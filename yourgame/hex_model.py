@@ -167,7 +167,8 @@ class HexMapModel(object):
 
     @staticmethod
     def get_neighbors(cell):
-        return HexMapModel.neighbor_mat + cell
+        for other in HexMapModel.neighbor_mat:
+            yield (other[0] + cell[0], other[1], cell[1])
 
     @staticmethod
     def get_facing(cell, facing):
