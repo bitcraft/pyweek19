@@ -1,4 +1,4 @@
-from scenes import Scene
+from yourgame.scenes import Scene
 
 
 class TitleScene(Scene):

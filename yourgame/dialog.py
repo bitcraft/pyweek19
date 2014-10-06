@@ -2,7 +2,7 @@ import pygame
 from pygame.locals import *
 
 from yourgame import gui
-from scenes import Scene
+from yourgame.scenes import Scene
 import os
 
 from this import s as demo_text
