@@ -199,9 +199,14 @@ class LevelScene(Scene):
             return self.view.data.get_nearest_cell(point)
 
     def draw(self, surface):
-        surface.fill((0, 0, 0))
-        self.view.draw(surface)
-        self.mode.draw(surface)
+        #surface.fill((0, 0, 0))
+
+        dirty = self.view.draw(surface)
+        #self.mode.draw(surface)
+        return dirty
+
+    def clear(self, surface):
+        self.view.clear(surface)
 
     def handle_click(self, button, cell):
         self.mode.handle_click(button, self.view, cell)

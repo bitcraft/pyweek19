@@ -3,7 +3,7 @@ import sys
 from pygame.time import Clock
 from pygame import event
 from pygame import QUIT
-from pygame.display import flip
+from pygame.display import flip, update
 
 
 class Game(object):
@@ -35,24 +35,27 @@ class Game(object):
     def loop(self):
         draw_interval = 1 / float(self.target_fps)
         draw_timer = 0
+        event_get = event.get
+        tick = self.clock.tick
+        main_surface = self.main_surface
+
         while len(self.scene_stack) > 0:
-            events = event.get()
+            events = event_get()
             for e in events:
                 if e.type == QUIT:
                     while len(self.scene_stack) > 0:
                         self.pop_scene()
                     sys.exit()
 
-            delta = self.clock.tick()
+            delta = tick()
             self.current_scene.update(delta, events)
 
-            print 'update'
             draw_timer += delta
             if draw_timer >= draw_interval:
-                print 'draw'
                 draw_timer -= draw_interval
-                self.current_scene.draw(self.main_surface)
-                flip()
+                self.current_scene.clear(main_surface)
+                dirty = self.current_scene.draw(main_surface)
+                update(dirty)
 
 
 class Scene(object):
@@ -77,3 +80,5 @@ class Scene(object):
     def update(self, delta, events):
         return True
 
+    def clear(self, surface):
+        pass

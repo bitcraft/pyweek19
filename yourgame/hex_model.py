@@ -1,8 +1,4 @@
 from math import sqrt
-from itertools import chain
-from collections import defaultdict
-
-from yourgame.euclid import Vector3
 
 # even-r : 'pointy top'
 
@@ -37,6 +33,19 @@ def axial_to_oddr(coords):
     r = z
 
     return q, r
+
+
+def axial_to_evenr(coords):
+    # axial => cube
+    x = coords[0]
+    z = coords[1]
+    #y = -x-z
+
+    # cube => evenr
+    q = x + (z + (z & 1)) / 2
+    r = z
+
+    return q, z
 
 
 def oddr_to_axial(coords):
@@ -129,7 +138,7 @@ class HexMapModel(object):
         x_list = list()
         y_list = list()
         for cell in self._data.keys():
-            x, y = axial_to_oddr(cell)
+            x, y = axial_to_evenr(cell)
             x_list.append(x)
             y_list.append(y)
 
