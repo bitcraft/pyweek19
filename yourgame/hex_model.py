@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from collections import defaultdict
 from heapq import heappush, heappop
 from itertools import chain
@@ -12,7 +13,8 @@ from yourgame.euclid import Vector3
 __all__ = ['HexMapModel',
            'Cell',
            'evenr_to_axial',
-           'pixel_to_axial']
+           'pixel_to_axial',
+           'sprites_to_axial']
 
 
 def pixel_to_axial(coords, size):
@@ -39,6 +41,19 @@ def axial_to_oddr(coords):
     r = z
 
     return q, r
+
+
+def axial_to_evenr(coords):
+    # axial => cube
+    x = coords[0]
+    z = coords[1]
+    #y = -x-z
+
+    # cube => evenr
+    q = x + (z + (z & 1)) / 2
+    r = z
+
+    return q, z
 
 
 def oddr_to_axial(coords):
@@ -69,6 +84,19 @@ def evenr_to_axial(coords):
     return q, r
 
 
+def sprites_to_axial(coords):
+    q, r = coords
+    x = q - (r + (int(round(r, 0)) & 1)) / 2
+    z = r
+    #y = -x-z
+
+    # cube => axial
+    q = x
+    r = z
+
+    return q, r
+
+
 class Cell(object):
 
     def __init__(self):
@@ -76,6 +104,7 @@ class Cell(object):
         self.cost = None
         self.filename = None
         self.raised = False
+        self.height = 0.0
 
 
 class HexMapModel(object):
@@ -117,7 +146,7 @@ class HexMapModel(object):
         x_list = list()
         y_list = list()
         for cell in self._data.keys():
-            x, y = axial_to_oddr(cell)
+            x, y = axial_to_evenr(cell)
             x_list.append(x)
             y_list.append(y)
 
@@ -155,7 +184,8 @@ class HexMapModel(object):
 
     @staticmethod
     def get_neighbors(cell):
-        return HexMapModel.neighbor_mat + cell
+        for other in HexMapModel.neighbor_mat:
+            yield (other[0] + cell[0], other[1], cell[1])
 
     @staticmethod
     def get_facing(cell, facing):

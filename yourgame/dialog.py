@@ -14,9 +14,6 @@ demo_text = "".join([d.get(c, c) for c in demo_text])
 
 __all__ = ['DialogScene']
 
-border_path = os.path.join(os.path.dirname(__file__),
-                           '..', 'data', 'dialog.png')
-
 
 class DialogScene(Scene):
 

@@ -1,6 +1,8 @@
 import pygame
 import pygame.gfxdraw
+import threading
 from pygame.transform import smoothscale
+from six.moves import queue
 from math import sin, cos, pi, sqrt, radians, ceil
 from itertools import product
 
@@ -10,6 +12,32 @@ from yourgame.hex_model import *
 
 
 __all__ = ['HexMapView']
+
+class BlitThread(threading.Thread):
+    def __init__(self, q, blit):
+        threading.Thread.__init__(self)
+        self.q = q
+        self.blit = blit
+        self.running = False
+        self.daemon = True
+
+    def run(self):
+        blit = self.blit
+        get = self.q.get
+        task_done = self.q.task_done
+
+        self.running = True
+        while self.running:
+            try:
+                surface, pos = get(1)
+            except queue.Empty:
+                self.running = False
+                "dead"
+                break
+
+            else:
+                blit(surface, pos)
+                task_done()
 
 
 def vec(i):
@@ -22,6 +50,15 @@ def get_hex_draw(mat, size):
         if fill_color:
             fill(surface, new_points, fill_color)
         outline(surface, new_points, border_color)
+        x1 = x2 = y1 = y2 = 0
+        for x, y in new_points:
+            if x < x1: x1 = x
+            if x > x2: x2 = x
+            if y < y1: y1 = y
+            if y > y2: y2 = y
+        width = abs(x1) + abs(x2)
+        height = abs(y1) + abs(y2)
+        return pygame.Rect(x1, y1, width, height).inflate(1,1)
 
     points = list()
     temp = 2 * pi / 6.
@@ -37,13 +74,13 @@ def get_hex_draw(mat, size):
 
 
 def get_hex_tile(mat, radius):
-    def draw_tile(surface, filename, coords):
+    def draw_tile(blit, filename, coords):
         x, y, z = coords
         tile = tile_dict[filename]
-        surface.blit(tile, (int(x - half_width), int(y - radius)))
+        blit((tile, (int(x - half_width), int(y - radius))))
 
-    height = radius * 2
-    width = (sqrt(3) / 2 * height) + 1
+    height = radius * 2 + 1
+    width = (sqrt(3) / 2 * height)
     half_width = int(width / 2)
     size = (int(width), int(height))
     tile_dict = dict()
@@ -54,27 +91,83 @@ def get_hex_tile(mat, radius):
             tile_dict[filename] = image
 
     # this is a heck!
-    radius -= 8
+    radius -= 16
 
     return draw_tile
 
 
+def get_projection(data, radius, mat, rect):
+    # caches the entire operation of axial coords to the screen
+    # returns the rect representing the map's boundry and a function to
+    # call that caches coordinate transformations
+    # if sending fractional data, do not cache the transformation
+
+    w, h = rect.size
+    size_sqrt3 = radius * sqrt(3)
+    size_ratio = radius * (3. / 2.)
+    tile_h = radius * 2
+    tile_w = (sqrt(3) / 2) * tile_h
+    mw = (data.width - 1) * tile_w
+    mh = (data.height - 1) * tile_h * 3 / 4
+    hw = (w / 2) - (mw / 2)
+    hh = (h / 2) - (mh / 2)
+    screen_offset = Vector3(hw, hh, 0)
+    map_rect = pygame.Rect((hw, hh), (mw, mh))
+
+    def project(i, cell):
+        # convert => cart
+        coords = size_sqrt3 * (i[0] + i[1] / 2.), size_ratio * i[1]
+
+        # project tilt and return
+        coords = mat * Vector3(*coords)
+
+        # translate on screen
+        coords += screen_offset
+
+        return coords
+
+    # cache of the expensive axial => cart transform
+    cache = dict()
+    def cached_project(i, cell=None, use_cache=True):
+        if use_cache:
+            try:
+                return cache[i]
+            except KeyError:
+                coords = project(i, cell)
+                cache[i] = coords
+                return coords
+        else:
+            return project(i, cell)
+
+    return map_rect, cached_project
+
+
 class HexMapView(pygame.sprite.Group):
+    border_color = 61, 55, 42, 64
+    line_color = 61, 42, 42
+    fill_color = 161, 92, 120
+    hover_color = 192, 184, 190, 128
+    select_color = 195, 177, 142
+
     def __init__(self, data, radius):
         super(HexMapView, self).__init__()
         self.data = data
+        self.dirty = False
         self._rect = None
         self._old_hovered = None
         self._hovered = None
         self._selected = list()
-        self._hw = None
-        self._hh = None
         self._hex_draw = None
         self._hex_tile = None
+        self._project = None
         self.hex_radius = None
+        self.refresh_map = None
+        self.dirty_rects = None
         self.prj = None
         self.inv_prj = None
-        self.tilt = 45
+        self.tilt = 43
+        self._buffer = None
+        self._thread = None
         self.reproject(self.tilt)
         self.set_radius(radius)
 
@@ -84,11 +177,16 @@ class HexMapView(pygame.sprite.Group):
         self.inv_prj = self.prj.inverse()
         if self.hex_radius:
             self.set_radius(self.hex_radius)
+        self.dirty = True
+        self.refresh_map = True
 
     def set_radius(self, radius):
         self.hex_radius = radius
         self._hex_draw = get_hex_draw(self.prj, radius)
         self._hex_tile = get_hex_tile(self.prj, radius)
+        self._project = None
+        self.dirty = True
+        self.refresh_map = True
 
     def select_cell(self, cell):
         # when clicked
@@ -96,17 +194,22 @@ class HexMapView(pygame.sprite.Group):
 
     def highlight_cell(self, cell):
         # hightlight cell (like for picking with mouse)
-        self._old_hovered = self._hovered
-        self._hovered = cell
+        if self._old_hovered is not cell:
+            self._old_hovered = self._hovered
+            self._hovered = cell
 
     def point_from_surface(self, point):
-        ## return a point in map space from the surface (broken!)
+        # # return a point in map space from the surface (broken!)
         if self._rect is None:
             return None
 
-        point = self.inv_prj * (Vector3(*point) - (self._hw, self._hh, 0))
+        x, y = point[:2]
+        x -= self._map_rect.left
+        y -= self._map_rect.top
+        point = Vector3(x, y, 0)
+        point = self.inv_prj * point
 
-        #hack?  yes
+        # hack?  yes
         point.y = point.y * (90.0 / (90 - self.tilt))
 
         x, y, z = vec(pixel_to_axial(point, self.hex_radius))
@@ -114,108 +217,110 @@ class HexMapView(pygame.sprite.Group):
 
     def point_from_local(self, point):
         # if self._rect is None:
-        #     return None
+        # return None
         #
         # point = Vector3(*point) - (self._rect.left, self._rect.top, 0)
         # return point[0] + self._hw, point[1] + self._hh
         raise NotImplementedError
 
+    def clear(self, surface, bgk=None):
+        if self._buffer is None: return
+        blit = surface.blit
+        _buffer = self._buffer
+        [blit(_buffer, rect, rect) for rect in self.dirty_rects]
+
     def draw(self, surface):
         # all temp variable to speed up the axial => screen space conversion
         self._rect = surface.get_rect()
-        rect = self._rect
-        w, h = rect.size
-        size_sqrt3 = self.hex_radius * sqrt(3)
-        size_ratio = self.hex_radius * (3. / 2.)
-        tile_h = self.hex_radius * 2
-        tile_w = (sqrt(3) / 2) * tile_h
-        mw = (self.data.width - 1) * tile_w
-        mh = (self.data.height - 1) * tile_h * 3 / 4
-        hw = (w / 2) - (mw / 2)
-        hh = (h / 2) - (mh / 2)
-        self._hw = hw
-        self._hh = hh
+
+        _dirty = list()
+
+        if self.dirty:
+            self._buffer = pygame.Surface(self._rect.size)
+            self.reproject(self.tilt)
+            self.dirty = False
+            _dirty = [self._rect]
+
+        if self._thread is None:
+            self._queue = queue.Queue()
+            self._thread = BlitThread(self._queue, self._buffer.blit)
+            self._thread.start()
+
+        if self._project is None:
+            self._map_rect, \
+            self._project = get_projection(self.data,
+                                           self.hex_radius,
+                                           self.prj,
+                                           self._rect)
+
+        put_tile = self._queue.put
+        project = self._project
         draw_tile = self._hex_tile
         draw_hex = self._hex_draw
-
-        border_color = 61, 55, 42, 64
-        line_color = 61, 42, 42
-        fill_color = 161, 92, 120
-        hover_color = 192, 184, 190, 128
-        select_color = 195, 177, 142
-
-        # comment out later
-        draw_outlines = 1
-        self.reproject(self.tilt)
-
-        _clip = surface.get_clip()
-        surface.set_clip(rect)
+        _buffer = self._buffer
 
         # draw the cell tiles
-        # get in blitting/draw order
-        for qq, rr in product(range(10), range(10)):
-            # convert => axial
-            q, r = evenr_to_axial((rr, qq))
-            cell = self.data.get_cell((q, r))
+        # get in draw order
+        if self.refresh_map:
+            for qq, rr in product(range(10), range(10)):
+                # convert => axial
+                q, r = evenr_to_axial((rr, qq))
+                cell = self.data.get_cell((q, r))
 
-            # convert => cart
-            pos = size_sqrt3 * (q + r / 2.), size_ratio * r
+                # convert => screen
+                pos = Vector3(*project((q, r), cell))
 
-            # project tilt
-            pos = self.prj * Vector3(*pos)
+                if cell.height > 0:
+                    # draw cell at base layer
+                    pos.y -= self.hex_radius / 2 * float(cell.height)
+                    draw_tile(put_tile, cell.filename, pos)
 
-            # handle raised tiles (fake y axis)
-            # this has to be redrawn over the grid
-            if cell.raised:
-                pos[1] -= self.hex_radius / 2
-
-            # translate map center
-            pos += (hw, hh, 0)
-
-            draw_tile(surface, cell.filename, pos)
-
-        # draw cell lines (outlines and highlights)
-        if draw_outlines:
-            surface.lock()
-            for (q, r), cell in self.data.cells:
-                # convert => cart
-                pos = size_sqrt3 * (q + r / 2.), size_ratio * r
-
-                # project tilt
-                pos = self.prj * Vector3(*pos)
-
-                # translate map center
-                pos += (hw, hh, 0)
-
-                if cell in self._selected:
-                    fill = select_color
-
-                elif cell is self._hovered:
-                    fill = hover_color
+                    # translate the cell height
+                    pos.y -= self.hex_radius / 2 * float(cell.height)
+                    draw_tile(put_tile, cell.filename, pos)
 
                 else:
-                    fill = None
+                    draw_tile(put_tile, cell.filename, pos)
 
-                if fill is not None:
-                    draw_hex(surface, pos, border_color, fill)
-            surface.unlock()
+            self._queue.join()
+            self.refresh_map = False
+            _dirty = [self._rect]
 
-        ## draw sprites
+        _sprite_dirty = list()
+
+        # draw cell lines (outlines and highlights)
+        surface.lock()
+        for pos, cell in self.data.cells:
+            if cell in self._selected:
+                fill = self.select_color
+
+            elif cell is self._hovered:
+                fill = self.hover_color
+
+            else:
+                continue
+
+            # convert => screen
+            pos = project(pos)
+            rect = draw_hex(surface, pos, self.border_color, fill)
+            _sprite_dirty.append(rect)
+        surface.unlock()
+
+        # # draw sprites to the surface, not the buffer
         for sprite in self.sprites():
             # convert => axial
             q, r = evenr_to_axial(sprite.position[:2])
 
-            # convert => cart
-            pos = size_sqrt3 * (q + r / 2.), size_ratio * r
-
-            # project tilt
-            pos = self.prj * Vector3(*pos)
-
-            # translate map center
-            x, y, z = pos + (hw, hh, 0)
+            # convert => screen
+            # no cache here since we may be dealing with fractional coordinates
+            x, y, z = project((q, r), use_cache=False)
 
             # translate anchor and blit
             pos = (int(x - sprite.anchor.x), int(y - sprite.anchor.y))
-            surface.blit(sprite.image, pos)
+            rect = surface.blit(sprite.image, pos)
+            _sprite_dirty.append(rect)
 
-        surface.set_clip(_clip)
+        _dirty.extend(_sprite_dirty)
+        self.dirty_rects = _dirty
+
+        return _dirty
