@@ -1,5 +1,6 @@
 import itertools
 import pygame
+from pygame.sprite import Group
 from pygame.sprite import groupcollide
 from pygame.locals import *
 
