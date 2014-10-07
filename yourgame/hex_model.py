@@ -1,6 +1,12 @@
 from math import sqrt
 from euclid import Vector2
 import pygame
+from collections import defaultdict
+from heapq import heappush, heappop
+from itertools import chain
+from math import sqrt
+from functools import reduce
+import time
 
 # even-r : 'pointy top'
 
@@ -213,3 +219,94 @@ class HexMapModel(object):
                 sprite.radius = .25
                 walls.append(sprite)
         return walls
+
+    @staticmethod
+    def dist(cell0, cell1):
+        q0, r0 = cell0
+        q1, r1 = cell1
+        return (abs(q0 - q1) + abs(r0 - r1) +
+                abs(q0 + r0 - q1 - r1)) / 2.0
+
+    def pathfind(self, current, end, blacklist=(), impassable=()):
+        """ modified: http://stackoverflow.com/questions/4159331/python-speed-up-an-a-star-pathfinding-algorithm """
+
+        def clip(vector, lowest, highest):
+            return type(vector)(map(min, map(max, vector, lowest), highest))
+
+        def surrounding_clip(coord, limit):
+            x, y = coord
+            return (clip(i, (0, 0), limit) for i in
+                    ((x - 1, y - 1), (x - 1, y), (x - 1, y + 1), (x, y - 1),
+                     (x, y + 1), (x + 1, y)))
+
+        def surrounding_noclip(coord, limit):
+            x, y = coord
+            return ((x - 1, y - 1), (x - 1, y), (x - 1, y + 1), (x, y - 1),
+                   (x, y + 1), (x + 1, y))
+
+        def retrace_path(c):
+            path = [c]
+            while parent.get(c, None) is not None:
+                c = parent[c]
+                path.append(c)
+            return reversed(path)
+
+        start_time = time.time()
+        parent = dict()
+        open_heap = list()
+        open_set = set()
+        closed_set = set()
+        limit = self.width - 1, self.height - 1
+        surrounding = surrounding_clip
+        current = current[0], current[1]
+        open_set.add(current)
+        open_heap.append((self.dist(current, end), current))
+        while open_set:
+            if time.time() - start_time > .0125:
+                try:
+                    return retrace_path(current), False
+                except:
+                    return list(), True
+
+            current = heappop(open_heap)[1]
+
+            if current == end:
+                return retrace_path(current), True
+
+            open_set.remove(current)
+            closed_set.add(current)
+            cells = {(self.dist(cell, end), cell)
+                     for cell in surrounding(current, limit)}
+            min_cell = reduce(
+                lambda cell1, cell2:
+                cell1 if cell1[0] <= cell2[0] else cell2,
+                filter(lambda x: x not in closed_set, cells))
+            try:
+                #print(self.get_cell(map(int, tile)).kind)
+                if self.get_cell(min_cell[1]).kind in impassable \
+                        or min_cell[1] in blacklist:
+                    continue
+            except (IndexError, AttributeError):
+                pass
+
+            parent[min_cell[1]] = current
+            if min_cell[1] not in open_set:
+                open_set.add(min_cell[1])
+                heappush(open_heap, min_cell)
+            '''for tile in surrounding(current, limit):
+                try:
+                    #print(self.get_cell(map(int, tile)).kind)
+                    if self.get_cell(map(int, tile)).kind in impassable \
+                            or tile in blacklist:
+                        continue
+                except (IndexError, AttributeError):
+                    pass
+
+                if tile not in closed_set:
+                    parent[tile] = current
+                    if tile not in open_set:
+                        print(tile)
+                        open_set.add(tile)
+                        heappush(open_heap, (self.dist(tile, end), tile))'''
+        print("Done")
+        return list(), True
