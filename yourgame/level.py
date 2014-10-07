@@ -164,7 +164,7 @@ class LevelScene(Scene):
             #    cell.height = 1
             #    cell.filename = 'tileRock_full.png'
             self.model.add_cell(coords, cell)
-        blacklist = {(1, 0), (4, 4)}
+        blacklist = {(1, 0), (4, 3), (3, 4), (4, 4), (4, 5)}
         impassable = {} #{'grass'}
         for c in (i for i in self.model.pathfind_evenr(
                 (0, 0), (5, 5), blacklist, impassable)[0]):

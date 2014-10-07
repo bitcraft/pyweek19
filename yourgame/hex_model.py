@@ -7,6 +7,7 @@ from heapq import heappush, heappop
 from itertools import chain
 from math import sqrt
 from functools import reduce
+from operator import itemgetter
 import time
 
 # even-r : 'pointy top'
@@ -237,6 +238,9 @@ class HexMapModel(object):
     def pathfind(self, current, end, blacklist=frozenset(), impassable=frozenset()):
         """ modified: http://stackoverflow.com/questions/4159331/python-speed-up-an-a-star-pathfinding-algorithm """
 
+        def cell_available(cell):
+            return coord_available(cell[1])
+
         def coord_available(coord):
             return coord not in closed_set \
                 and coord not in blacklist \
@@ -244,9 +248,6 @@ class HexMapModel(object):
 
         def clip(vector, lowest, highest):
             return type(vector)(map(min, map(max, vector, lowest), highest))
-
-        def lower_cost(cell1, cell2):
-            return cell1 if cell1[0] < cell2[0] else cell2
 
         def surrounding_clip(coord, limit):
             x, y = coord
@@ -290,13 +291,12 @@ class HexMapModel(object):
 
             open_set.remove(current)
             closed_set.add(current)
-            cells = {
-                (self.dist(coord, end)+self.get_cell(current).cost, coord)
-                for coord in surrounding(current, limit)
-                if coord_available(coord)
-            }
-            lowest_cost = reduce(lower_cost, cells, (float('inf'), None))[0]
-            for cell in (cell for cell in cells if cell[0] == lowest_cost):
+            cells = filter(cell_available,
+                           ((self.dist(coord, end)+self.get_cell(coord).cost, coord)
+                            for coord in surrounding(current, limit)))
+            # Push the highest costing tiles first, so we'll check them last
+            # Should keep working when there's a dead end
+            for cell in sorted(cells, key=itemgetter(0), reverse=True):
                 parent[cell[1]] = current
                 if cell[1] not in open_set:
                     open_set.add(cell[1])
