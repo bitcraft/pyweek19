@@ -5,6 +5,7 @@ from pygame.transform import smoothscale
 from six.moves import queue
 from math import sin, cos, pi, sqrt, radians, ceil
 from itertools import product
+from collections import defaultdict
 
 from yourgame.euclid import Point3, Vector3, Matrix4
 from yourgame import resources
@@ -32,18 +33,18 @@ class BlitThread(threading.Thread):
         self.running = True
         while self.running:
             try:
-                surface, pos, layer = get(True, 30)
+                surface, cell, pos, layer = get(True, 30)
             except queue.Empty:
                 self.running = False
                 break
 
             else:
                 rect = blit(surface, pos)
-                put((rect, layer))
+                put((cell, surface, rect, layer))
                 task_done()
 
 
-class HexMapView(pygame.sprite.RenderUpdates):
+class HexMapView(pygame.sprite.LayeredUpdates):
     border_color = 61, 55, 42, 64
     line_color = 61, 42, 42
     fill_color = 161, 92, 120
@@ -51,10 +52,9 @@ class HexMapView(pygame.sprite.RenderUpdates):
     select_color = 195, 177, 142
 
     def __init__(self, data, radius):
-        super(HexMapView, self).__init__()
+        super(HexMapView, self).__init__(default_layer=1)
         self.data = data
         self.hex_radius = None
-        self.dirty_rects = None
         self.tilt = 43
 
         # this must be set to true when tile size or tilt changes
@@ -65,7 +65,7 @@ class HexMapView(pygame.sprite.RenderUpdates):
 
         self.prj = None
         self.inv_prj = None
-        self.upper_rects = list()
+        self.upper_cells = list()
         self.rect = None
         self.lost_sprites = list()
         self._map_rect = None
@@ -108,10 +108,11 @@ class HexMapView(pygame.sprite.RenderUpdates):
         return draw_hex
 
     def get_hex_tile(self):
-        def draw_tile(blit, filename, coords, layer):
+        def draw_tile(blit, cell, coords, layer):
             x, y, z = coords
-            tile = tile_dict[filename]
-            return blit((tile, (int(x - half_width), int(y - radius)), layer))
+            tile = tile_dict[cell.filename]
+            return blit((tile, cell,
+                         (int(x - half_width), int(y - radius)), layer))
 
         height = self.hex_radius * 2 + 1
         width = (sqrt(3) / 2 * height)
@@ -273,7 +274,7 @@ class HexMapView(pygame.sprite.RenderUpdates):
                                           buffer_blit)
                 self._thread.start()
 
-            self.upper_rects = list()
+            self.upper_cells = list()
             put_tile = self._blit_queue.put
 
             # get in draw order
@@ -291,19 +292,32 @@ class HexMapView(pygame.sprite.RenderUpdates):
                         # translate the cell height
                         # pos.y -= self.hex_radius / 2 * float(cell.height)
                         pos.y -= self.hex_radius / 2
-                        draw_tile(put_tile, cell.filename, pos, 1)
-
+                        draw_tile(put_tile, cell, pos, i)
                 else:
-                    draw_tile(put_tile, cell.filename, pos, 0)
+                    draw_tile(put_tile, cell, pos, 0)
 
+            sorter = defaultdict(list)
             self._blit_queue.join()
             while 1:
                 try:
-                    i = self._return_queue.get_nowait()
+                    cell, _surf, rect, layer = self._return_queue.get_nowait()
                 except queue.Empty:
                     break
                 else:
-                    self.upper_rects.append(i)
+                    sorter[cell].append((_surf, rect, layer))
+
+            for key, value in sorter.items():
+                if len(value) == 1:
+                    continue
+                #surfaces = [i[0] for i in value]
+                rects = [i[1] for i in value]
+                #layers = [i[2] for i in value]
+                rect = rects[0].unionall(rects[1:])
+                #tmp = pygame.Surface(rect.size, pygame.SRCALPHA)
+                tmp = pygame.Surface(rect.size, pygame.RLEACCEL)
+                tmp.fill((0, 0, 0))
+                tmp.set_alpha(128)
+                self.upper_cells.append((tmp, rect, 1))
 
             rect = surface.blit(self._buffer, self.rect)
             dirty_append(rect)
@@ -341,6 +355,8 @@ class HexMapView(pygame.sprite.RenderUpdates):
 
         # draw sprites to the surface, not the buffer
         for sprite in self.sprites():
+
+            # hover is the internal name for the tile cursor
             if sprite == "hover":
                 continue
 
@@ -369,10 +385,19 @@ class HexMapView(pygame.sprite.RenderUpdates):
                     dirty_append(rect)
                 spritedict[sprite] = rect
 
-        # draw the upper sprites over the map
-        for rect, layer in self.upper_rects:
-            if layer > 0:
-                surface.blit(self._buffer, rect, rect)
+            sprite_layer = sprite._layer
+            print sprite_layer
+            # quadtree or somthing similar would be good here
+            # draw the upper sprites over the map
+            for up_surf, up_rect, layer in self.upper_cells:
+                if sprite_layer <= layer:
+                    # 12 pixels is the height of the bottom triangle of the tile
+                    if rect.bottom < up_rect.bottom - 12:
+                        overlap = rect.clip(up_rect)
+                        if overlap:
+                            surface.set_clip(overlap)
+                            surface.blit(up_surf, up_rect)
 
-        self.dirty_rects = tuple(dirty)
+        surface.set_clip(None)
+
         return dirty

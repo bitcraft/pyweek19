@@ -82,6 +82,7 @@ class GameEntity(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.anchor = Point2(16, 57)
         self.radius = .5
+        self._layer = 1
 
         # set this init value to False if sprite is facing right
         self._flipped = False

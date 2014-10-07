@@ -72,10 +72,10 @@ class LevelScene(Scene):
 
         # "switch"
         button = entity.GameEntity('tileRock_tile.png')
-        button.position.x = 4
+        button.position.x = 2
         button.position.y = 5
         button.anchor = Point2(33, 30)
-        self.view.add(button)
+        self.view.add(button, layer=0)
         self.internal_event_group.add(sprite)
 
         # this must come last
