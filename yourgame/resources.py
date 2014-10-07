@@ -4,7 +4,7 @@ import logging
 import glob
 logger = logging.getLogger('yourgame.resources')
 
-import gui
+import yourgame.gui
 
 __all__ = ['load', 'sounds', 'images', 'music', 'maps', 'tiles', 'play_music',
            'border']

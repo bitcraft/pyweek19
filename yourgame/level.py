@@ -3,13 +3,13 @@ import pygame
 from pygame.sprite import groupcollide
 from pygame.locals import *
 
-from scenes import Scene
-import resources
-import gui
-import hex_model
-import hex_view
-import entity
-from . import config
+from yourgame.scenes import Scene
+from yourgame import resources
+from yourgame import gui
+from yourgame import hex_model
+from yourgame import hex_view
+from yourgame import entity
+from yourgame import config
 import os
 
 __all__ = ['LevelScene']
@@ -158,15 +158,19 @@ class LevelScene(Scene):
             coords = hex_model.evenr_to_axial((r, q))
             cell = hex_model.Cell()
             cell.filename = 'tileGrass.png'
-            if coords in raised:
-                cell.height = 3
-                cell.raised = True
-                cell.filename = 'tileRock_full.png'
+            cell.kind = 'grass'
+            #if coords in raised:
+            #    cell.raised = True
+            #    cell.height = 1
+            #    cell.filename = 'tileRock_full.png'
             self.model.add_cell(coords, cell)
-
-        print(self.model._data)
-        for c in (i for i in self.model.pathfind((0, 0), (5, 8))[0]):
+        blacklist = {(1, 0), (4, 4)}
+        impassable = {} #{'grass'}
+        for c in (i for i in self.model.pathfind_evenr(
+                (0, 0), (5, 5), blacklist, impassable)[0]):
             self.model._data[c].raised = True
+            self.model._data[c].height = 1
+            cell.filename = 'tileRock_full.png'
 
         self.view = hex_view.HexMapView(self.model,
                                         config.getint('display', 'tile_size'))

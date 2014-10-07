@@ -1,6 +1,7 @@
 from math import sqrt
-from euclid import Vector2
+from euclid import Vector2, Vector3
 import pygame
+
 from collections import defaultdict
 from heapq import heappush, heappop
 from itertools import chain
@@ -118,7 +119,7 @@ class Cell(object):
 
     def __init__(self):
         self.kind = None
-        self.cost = None
+        self.cost = 0
         self.filename = None
         self.raised = False
         self.height = 0.0
@@ -227,7 +228,20 @@ class HexMapModel(object):
         return (abs(q0 - q1) + abs(r0 - r1) +
                 abs(q0 + r0 - q1 - r1)) / 2.0
 
-    def pathfind(self, current, end, blacklist=(), impassable=()):
+    def pathfind_evenr(self, current, end, blacklist=frozenset(), impassable=frozenset()):
+        current = evenr_to_axial(current)
+        end = evenr_to_axial(end)
+        blacklist = {evenr_to_axial(coord) for coord in blacklist}
+        return self.pathfind(current, end, blacklist, impassable)
+
+    def pathfind(self, current, end, blacklist=frozenset(), impassable=frozenset()):
+        """ modified: http://stackoverflow.com/questions/4159331/python-speed-up-an-a-star-pathfinding-algorithm """
+
+        def cell_available(cell):
+            coord = cell[1]
+            return coord not in closed_set \
+                and coord not in blacklist \
+                and self.get_cell(coord).kind not in impassable
 
         def clip(vector, lowest, highest):
             return type(vector)(map(min, map(max, vector, lowest), highest))
@@ -251,61 +265,42 @@ class HexMapModel(object):
             return reversed(path)
 
         start_time = time.time()
-        parent = dict()
-        open_heap = list()
+        parent = {}
+        open_heap = []
         open_set = set()
         closed_set = set()
         limit = self.width - 1, self.height - 1
         surrounding = surrounding_clip
         current = current[0], current[1]
         open_set.add(current)
-        open_heap.append((self.dist(current, end), current))
+        open_heap.append(current)
         while open_set:
             if time.time() - start_time > .0125:
                 try:
                     return retrace_path(current), False
                 except:
-                    return list(), True
+                    return (), True
 
-            current = heappop(open_heap)[1]
+            current = heappop(open_heap)
 
             if current == end:
                 return retrace_path(current), True
 
             open_set.remove(current)
             closed_set.add(current)
-            cells = {(self.dist(cell, end), cell)
-                     for cell in surrounding(current, limit)}
-            min_cell = reduce(
-                lambda cell1, cell2:
-                cell1 if cell1[0] <= cell2[0] else cell2,
-                filter(lambda x: x not in closed_set, cells))
+            cells = filter(cell_available,
+                           ((self.dist(cell, end)+self.get_cell(current).cost, cell)
+                            for cell in surrounding(current, limit)))
             try:
-                #print(self.get_cell(map(int, tile)).kind)
-                if self.get_cell(min_cell[1]).kind in impassable \
-                        or min_cell[1] in blacklist:
-                    continue
-            except (IndexError, AttributeError):
-                pass
+                min_cell = reduce(
+                    lambda cell1, cell2:
+                    cell1 if cell1[0] < cell2[0] else cell2,
+                    cells)
+                parent[min_cell[1]] = current
+                if min_cell[1] not in open_set:
+                    open_set.add(min_cell[1])
+                    heappush(open_heap, min_cell[1])
+            except TypeError:
+                continue
 
-            parent[min_cell[1]] = current
-            if min_cell[1] not in open_set:
-                open_set.add(min_cell[1])
-                heappush(open_heap, min_cell)
-            '''for tile in surrounding(current, limit):
-                try:
-                    #print(self.get_cell(map(int, tile)).kind)
-                    if self.get_cell(map(int, tile)).kind in impassable \
-                            or tile in blacklist:
-                        continue
-                except (IndexError, AttributeError):
-                    pass
-
-                if tile not in closed_set:
-                    parent[tile] = current
-                    if tile not in open_set:
-                        print(tile)
-                        open_set.add(tile)
-                        heappush(open_heap, (self.dist(tile, end), tile))'''
-        print("Done")
-        return list(), True
+        return (), True
