@@ -319,7 +319,7 @@ class HexMapView(pygame.sprite.LayeredUpdates):
                 tmp.set_alpha(128)
                 self.upper_cells.append((tmp, rect, 1))
 
-            rect = surface.blit(self._buffer, self.rect)
+            rect = surface_blit(self._buffer, self.rect)
             dirty_append(rect)
             self.needs_refresh = False
             refreshed = True
@@ -350,7 +350,6 @@ class HexMapView(pygame.sprite.LayeredUpdates):
                 else:
                     dirty_append(rect)
                 spritedict["hover"] = rect
-
         surface.unlock()
 
         # draw sprites to the surface, not the buffer
@@ -383,10 +382,9 @@ class HexMapView(pygame.sprite.LayeredUpdates):
                         dirty_append(rect)
                 else:
                     dirty_append(rect)
-                spritedict[sprite] = rect
+            spritedict[sprite] = rect
 
             sprite_layer = sprite._layer
-            print sprite_layer
             # quadtree or somthing similar would be good here
             # draw the upper sprites over the map
             for up_surf, up_rect, layer in self.upper_cells:
@@ -396,7 +394,7 @@ class HexMapView(pygame.sprite.LayeredUpdates):
                         overlap = rect.clip(up_rect)
                         if overlap:
                             surface.set_clip(overlap)
-                            surface.blit(up_surf, up_rect)
+                            surface_blit(up_surf, up_rect)
 
         surface.set_clip(None)
 
