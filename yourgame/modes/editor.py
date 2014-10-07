@@ -113,25 +113,28 @@ class EditMode(LevelSceneMode):
     def update(self, delta, events):
         moved = False
         pressed = pygame.key.get_pressed()
-        movement_speed = .005
+        movement_speed = .0001
 
         if pressed[K_DOWN]:
-            self.sprite.velocity.y = movement_speed
+            self.sprite.acceleration.y = movement_speed
             moved = True
         elif pressed[K_UP]:
-            self.sprite.velocity.y = -movement_speed
+            self.sprite.acceleration.y = -movement_speed
             moved = True
         else:
-            self.sprite.velocity.y = 0
+            self.sprite.acceleration.y = 0
 
         if pressed[K_LEFT]:
-            self.sprite.velocity.x = -movement_speed
+            self.sprite.acceleration.x = -movement_speed
             moved = True
         elif pressed[K_RIGHT]:
-            self.sprite.velocity.x = movement_speed
+            self.sprite.acceleration.x = movement_speed
             moved = True
         else:
-            self.sprite.velocity.x = 0
+            self.sprite.acceleration.x = 0
+
+        if pressed[K_SPACE]:
+            self.sprite.velocity.z = 2
 
         if moved and self.state == 2:
             self.change_state(3)
