@@ -347,7 +347,7 @@ class HexMapView(pygame.sprite.RenderUpdates):
             old_rect = spritedict[sprite]
 
             # convert => axial
-            pos = evenr_to_axial(sprite.position[:2])
+            pos = sprites_to_axial(sprite.position[:2])
 
             # convert => screen
             # no cache here since we may be dealing with fractional coordinates

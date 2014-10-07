@@ -88,16 +88,9 @@ def evenr_to_axial(coords):
 
 
 def sprites_to_axial(coords):
-    q, r = coords
-    x = q - (r + (int(round(r, 0)) & 1)) / 2
-    z = r
-    #y = -x-z
-
-    # cube => axial
-    q = x
-    r = z
-
-    return q, r
+    x, y = coords
+    x -= y / 2
+    return x, y
 
 
 def collide_hex(left, right, radius=None):
