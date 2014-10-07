@@ -229,15 +229,17 @@ class HexMapModel(object):
         return (abs(q0 - q1) + abs(r0 - r1) +
                 abs(q0 + r0 - q1 - r1)) / 2.0
 
-    def pathfind_evenr(self, current, end, blacklist=frozenset(),
-                       impassable=frozenset()):
+    def pathfind_evenr(self, current, end, blacklist=set(),
+                       impassable=set()):
         current = evenr_to_axial(current)
         end = evenr_to_axial(end)
         blacklist = {evenr_to_axial(coord) for coord in blacklist}
         return self.pathfind(current, end, blacklist, impassable)
 
-    def pathfind(self, current, end, blacklist=frozenset(),
-                 impassable=frozenset()):
+    def pathfind(self, current, end, blacklist=set(),
+                 impassable=set()):
+        blacklist.update({coord for coord in self._data if self._data[coord].raised})
+
         def cell_available(cell):
             return coord_available(cell[1])
 

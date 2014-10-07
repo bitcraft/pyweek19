@@ -112,7 +112,6 @@ class HexMapView(pygame.sprite.RenderUpdates):
             x, y, z = coords
             tile = tile_dict[filename]
             return blit((tile, (int(x - half_width), int(y - radius)), layer))
-            #return blit(tile, (int(x - half_width), int(y - radius)))
 
         height = self.hex_radius * 2 + 1
         width = (sqrt(3) / 2 * height)
@@ -292,11 +291,9 @@ class HexMapView(pygame.sprite.RenderUpdates):
                         # translate the cell height
                         # pos.y -= self.hex_radius / 2 * float(cell.height)
                         pos.y -= self.hex_radius / 2
-                        #draw_tile(self._buffer.blit, cell.filename, pos, 1)
                         draw_tile(put_tile, cell.filename, pos, 1)
 
                 else:
-                    #draw_tile(self._buffer.blit, cell.filename, pos, 0)
                     draw_tile(put_tile, cell.filename, pos, 0)
 
             self._blit_queue.join()
@@ -358,7 +355,7 @@ class HexMapView(pygame.sprite.RenderUpdates):
 
             # translate anchor and blit
             pos = (int(round(x - sprite.anchor.x, 0)),
-                   int(round(y - sprite.anchor.y, 0)))
+                   int(round(y - sprite.anchor.y - sprite.position.z, 0)))
 
             rect = surface_blit(sprite.image, pos)
             if not refreshed:
