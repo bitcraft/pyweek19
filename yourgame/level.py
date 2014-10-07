@@ -8,6 +8,7 @@ from yourgame import hex_model
 from yourgame import hex_view
 from yourgame import entity
 from yourgame import config
+from yourgame import resources
 from modes.editor import EditMode
 
 __all__ = ['LevelScene']
@@ -87,7 +88,6 @@ class LevelScene(Scene):
     once = False
 
     def draw(self, surface):
-        #surface.fill((0, 0, 0))
         if not self.once:
             surface.blit(resources.images["backdrop"], (0, 0))
             self.once = True

@@ -111,8 +111,8 @@ class HexMapView(pygame.sprite.RenderUpdates):
         def draw_tile(blit, filename, coords, layer):
             x, y, z = coords
             tile = tile_dict[filename]
-            # return blit(tile, (int(x - half_width), int(y - radius)), layer)
-            return blit(tile, (int(x - half_width), int(y - radius)))
+            return blit((tile, (int(x - half_width), int(y - radius)), layer))
+            #return blit(tile, (int(x - half_width), int(y - radius)))
 
         height = self.hex_radius * 2 + 1
         width = (sqrt(3) / 2 * height)
@@ -240,7 +240,7 @@ class HexMapView(pygame.sprite.RenderUpdates):
 
         if self.needs_cache:
             self.set_tilt(self.tilt)
-            self._buffer = pygame.Surface(surface.get_size())
+            self._buffer = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
             self._hex_draw = self.get_hex_draw()
             self._hex_tile = self.get_hex_tile()
             self._map_rect, self._project = self.get_projection()
@@ -263,19 +263,19 @@ class HexMapView(pygame.sprite.RenderUpdates):
         # draw the cell tiles, a thread will blit the tiles in the background
         # this is rendering the background and all hex tiles
         if self.needs_refresh:
-            # if self._thread is None:
-            # def buffer_blit(*args):
-            #         self._buffer.blit(*args)
-            #
-            #     self._blit_queue = queue.Queue()
-            #     self._return_queue = queue.Queue()
-            #     self._thread = BlitThread(self._blit_queue,
-            #                               self._return_queue,
-            #                               buffer_blit)
-            #     self._thread.start()
+            if self._thread is None:
+                def buffer_blit(*args):
+                    self._buffer.blit(*args)
+
+                self._blit_queue = queue.Queue()
+                self._return_queue = queue.Queue()
+                self._thread = BlitThread(self._blit_queue,
+                                          self._return_queue,
+                                          buffer_blit)
+                self._thread.start()
 
             self.upper_rects = list()
-            #put_tile = self._blit_queue.put
+            put_tile = self._blit_queue.put
 
             # get in draw order
             for qq, rr in product(range(10), range(10)):
@@ -292,21 +292,21 @@ class HexMapView(pygame.sprite.RenderUpdates):
                         # translate the cell height
                         # pos.y -= self.hex_radius / 2 * float(cell.height)
                         pos.y -= self.hex_radius / 2
-                        draw_tile(self._buffer.blit, cell.filename, pos, 1)
-                        #draw_tile(put_tile, cell.filename, pos, 1)
+                        #draw_tile(self._buffer.blit, cell.filename, pos, 1)
+                        draw_tile(put_tile, cell.filename, pos, 1)
 
                 else:
-                    draw_tile(self._buffer.blit, cell.filename, pos, 0)
-                    #draw_tile(put_tile, cell.filename, pos, 0)
+                    #draw_tile(self._buffer.blit, cell.filename, pos, 0)
+                    draw_tile(put_tile, cell.filename, pos, 0)
 
-            # self._blit_queue.join()
-            # while 1:
-            #     try:
-            #         i = self._return_queue.get_nowait()
-            #     except queue.Empty:
-            #         break
-            #     else:
-            #         self.upper_rects.append(i)
+            self._blit_queue.join()
+            while 1:
+                try:
+                    i = self._return_queue.get_nowait()
+                except queue.Empty:
+                    break
+                else:
+                    self.upper_rects.append(i)
 
             rect = surface.blit(self._buffer, self.rect)
             dirty_append(rect)
