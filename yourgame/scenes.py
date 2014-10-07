@@ -64,7 +64,8 @@ class Scene(object):
     def __init__(self, name, game):
         self.game = game
         self.name = name
-        self.state = dict()
+        self.state = {"events": {}}
+        # events are stored as {"event-name": list of kwargs dicts}
 
     def setup(self):
         raise NotImplemented("Not implemented by subclass")
@@ -79,7 +80,22 @@ class Scene(object):
         pass
 
     def update(self, delta, events):
+        events = self.state["events"]
+        for event_list in events.values():
+            for e in event_list:
+                e["frames_list"] -= 1
+                if event["frame_list"] <= 0:
+                    pass
         return True
 
     def clear(self, surface):
         pass
+
+    def raise_event(self, originator, event_name, **kwargs):
+        events = self.state["events"]
+        events[event_name] = dict(kwargs)
+        events[event_name]["originator"] = originator
+        events[event_name]["frames_left"] = 2
+
+    def clear_events(self):
+        self.states["events"] = dict()

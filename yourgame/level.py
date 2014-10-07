@@ -51,7 +51,7 @@ class LevelScene(Scene):
         sprite.position.y = 0
         self.view.add(sprite)
         sprite = entity.GameEntity()
-        sprite.position.x = 5
+        sprite.position.x = 5 
         sprite.position.y = 5
         self.view.add(sprite)
         sprite = entity.GameEntity()
@@ -115,7 +115,7 @@ class LevelScene(Scene):
                     self.handle_click(event.button, cell)
 
         # collisions
-        #c = groupcollide(self.view, self.view.data.walls(),
+        # c = groupcollide(self.view, self.view.data.walls(),
         #                 False, False, hex_model.collide_hex)
 
         self.mode.update(delta, events)

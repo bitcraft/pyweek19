@@ -9,6 +9,7 @@ __all__ = ['PhysicsGroup'
 
 
 class PhysicsGroup(pygame.sprite.Group):
+
     def update(self, delta):
         for sprite in self.sprites():
             sprite.position += sprite.velocity * delta
