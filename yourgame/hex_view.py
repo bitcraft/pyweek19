@@ -94,7 +94,7 @@ class HexMapView(pygame.sprite.RenderUpdates):
             y1 = new_points[4][1]
             w = new_points[0][0] - x1
             h = new_points[1][1] - y1
-            return pygame.Rect(x1, y1, w, h).inflate(2, 2)
+            return pygame.Rect(x1, y1, w, h).inflate(4, 4)
 
         points = list()
         temp = 2 * pi / 6.
@@ -264,7 +264,7 @@ class HexMapView(pygame.sprite.RenderUpdates):
         if self.needs_refresh:
             if self._thread is None:
                 def buffer_blit(*args):
-                    self._buffer.blit(*args)
+                    return self._buffer.blit(*args)
 
                 self._blit_queue = queue.Queue()
                 self._return_queue = queue.Queue()
@@ -370,9 +370,9 @@ class HexMapView(pygame.sprite.RenderUpdates):
                 spritedict[sprite] = rect
 
         # draw the upper sprites over the map
-        # for rect, layer in self.upper_rects:
-        #    if layer > 1:
-        #        surface.blit(self._buffer, rect, rect)
+        for rect, layer in self.upper_rects:
+            if layer > 0:
+                surface.blit(self._buffer, rect, rect)
 
         self.dirty_rects = tuple(dirty)
         return dirty

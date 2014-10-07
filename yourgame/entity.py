@@ -45,21 +45,22 @@ class PhysicsGroup(pygame.sprite.Group):
                         sprite.velocity.y = 0.0
 
             if not z == 0:
-                if sprite.position.z < 0:
-                    sprite.position.z = 0
-                    sprite.velocity.z = 0
-                    sprite.acceleration.z = 0
-
                 if not self.move_sprite(sprite, (0, 0, z)):
-                    if abs(sprite.velocity.z) > .0002:
+                    if abs(sprite.velocity.z) > .2:
                         sprite.acceleration.z = 0.0
-                        sprite.vel.z = -sprite.velocity.z * .05
+                        sprite.velocity.z = -sprite.velocity.z * .05
 
             if sprite.position.z == 0:
                 sprite.velocity.x *= self.ground_friction
                 sprite.velocity.y *= self.ground_friction
 
     def move_sprite(self, sprite, point, clip=True):
+        z, y, z = point
+        if z < 0:
+            if sprite.position.z < 0:
+                sprite.position.z = 0
+                return False
+
         return True
 
     def set_timestep(self, timestep):
@@ -71,12 +72,12 @@ class PhysicsGroup(pygame.sprite.Group):
 
 class GameEntity(pygame.sprite.Sprite):
 
-    def __init__(self):
+    def __init__(self, filename):
         super(GameEntity, self).__init__()
         self.position = Point3(0, 0, 0)
         self.acceleration = Vector3(0, 0, 0)
         self.velocity = Vector3(0, 0, 0)
-        self.original_image = resources.tiles['alienBlue.png']
+        self.original_image = resources.tiles[filename]
         self.image = self.original_image
         self.rect = self.image.get_rect()
         self.anchor = Point2(16, 57)
@@ -94,3 +95,6 @@ class GameEntity(pygame.sprite.Sprite):
         if self._flipped or value:
             self.image = flip(self.original_image, value, 0)
         self._flipped = bool(value)
+
+    def handle_internal_events(self, scene):
+        pass

@@ -46,7 +46,7 @@ class EditMode(LevelSceneMode):
                 cell.height = 0
                 cell.filename = 'tileGrass.png'
 
-            view.refresh_map = True
+            view.needs_refresh = True
 
     def change_state(self, state):
         change = False

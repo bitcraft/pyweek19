@@ -11,6 +11,7 @@ from yourgame import entity
 from yourgame import config
 from yourgame import resources
 from yourgame.modes.editor import EditMode
+from euclid import Point2
 
 __all__ = ['LevelScene']
 
@@ -30,7 +31,7 @@ class LevelScene(Scene):
             cell.kind = 'grass'
             if coords in raised:
                 cell.raised = True
-                cell.height = 1
+                cell.height = config.getint('display', 'wall_height')
                 cell.filename = 'tileRock_full.png'
             self.model.add_cell(coords, cell)
 
@@ -46,25 +47,21 @@ class LevelScene(Scene):
                                         config.getint('display', 'tile_size'))
 
         self.velocity_updates = entity.PhysicsGroup()
-        self.internal_event_group = Group()
+        self.internal_event_group = pygame.sprite.Group()
 
-        sprite = entity.GameEntity()
+        sprite = entity.GameEntity('alienBlue.png')
         sprite.position.x = 0
         sprite.position.y = 0
         self.view.add(sprite)
-        sprite = entity.GameEntity()
-        sprite.position.x = 5 
-        sprite.position.y = 5
-        self.view.add(sprite)
-        sprite = entity.GameEntity()
+        sprite = entity.GameEntity('alienBlue.png')
         sprite.position.x = 7
         sprite.position.y = 2
         self.view.add(sprite)
-        sprite = entity.GameEntity()
+        sprite = entity.GameEntity('alienBlue.png')
         sprite.position.x = 9
         sprite.position.y = 9
         self.view.add(sprite)
-        sprite = entity.GameEntity()
+        sprite = entity.GameEntity('alienBlue.png')
         sprite.position.x = 2
         sprite.position.y = 7
         self.view.add(sprite)
@@ -72,6 +69,14 @@ class LevelScene(Scene):
 
         self.sprite = sprite
         self.velocity_updates.add(sprite)
+
+        # "switch"
+        button = entity.GameEntity('tileRock_tile.png')
+        button.position.x = 4
+        button.position.y = 5
+        button.anchor = Point2(33, 30)
+        self.view.add(button)
+        self.internal_event_group.add(sprite)
 
         # this must come last
         self.mode = EditMode(self)
@@ -120,7 +125,7 @@ class LevelScene(Scene):
         # collisions
         # c = groupcollide(self.view, self.view.data.walls(),
         #                 False, False, hex_model.collide_hex)
-        
+
         self.mode.update(delta, events)
 
         for sprite in self.internal_event_group:
