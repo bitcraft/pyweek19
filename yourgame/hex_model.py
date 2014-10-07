@@ -228,7 +228,6 @@ class HexMapModel(object):
                 abs(q0 + r0 - q1 - r1)) / 2.0
 
     def pathfind(self, current, end, blacklist=(), impassable=()):
-        """ modified: http://stackoverflow.com/questions/4159331/python-speed-up-an-a-star-pathfinding-algorithm """
 
         def clip(vector, lowest, highest):
             return type(vector)(map(min, map(max, vector, lowest), highest))

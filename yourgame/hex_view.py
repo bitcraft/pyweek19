@@ -14,31 +14,32 @@ from yourgame.hex_model import *
 __all__ = ['HexMapView']
 
 class BlitThread(threading.Thread):
-    def __init__(self, q, blit):
+    def __init__(self, q0, q1, blit):
         threading.Thread.__init__(self)
-        self.q = q
+        self.q0 = q0
+        self.q1 = q1
         self.blit = blit
         self.running = False
         self.daemon = True
 
     def run(self):
         blit = self.blit
-        get = self.q.get
-        task_done = self.q.task_done
+        get = self.q0.get
+        put = self.q1.put
+        task_done = self.q0.task_done
 
         self.running = True
         while self.running:
             try:
-                surface, pos = get(1)
+                surface, pos, layer = get(1)
             except queue.Empty:
                 self.running = False
-                "dead"
                 break
 
             else:
-                blit(surface, pos)
+                rect = blit(surface, pos)
+                put((rect, layer))
                 task_done()
-
 
 def vec(i):
     return Vector3(i[0], i[1], 0)
@@ -74,10 +75,10 @@ def get_hex_draw(mat, size):
 
 
 def get_hex_tile(mat, radius):
-    def draw_tile(blit, filename, coords):
+    def draw_tile(blit, filename, coords, layer):
         x, y, z = coords
         tile = tile_dict[filename]
-        blit((tile, (int(x - half_width), int(y - radius))))
+        return blit((tile, (int(x - half_width), int(y - radius)), layer))
 
     height = radius * 2 + 1
     width = (sqrt(3) / 2 * height)
@@ -165,12 +166,15 @@ class HexMapView(pygame.sprite.Group):
         # set this to True to trigger a map redraw
         self.refresh_map = None
 
+        self._upper_rects = list()
         self.dirty_rects = None
         self.prj = None
         self.inv_prj = None
         self.tilt = 43
         self._buffer = None
         self._thread = None
+        self._queue = None
+        self._return_queue = None
         self.reproject(self.tilt)
         self.set_radius(radius)
 
@@ -259,9 +263,13 @@ class HexMapView(pygame.sprite.Group):
         if self.refresh_map:
             if self._thread is None:
                 self._queue = queue.Queue()
-                self._thread = BlitThread(self._queue, self._buffer.blit)
+                self._return_queue = queue.Queue()
+                self._thread = BlitThread(self._queue,
+                                          self._return_queue,
+                                          self._buffer.blit)
                 self._thread.start()
 
+            self._upper_rects = list()
             put_tile = self._queue.put
             for qq, rr in product(range(10), range(10)):
                 # convert => axial
@@ -278,12 +286,20 @@ class HexMapView(pygame.sprite.Group):
                         # translate the cell height
                         #pos.y -= self.hex_radius / 2 * float(cell.height)
                         pos.y -= self.hex_radius / 2
-                        draw_tile(put_tile, cell.filename, pos)
+                        draw_tile(put_tile, cell.filename, pos, 1)
 
                 else:
-                    draw_tile(put_tile, cell.filename, pos)
+                    draw_tile(put_tile, cell.filename, pos, 0)
 
             self._queue.join()
+            while 1:
+                try:
+                    i = self._return_queue.get_nowait()
+                except queue.Empty:
+                    break
+                else:
+                    self._upper_rects.append(i)
+
             self.refresh_map = False
             _dirty = [self._rect]
 
@@ -322,6 +338,11 @@ class HexMapView(pygame.sprite.Group):
             _sprite_dirty.append(rect)
 
         _dirty.extend(_sprite_dirty)
-        self.dirty_rects = _dirty
 
+        # draw the upper sprites over the map
+        for rect, layer in self._upper_rects:
+            if layer > 0:
+                surface.blit(self._buffer, rect, rect)
+
+        self.dirty_rects = _dirty
         return _dirty
