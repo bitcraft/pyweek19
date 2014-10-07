@@ -18,13 +18,14 @@ class EditMode(LevelSceneMode):
     """
     def __init__(self, scene):
         super(EditMode, self).__init__()
+        self.scene = scene
         self.border = gui.GraphicBox(resources.border_path, False)
         self.state = None
         self._font = pygame.font.Font(resources.fonts['rez'], 32)
-        self._surface = None
-        self._rect = None
+        self.surface = None
+        self.rect = None
         self._dialog = None
-        self.needs_clear = False
+        self.needs_refresh = False
 
         self.sprite = scene.sprite
 
@@ -59,8 +60,8 @@ class EditMode(LevelSceneMode):
 
         elif self.state == 0 and state == 1:
             self.state = state
-            self._surface = None
-            self.needs_clear = True
+            self.surface = None
+            self.scene.needs_refresh = True
             change = True
 
         elif self.state == 1 and state == 2:
@@ -71,9 +72,9 @@ class EditMode(LevelSceneMode):
 
         elif self.state == 2 and state == 3:
             self.state = state
-            self._surface = None
+            self.surface = None
             self._dialog = None
-            self.needs_clear = True
+            self.scene.needs_refresh = True
             change = True
 
         if not change:
@@ -81,32 +82,36 @@ class EditMode(LevelSceneMode):
                 self.state, state))
 
     def render_dialog(self, text):
-        if self._rect is None:
+        if self.rect is None:
             raise ValueError('cannot change state without video')
 
-        sw, sh = self._rect.size
+        sw, sh = self.rect.size
         rect = pygame.Rect(((0, 5), (sw, sh * .15))).inflate(-10, 0)
         tmp = pygame.Surface(rect.inflate(10, 10).size, pygame.SRCALPHA)
         self.border.draw(tmp, rect)
         gui.draw_text(tmp, text,
                       (255, 255, 255), rect.inflate(-20, -20),
                       self._font, True)
-        self._surface = tmp
+        self.surface = tmp
+        self.needs_refresh = True
 
     def draw(self, surface):
-        self._rect = surface.get_rect()
+        self.rect = surface.get_rect()
 
+        refreshed = False
         dirty = list()
 
         if self.state is None:
             self.change_state(0)
 
-        if self._surface:
-            rect = surface.blit(self._surface, (0, 0))
-            dirty.append(rect)
-
-        if self.needs_clear:
-            dirty.append(self._rect)
+        if self.needs_refresh:
+            if self.surface:
+                rect = surface.blit(self.surface, (0, 0))
+                dirty.append(rect)
+            else:
+                dirty.append(self.rect)
+            self.needs_refresh = False
+            refreshed = True
 
         return dirty
 

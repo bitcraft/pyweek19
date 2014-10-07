@@ -21,6 +21,8 @@ class LevelScene(Scene):
     def __init__(self, game):
         super(LevelScene, self).__init__("level", game)
 
+        self.damage = list()
+        self.needs_refresh = True
         # these coordinates are a bit wonky, the draw order hack messes it up
         raised = ((2, 3), (4, 5), (1, 7))
         self.model = hex_model.HexMapModel()
@@ -43,7 +45,7 @@ class LevelScene(Scene):
         #     self.model._data[c].height = 1
         #     cell.filename = 'tileRock_full.png'
 
-        self.view = hex_view.HexMapView(self.model,
+        self.view = hex_view.HexMapView(self, self.model,
                                         config.getint('display', 'tile_size'))
 
         self.velocity_updates = entity.PhysicsGroup()
@@ -71,7 +73,7 @@ class LevelScene(Scene):
         self.velocity_updates.add(sprite)
 
         # "switch"
-        button = entity.GameEntity('tileRock_tile.png')
+        button = entity.Button('tileRock_tile.png')
         button.position.x = 2
         button.position.y = 5
         button.anchor = Point2(33, 30)
@@ -92,16 +94,35 @@ class LevelScene(Scene):
         if point:
             return self.view.data.get_nearest_cell(point)
 
-    # fix this
-    once = False
-
     def draw(self, surface):
-        if not self.once:
-            surface.blit(resources.images["backdrop"], (0, 0))
-            self.once = True
+        dirty = list()
+        refreshed = False
 
-        dirty = self.view.draw(surface)
-        dirty.extend(self.mode.draw(surface))
+        if self.needs_refresh:
+            surface.blit(resources.images["backdrop"], (0, 0))
+            dirty = [surface.get_rect()]
+            self.view.needs_refresh = True
+            self.mode.needs_refresh = True
+            self.needs_refresh = False
+            refreshed = True
+
+        _dirty = self.view.draw(surface)
+        if _dirty:
+            if not refreshed:
+                dirty.extend(_dirty)
+
+            damage = _dirty[0].unionall(_dirty)
+            if self.damage:
+                if damage.colliderect(self.damage):
+                    self.mode.needs_refresh = True
+
+        _dirty = self.mode.draw(surface)
+        if _dirty:
+            if not refreshed:
+                dirty.extend(_dirty)
+
+            self.damage = _dirty[0].unionall(_dirty)
+
         return dirty
 
     def clear(self, surface):
@@ -122,8 +143,8 @@ class LevelScene(Scene):
                 if cell:
                     self.handle_click(event.button, cell)
 
-        # collisions
-        # c = groupcollide(self.view, self.view.data.walls(),
+        # collisions with walls (broken!)
+        #c = groupcollide(self.view, self.view.data.walls(),
         #                 False, False, hex_model.collide_hex)
 
         self.mode.update(delta, events)
@@ -134,6 +155,7 @@ class LevelScene(Scene):
 
         self.internal_event_group.update(self)
         self.velocity_updates.update(delta)
+        self.view.test_sprite_collisions()
 
     def resume(self):
         print("Resuming level scene")

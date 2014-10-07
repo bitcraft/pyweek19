@@ -89,7 +89,7 @@ def evenr_to_axial(coords):
 
 def sprites_to_axial(coords):
     x, y = coords
-    x -= y / 2
+    x -= y / 2 + 1
     return x, y
 
 

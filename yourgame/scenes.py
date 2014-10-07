@@ -95,13 +95,13 @@ class Scene(object):
     def update_events(self):
         events = self.state["events"]
         for event_list in events.values():
-            dead = []
+            dead = list()
             for e in event_list:
                 e["frames_left"] -= 1
-                if event["frame_left"] <= 0:
-                    dead.append(event["frame_left"])
+                if e["frame_left"] <= 0:
+                    dead.append(e["frame_left"])
             for e in dead:
                 event_list.remove(e)
 
     def clear_events(self):
-        self.states["events"] = dict()
+        self.state["events"] = dict()

@@ -7,7 +7,8 @@ from yourgame import config
 from yourgame.euclid import Vector3, Point2, Point3
 
 __all__ = ['PhysicsGroup'
-           'GameEntity']
+           'GameEntity',
+           'Button']
 
 
 class PhysicsGroup(pygame.sprite.Group):
@@ -83,6 +84,7 @@ class GameEntity(pygame.sprite.Sprite):
         self.anchor = Point2(16, 57)
         self.radius = .5
         self._layer = 1
+        self.event_handlers = list()
 
         # set this init value to False if sprite is facing right
         self._flipped = False
@@ -97,5 +99,8 @@ class GameEntity(pygame.sprite.Sprite):
             self.image = flip(self.original_image, value, 0)
         self._flipped = bool(value)
 
+
+class Button(GameEntity):
     def handle_internal_events(self, scene):
-        pass
+        for event in scene.state['events']:
+            print event
