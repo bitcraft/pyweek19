@@ -45,6 +45,7 @@ class LevelScene(Scene):
                                         config.getint('display', 'tile_size'))
 
         self.velocity_updates = entity.PhysicsGroup()
+        self.internal_event_group = Group()
 
         sprite = entity.GameEntity()
         sprite.position.x = 0
@@ -66,6 +67,7 @@ class LevelScene(Scene):
         sprite.position.x = 2
         sprite.position.y = 7
         self.view.add(sprite)
+        self.internal_event_group.add(sprite)
 
         self.sprite = sprite
         self.velocity_updates.add(sprite)
@@ -117,8 +119,14 @@ class LevelScene(Scene):
         # collisions
         # c = groupcollide(self.view, self.view.data.walls(),
         #                 False, False, hex_model.collide_hex)
-
+        
         self.mode.update(delta, events)
+
+        for sprite in self.internal_event_group:
+            if hasattr(sprite, "handle_internal_events"):
+                sprite.handle_internal_events(self)
+
+        self.internal_event_group.update(self)
         self.velocity_updates.update(delta)
 
     def resume(self):
