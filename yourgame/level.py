@@ -41,7 +41,7 @@ class EditMode(LevelSceneMode):
         super(EditMode, self).__init__()
         self.border = gui.GraphicBox(resources.border_path, False)
         self.state = None
-        self._font = pygame.font.Font(resources.fonts['rez'], 24)
+        self._font = pygame.font.Font(resources.fonts['rez'], 32)
         self._surface = None
         self._rect = None
         self._dialog = None
@@ -60,13 +60,13 @@ class EditMode(LevelSceneMode):
 
             cell.raised = not cell.raised
             if cell.raised:
-                cell.height = 1
+                cell.height = config.getint('display', 'wall_height')
                 cell.filename = 'tileRock_full.png'
-                #view.dirty = True
             else:
                 cell.height = 0
                 cell.filename = 'tileGrass.png'
-                #view.dirty = True
+
+            view.refresh_map = True
 
     def change_state(self, state):
         change = False
@@ -114,11 +114,16 @@ class EditMode(LevelSceneMode):
     def draw(self, surface):
         self._rect = surface.get_rect()
 
+        dirty = list()
+
         if self.state is None:
             self.change_state(0)
 
         if self._surface:
-            surface.blit(self._surface, (0, 0))
+            rect = surface.blit(self._surface, (0, 0))
+            dirty.append(rect)
+
+        return dirty
 
     def update(self, delta, events):
         moved = False
@@ -154,7 +159,7 @@ class LevelScene(Scene):
             cell.filename = 'tileGrass.png'
             if coords in raised:
                 cell.raised = True
-                cell.height = 1
+                cell.height = config.getint('display', 'wall_height')
                 cell.filename = 'tileRock_full.png'
             self.model.add_cell(coords, cell)
 
@@ -202,7 +207,7 @@ class LevelScene(Scene):
         #surface.fill((0, 0, 0))
 
         dirty = self.view.draw(surface)
-        #self.mode.draw(surface)
+        dirty.extend(self.mode.draw(surface))
         return dirty
 
     def clear(self, surface):

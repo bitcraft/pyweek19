@@ -153,6 +153,7 @@ class HexMapView(pygame.sprite.Group):
         super(HexMapView, self).__init__()
         self.data = data
         self.dirty = False
+        self.hex_radius = None
         self._rect = None
         self._old_hovered = None
         self._hovered = None
@@ -160,8 +161,10 @@ class HexMapView(pygame.sprite.Group):
         self._hex_draw = None
         self._hex_tile = None
         self._project = None
-        self.hex_radius = None
+
+        # set this to True to trigger a map redraw
         self.refresh_map = None
+
         self.dirty_rects = None
         self.prj = None
         self.inv_prj = None
@@ -241,27 +244,25 @@ class HexMapView(pygame.sprite.Group):
             self.dirty = False
             _dirty = [self._rect]
 
-        if self._thread is None:
-            self._queue = queue.Queue()
-            self._thread = BlitThread(self._queue, self._buffer.blit)
-            self._thread.start()
-
         if self._project is None:
             self._map_rect, \
             self._project = get_projection(self.data,
                                            self.hex_radius,
                                            self.prj,
                                            self._rect)
-
-        put_tile = self._queue.put
         project = self._project
         draw_tile = self._hex_tile
         draw_hex = self._hex_draw
-        _buffer = self._buffer
 
-        # draw the cell tiles
+        # draw the cell tiles, a thread will blit the tiles in the background
         # get in draw order
         if self.refresh_map:
+            if self._thread is None:
+                self._queue = queue.Queue()
+                self._thread = BlitThread(self._queue, self._buffer.blit)
+                self._thread.start()
+
+            put_tile = self._queue.put
             for qq, rr in product(range(10), range(10)):
                 # convert => axial
                 q, r = evenr_to_axial((rr, qq))
@@ -272,12 +273,12 @@ class HexMapView(pygame.sprite.Group):
 
                 if cell.height > 0:
                     # draw cell at base layer
-                    pos.y -= self.hex_radius / 2 * float(cell.height)
-                    draw_tile(put_tile, cell.filename, pos)
 
-                    # translate the cell height
-                    pos.y -= self.hex_radius / 2 * float(cell.height)
-                    draw_tile(put_tile, cell.filename, pos)
+                    for i in range(int(ceil(cell.height))):
+                        # translate the cell height
+                        #pos.y -= self.hex_radius / 2 * float(cell.height)
+                        pos.y -= self.hex_radius / 2
+                        draw_tile(put_tile, cell.filename, pos)
 
                 else:
                     draw_tile(put_tile, cell.filename, pos)
