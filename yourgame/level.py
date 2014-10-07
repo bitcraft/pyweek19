@@ -157,8 +157,9 @@ class LevelScene(Scene):
         for q, r in itertools.product(range(10), range(10)):
             coords = hex_model.evenr_to_axial((r, q))
             cell = hex_model.Cell()
-            cell.filename = 'tileDirt.png'
+            cell.filename = 'tileGrass.png'
             if coords in raised:
+                cell.height = 3
                 cell.raised = True
                 cell.filename = 'tileRock_full.png'
             self.model.add_cell(coords, cell)
@@ -235,9 +236,6 @@ class LevelScene(Scene):
         # collisions
         c = groupcollide(self.view, self.view.data.walls(),
                          False, False, hex_model.collide_hex)
-
-        if c:
-            print c
 
         self.mode.update(delta, events)
 
