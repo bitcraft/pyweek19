@@ -97,9 +97,9 @@ class Scene(object):
         for event_list in events.values():
             dead = []
             for e in event_list:
-                e["frames_list"] -= 1
-                if event["frame_list"] <= 0:
-                    dead.append(event["frame_list"])
+                e["frames_left"] -= 1
+                if event["frame_left"] <= 0:
+                    dead.append(event["frame_left"])
             for e in dead:
                 event_list.remove(e)
 
