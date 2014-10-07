@@ -124,7 +124,7 @@ class LevelScene(Scene):
 
         for sprite in self.internal_event_group:
             if hasattr(sprite, "handle_internal_events"):
-                sprite.handle_internal_events(self.state["events"])
+                sprite.handle_internal_events(self)
 
         self.internal_event_group.update(self)
         self.velocity_updates.update(delta)
