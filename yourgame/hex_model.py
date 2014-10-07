@@ -1,4 +1,6 @@
 from math import sqrt
+from euclid import Vector2
+import pygame
 
 # even-r : 'pointy top'
 
@@ -6,7 +8,8 @@ __all__ = ['HexMapModel',
            'Cell',
            'evenr_to_axial',
            'pixel_to_axial',
-           'sprites_to_axial']
+           'sprites_to_axial',
+           'collide_hex']
 
 
 def pixel_to_axial(coords, size):
@@ -89,6 +92,22 @@ def sprites_to_axial(coords):
     return q, r
 
 
+def collide_hex(left, right, radius=None):
+    """ Fast approximation of collisions between hex cells in axial space
+    """
+    distancesquared = dist_hex(left.position[:2], right.position[:2]) ** 2
+    leftradius = left.radius
+    rightradius = right.radius
+    return distancesquared <= (leftradius + rightradius) ** 2
+
+
+def dist_hex(cell0, cell1):
+    q0, r0 = cell0
+    q1, r1 = cell1
+    return (abs(q0 - q1) + abs(r0 - r1) +
+            abs(q0 + r0 - q1 - r1)) / 2.0
+
+
 class Cell(object):
 
     def __init__(self):
@@ -111,6 +130,7 @@ class HexMapModel(object):
         self._data = dict()
         self._width = None
         self._height = None
+        self._dirty = False
 
     def get_cell(self, coords):
         return self._data.get(tuple(coords), None)
@@ -184,10 +204,12 @@ class HexMapModel(object):
         return (cell[0] + HexMapModel.neighbor_mat[facing],
                 cell[1] + HexMapModel.neighbor_mat[facing])
 
-    @staticmethod
-    def dist(cell0, cell1):
-        q0, r0 = cell0
-        q1, r1 = cell1
-        return (abs(q0 - q1) + abs(r0 - r1) +
-                abs(q0 + r0 - q1 - r1)) / 2.0
-
+    def walls(self):
+        walls = list()
+        for pos, cell in self._data.items():
+            if cell.raised:
+                sprite = pygame.sprite.Sprite()
+                sprite.position = Vector2(*pos)
+                sprite.radius = .25
+                walls.append(sprite)
+        return walls

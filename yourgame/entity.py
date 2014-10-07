@@ -15,3 +15,6 @@ class GameEntity(pygame.sprite.Sprite):
 
         w, h = self.image.get_size()
         self.anchor = Point2(16, 57)
+
+        # do not change
+        self.radius = .5

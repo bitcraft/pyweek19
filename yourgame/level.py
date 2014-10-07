@@ -1,5 +1,6 @@
 import itertools
 import pygame
+from pygame.sprite import groupcollide
 from pygame.locals import *
 
 from scenes import Scene
@@ -227,6 +228,13 @@ class LevelScene(Scene):
                 cell = self.get_nearest_cell(event.pos)
                 if cell:
                     self.handle_click(event.button, cell)
+
+        # collisions
+        c = groupcollide(self.view, self.view.data.walls(),
+                         False, False, hex_model.collide_hex)
+
+        if c:
+            print c
 
         self.mode.update(delta, events)
 
