@@ -49,6 +49,7 @@ class Game(object):
                     sys.exit()
 
             delta = tick(tick_fps)
+            self.current_scene.update_events()
             self.current_scene.update(delta, events)
 
             draw_timer += delta
@@ -80,12 +81,6 @@ class Scene(object):
         pass
 
     def update(self, delta, events):
-        events = self.state["events"]
-        for event_list in events.values():
-            for e in event_list:
-                e["frames_list"] -= 1
-                if event["frame_list"] <= 0:
-                    pass
         return True
 
     def clear(self, surface):
@@ -96,6 +91,17 @@ class Scene(object):
         events[event_name] = dict(kwargs)
         events[event_name]["originator"] = originator
         events[event_name]["frames_left"] = 2
+
+    def update_events(self):
+        events = self.state["events"]
+        for event_list in events.values():
+            dead = []
+            for e in event_list:
+                e["frames_list"] -= 1
+                if event["frame_list"] <= 0:
+                    dead.append(event["frame_list"])
+            for e in dead:
+                event_list.remove(e)
 
     def clear_events(self):
         self.states["events"] = dict()
