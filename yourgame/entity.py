@@ -1,4 +1,5 @@
 import pygame
+from pygame.transform import flip
 from pygame.locals import *
 
 from yourgame import resources
@@ -75,7 +76,21 @@ class GameEntity(pygame.sprite.Sprite):
         self.position = Point3(0, 0, 0)
         self.acceleration = Vector3(0, 0, 0)
         self.velocity = Vector3(0, 0, 0)
-        self.image = resources.tiles['alienBlue.png']
+        self.original_image = resources.tiles['alienBlue.png']
+        self.image = self.original_image
         self.rect = self.image.get_rect()
         self.anchor = Point2(16, 57)
         self.radius = .5
+
+        # set this init value to False if sprite is facing right
+        self._flipped = False
+
+    @property
+    def flipped(self):
+        return self._flipped
+
+    @flipped.setter
+    def flipped(self, value):
+        if self._flipped or value:
+            self.image = flip(self.original_image, value, 0)
+        self._flipped = bool(value)

@@ -126,9 +126,11 @@ class EditMode(LevelSceneMode):
 
         if pressed[K_LEFT]:
             self.sprite.acceleration.x = -movement_speed
+            self.sprite.flipped = True
             moved = True
         elif pressed[K_RIGHT]:
             self.sprite.acceleration.x = movement_speed
+            self.sprite.flipped = False
             moved = True
         else:
             self.sprite.acceleration.x = 0
