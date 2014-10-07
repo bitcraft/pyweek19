@@ -1,5 +1,5 @@
 from math import sqrt
-from euclid import Vector2, Vector3
+from yourgame.euclid import Vector2, Vector3
 import pygame
 
 from collections import defaultdict
@@ -237,14 +237,16 @@ class HexMapModel(object):
     def pathfind(self, current, end, blacklist=frozenset(), impassable=frozenset()):
         """ modified: http://stackoverflow.com/questions/4159331/python-speed-up-an-a-star-pathfinding-algorithm """
 
-        def cell_available(cell):
-            coord = cell[1]
+        def coord_available(coord):
             return coord not in closed_set \
                 and coord not in blacklist \
                 and self.get_cell(coord).kind not in impassable
 
         def clip(vector, lowest, highest):
             return type(vector)(map(min, map(max, vector, lowest), highest))
+
+        def lower_cost(cell1, cell2):
+            return cell1 if cell1[0] < cell2[0] else cell2
 
         def surrounding_clip(coord, limit):
             x, y = coord
@@ -288,19 +290,16 @@ class HexMapModel(object):
 
             open_set.remove(current)
             closed_set.add(current)
-            cells = filter(cell_available,
-                           ((self.dist(cell, end)+self.get_cell(current).cost, cell)
-                            for cell in surrounding(current, limit)))
-            try:
-                min_cell = reduce(
-                    lambda cell1, cell2:
-                    cell1 if cell1[0] < cell2[0] else cell2,
-                    cells)
-                parent[min_cell[1]] = current
-                if min_cell[1] not in open_set:
-                    open_set.add(min_cell[1])
-                    heappush(open_heap, min_cell[1])
-            except TypeError:
-                continue
+            cells = {
+                (self.dist(coord, end)+self.get_cell(current).cost, coord)
+                for coord in surrounding(current, limit)
+                if coord_available(coord)
+            }
+            lowest_cost = reduce(lower_cost, cells, (float('inf'), None))[0]
+            for cell in (cell for cell in cells if cell[0] == lowest_cost):
+                parent[cell[1]] = current
+                if cell[1] not in open_set:
+                    open_set.add(cell[1])
+                    heappush(open_heap, cell[1])
 
         return (), True
