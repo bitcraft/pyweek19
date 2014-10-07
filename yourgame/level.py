@@ -10,6 +10,8 @@ from yourgame import hex_model
 from yourgame import hex_view
 from yourgame import entity
 from yourgame import config
+from yourgame.resources import images
+
 import os
 
 __all__ = ['LevelScene']
@@ -29,6 +31,7 @@ class LevelSceneMode(object):
 
     def update(self, delta, events):
         pass
+
 
 class EditMode(LevelSceneMode):
     """
@@ -114,7 +117,6 @@ class EditMode(LevelSceneMode):
 
     def draw(self, surface):
         self._rect = surface.get_rect()
-
         dirty = list()
 
         if self.state is None:
@@ -212,8 +214,14 @@ class LevelScene(Scene):
         if point:
             return self.view.data.get_nearest_cell(point)
 
+    # fix this
+    once = False
+
     def draw(self, surface):
         #surface.fill((0, 0, 0))
+        if not self.once:
+            surface.blit(resources.images["backdrop"], (0, 0))
+            self.once = True
 
         dirty = self.view.draw(surface)
         dirty.extend(self.mode.draw(surface))

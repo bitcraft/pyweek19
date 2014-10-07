@@ -21,7 +21,6 @@ tiles = None
 border_path = None
 border = None
 
-
 def get_text(heading):
     fh = open(_jpath(resource_path, 'dialogs.txt'))
 
@@ -67,7 +66,6 @@ def load():
     resource_path = os.path.abspath(resource_path)
 
     border_path = _jpath(resource_path, 'dialog.png')
-
     transparent = (255, 0, 255)
 
     # load the tiles
