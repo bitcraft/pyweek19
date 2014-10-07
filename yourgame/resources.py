@@ -64,20 +64,14 @@ def load():
 
     resource_path = config.get('paths', 'resource-path')
     resource_path = os.path.abspath(resource_path)
-
     border_path = _jpath(resource_path, 'dialog.png')
-    transparent = (255, 0, 255)
 
     # load the tiles
     tile_path = _jpath(resource_path, 'tiles', '*png')
     for filename in glob.glob(tile_path):
         path = _jpath(resource_path, 'tiles', filename)
-        _image = pygame.image.load(path).convert_alpha()
-        image = pygame.Surface(_image.get_size())
-        image.fill(transparent)
-        image.blit(_image, (0, 0))
-        image.set_colorkey(transparent, pygame.RLEACCEL)
-        tiles[os.path.basename(filename)] = _image
+        image = pygame.image.load(path).convert_alpha()
+        tiles[os.path.basename(filename)] = image
         yield path, image
 
     for name, filename in config.items('font-files'):

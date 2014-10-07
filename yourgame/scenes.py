@@ -34,6 +34,7 @@ class Game(object):
 
     def loop(self):
         draw_interval = 1 / float(self.target_fps)
+        tick_fps = self.target_fps * 2
         draw_timer = 0
         event_get = event.get
         tick = self.clock.tick
@@ -47,7 +48,7 @@ class Game(object):
                         self.pop_scene()
                     sys.exit()
 
-            delta = tick()
+            delta = tick(tick_fps)
             self.current_scene.update(delta, events)
 
             draw_timer += delta
