@@ -9,7 +9,7 @@ from yourgame import hex_view
 from yourgame import entity
 from yourgame import config
 from yourgame import resources
-from modes.editor import EditMode
+from yourgame.modes.editor import EditMode
 
 __all__ = ['LevelScene']
 

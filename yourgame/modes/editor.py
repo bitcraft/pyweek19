@@ -1,6 +1,6 @@
 from yourgame import resources
 from yourgame import gui
-from mode import LevelSceneMode
+from yourgame.modes.mode import LevelSceneMode
 from yourgame import config
 import pygame
 from pygame.locals import *

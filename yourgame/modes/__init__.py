@@ -1,1 +1,1 @@
-from editor import EditMode
+from yourgame.modes.editor import EditMode
