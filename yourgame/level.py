@@ -1,7 +1,5 @@
 import itertools
 import pygame
-from pygame.sprite import Group
-from pygame.sprite import groupcollide
 from pygame.locals import *
 
 from yourgame.scenes import Scene
@@ -81,6 +79,7 @@ class LevelScene(Scene):
         coords = hex_model.evenr_to_axial((0, 0))
         cell = self.view.data.get_cell(coords)
         door = entity.Door('smallRockStone.png', 'testDoor', cell)
+        # it must be added to the view group so it can trigger map refreshes
         self.view.add(door)
         self.internal_event_group.add(door)
 

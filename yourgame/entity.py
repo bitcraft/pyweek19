@@ -8,7 +8,8 @@ from yourgame.euclid import Vector2, Vector3
 
 __all__ = ['PhysicsGroup'
            'GameEntity',
-           'Button']
+           'Button',
+           'Door']
 
 
 class PhysicsGroup(pygame.sprite.Group):

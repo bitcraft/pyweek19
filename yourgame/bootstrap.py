@@ -8,7 +8,6 @@ from yourgame import config
 from yourgame.scenes import Game
 from yourgame.title import TitleScene
 from yourgame.level import LevelScene
-#from yourgame.dialog import DialogScene
 from yourgame import resources
 
 logger = logging.getLogger('yourgame.bootstrap')
@@ -30,6 +29,5 @@ def bootstrap_game():
     game = Game(config.getint('display', 'target-fps'), main_surface)
     game.register_scene(TitleScene(game))
     game.register_scene(LevelScene(game))
-    #game.register_scene(DialogScene(game))
     game.push_scene("level")
     return game
