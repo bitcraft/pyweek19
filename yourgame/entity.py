@@ -116,12 +116,25 @@ class GameEntity(pygame.sprite.DirtySprite):
         self.image = None
         self.update_image()
         self.rect = self.image.get_rect()
+        self.move_sound = resources.sounds['scifidrone.wav']
+        self._playing_move_sound = False
 
     def update_image(self):
         w, h = self.original_image.get_size()
         self.image = smoothscale(flip(self.original_image, self._flipped, 0),
                                  (int(w * self.scale), int(h * self.scale)))
         self.image = self.image.convert_alpha()
+
+    def update(self, delta):
+        if abs(self.acceleration) > 0:
+            if not self._playing_move_sound:
+                self.move_sound.set_volume(.1)
+                self.move_sound.play(-1, fade_ms=200)
+                self._playing_move_sound = True
+        else:
+            if self._playing_move_sound:
+                self.move_sound.fadeout(200)
+                self._playing_move_sound = False
 
     @property
     def flipped(self):

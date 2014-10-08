@@ -12,6 +12,31 @@
 
 ###############################################################################
 
+fonts
+=====
+
 rez.ttf
 http://www.dafont.com/rezland.font
 
+
+music
+=====
+
+all music
+kevin macloed www.incompetech.com
+
+
+sounds
+======
+
+Jason Dagenet
+scifidrone.wav
+http://opengameart.org/content/sci-fi-drone-loop
+
+bart
+warp.wav
+http://opengameart.org/content/warp-engine-engage-sound
+
+Tim Mortimer
+space gui sounds
+http://opengameart.org/content/4-sci-fi-menu-sounds

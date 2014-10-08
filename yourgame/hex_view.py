@@ -233,7 +233,7 @@ class HexMapView(pygame.sprite.LayeredUpdates):
         # draw the cell tiles, a thread will blit the tiles in the background
         # this is rendering the background and all hex tiles
         if self.needs_refresh:
-            upper_buffer = pygame.Surface(self.map_rect.size, pygame.SRCALPHA)
+            upper_buffer = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
             buffer2_blit = upper_buffer.blit
             self.upper_cells = list()
 

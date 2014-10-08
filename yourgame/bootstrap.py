@@ -1,10 +1,10 @@
 import logging
 import os
 import pygame
-from pygame import init
 from pygame.display import set_mode
 
 from yourgame import config
+from yourgame import gui
 from yourgame.scenes import Game
 from yourgame.title import TitleScene
 from yourgame.level import LevelScene
@@ -16,11 +16,19 @@ config.read(filename)
 
 
 def bootstrap_game():
-    init()
+    pygame.display.init()
+    pygame.mixer.init(frequency=config.getint('sound', 'frequency'),
+                         buffer=config.getint('sound', 'buffer'))
+    pygame.font.init()
+    pygame.init()
+
     main_surface = set_mode((config.getint('display', 'width'),
                              config.getint('display', 'height')))
 
     main_surface.fill((0, 0, 0))
+    gui.draw_text(main_surface, "loading, please wait...", (255,255,255),
+                  main_surface.get_rect())
+    pygame.display.flip()
 
     for path, thing in resources.load():
         logger.info('loaded %s', path)

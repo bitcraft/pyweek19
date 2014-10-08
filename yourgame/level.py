@@ -88,9 +88,11 @@ class LevelScene(Scene):
 
     def setup(self):
         print("Setting up level scene")
+        resources.play_music('level')
 
     def teardown(self):
         print("Tearing down level scene")
+        pygame.mixer.music.fadeout(500)
 
     def get_nearest_cell(self, coords):
         point = self.view.point_from_surface(coords)

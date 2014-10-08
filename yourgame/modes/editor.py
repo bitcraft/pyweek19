@@ -141,7 +141,7 @@ class EditMode(LevelSceneMode):
 
         if pressed[K_SPACE]:
             if self.sprite.position.z == 0:
-                self.sprite.velocity.z = 5
+                self.sprite.velocity.z = .5
 
         if moved and self.state == 2:
             self.change_state(3)
