@@ -1,5 +1,5 @@
 import pygame
-from pygame.transform import flip
+from pygame.transform import flip, smoothscale
 from pygame.locals import *
 
 from yourgame import resources
@@ -17,15 +17,16 @@ class PhysicsGroup(pygame.sprite.Group):
         super(PhysicsGroup, self).__init__()
         gravity = config.getfloat('world', 'gravity')
 
-        self.timestep = None
+        self.timestep = config.getfloat('world', 'physics_tick')
         self.gravity_delta = None
         self.ground_friction = None
         self.sleeping = set()
         self.gravity = Vector3(0, 0, gravity)
 
     def update(self, delta):
+        delta = self.timestep
         gravity_delta = self.gravity * delta
-        ground_friction = pow(.99, delta)
+        ground_friction = pow(.999, delta)
 
         for sprite in self.sprites():
             velocity = sprite.velocity
@@ -37,7 +38,7 @@ class PhysicsGroup(pygame.sprite.Group):
                 acceleration += gravity_delta
 
             velocity += acceleration * delta
-            position += velocity
+            position += velocity * delta
             x, y, z = velocity
 
             if not z == 0:
@@ -55,7 +56,7 @@ class PhysicsGroup(pygame.sprite.Group):
                     velocity.x *= ground_friction
 
                 if not self.move_sprite(sprite, (x, 0, 0)):
-                    if abs(velocity.x) > .0002:
+                    if abs(velocity.x) > .00002:
                         acceleration.x = 0.0
                         velocity.x = 0.0
 
@@ -73,7 +74,7 @@ class PhysicsGroup(pygame.sprite.Group):
                     velocity.y *= ground_friction
 
                 if not self.move_sprite(sprite, (0, y, 0)):
-                    if abs(velocity.y) > .0002:
+                    if abs(velocity.y) > .00002:
                         acceleration.y = 0.0
                         velocity.y = 0.0
 
@@ -96,7 +97,7 @@ class PhysicsGroup(pygame.sprite.Group):
         return True
 
 
-class GameEntity(pygame.sprite.Sprite):
+class GameEntity(pygame.sprite.DirtySprite):
 
     def __init__(self, filename):
         super(GameEntity, self).__init__()
@@ -104,16 +105,22 @@ class GameEntity(pygame.sprite.Sprite):
         self.acceleration = Vector3(0, 0, 0)
         self.velocity = Vector3(0, 0, 0)
         self.original_image = resources.tiles[filename]
-        self.image = self.original_image
-        self.rect = self.image.get_rect()
         self.anchor = Vector2(16, 57)
         self.radius = .5
         self._layer = 1
         self.event_handlers = list()
         self.max_velocity = [.15, .15, 100]
-
-        # set this init value to False if sprite is facing right
+        self.scale = 1
         self._flipped = False
+        self.image = None
+        self.update_image()
+        self.rect = self.image.get_rect()
+
+    def update_image(self):
+        w, h = self.original_image.get_size()
+        self.image = smoothscale(flip(self.original_image, self._flipped, 0),
+                                 (int(w * self.scale), int(h * self.scale)))
+        self.image = self.image.convert_alpha()
 
     @property
     def flipped(self):
@@ -122,11 +129,21 @@ class GameEntity(pygame.sprite.Sprite):
     @flipped.setter
     def flipped(self, value):
         if self._flipped or value:
-            self.image = flip(self.original_image, value, 0)
-        self._flipped = bool(value)
+            self._flipped = bool(value)
+            self.update_image()
+
+    def trigger_view_refresh(self):
+        for group in self.groups():
+            if hasattr(group, 'needs_refresh'):
+                group.needs_refresh = True
 
 
 class Button(GameEntity):
+    def __init__(self, filename, key):
+        super(Button, self).__init__(filename)
+        assert(key is not None)
+        self.key = key
+
     def handle_internal_events(self, scene):
         interested = scene.state['events'].get('Collision', None)
         if not interested:
@@ -140,5 +157,37 @@ class Button(GameEntity):
             except ValueError:
                 continue
 
-            other.kill()
+            scene.raise_event(self, 'Switch', key=self.key, state=True)
 
+
+class Door(GameEntity):
+    def __init__(self, filename, key, cell):
+        super(Door, self).__init__(filename)
+        assert(key is not None)
+        assert(cell is not None)
+        self.key = key
+        self.cell = cell
+        self.visible = False
+
+    def handle_internal_events(self, scene):
+        interested = scene.state['events'].get('Switch', None)
+        if not interested:
+            return
+
+        for event in interested:
+            if not event['key'] == self.key:
+                continue
+
+            cell = self.cell
+            if event['state']:
+                if not cell.height == 3:
+                    cell.filename = 'tileMagic_full.png'
+                    cell.height = 3
+                    cell.raised = True
+                    self.trigger_view_refresh()
+            else:
+                if cell.raised:
+                    cell.filename = 'tileGrass_full.png'
+                    cell.height = 0
+                    cell.raised = False
+                    self.trigger_view_refresh()

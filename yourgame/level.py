@@ -24,22 +24,19 @@ class LevelScene(Scene):
 
         self.damage = list()
         self.needs_refresh = True
+
+        # build a basic flat map
         self.model = hex_model.HexMapModel()
         w = config.getint('world', 'width')
         h = config.getint('world', 'height')
-        raised = {(2, 3), (4, 5), (1, 7)}
         for q, r in itertools.product(range(w), range(h)):
             coords = hex_model.evenr_to_axial((q, r))
             cell = hex_model.Cell()
             cell.filename = 'tileGrass.png'
             cell.kind = 'grass'
-            if coords in raised:
-                cell.raised = True
-                cell.height = config.getint('display', 'wall_height')
-                cell.filename = 'tileRock_full.png'
-                cell.kind = 'rock'
             self.model.add_cell(coords, cell)
 
+        # build a maze
         maze.build_maze_from_hex(self.model,
                                  lower_limit=(1, 1),
                                  upper_limit=(self.model.width-2,
@@ -47,8 +44,7 @@ class LevelScene(Scene):
                                  height=1.0,
                                  raised_tile='tileRock_full.png',
                                  lowered_tile='tileGrass.png',
-                                 num_adjacent=1,
-                                 closed_set=raised)
+                                 num_adjacent=1)
 
         self.view = hex_view.HexMapView(self, self.model,
                                         config.getint('display', 'hex_radius'))
@@ -56,10 +52,6 @@ class LevelScene(Scene):
         self.velocity_updates = entity.PhysicsGroup()
         self.internal_event_group = pygame.sprite.Group()
 
-        sprite = entity.GameEntity('alienBlue.png')
-        sprite.position.x = 0
-        sprite.position.y = 0
-        self.view.add(sprite)
         sprite = entity.GameEntity('alienBlue.png')
         sprite.position.x = 7
         sprite.position.y = 2
@@ -70,7 +62,7 @@ class LevelScene(Scene):
         self.view.add(sprite)
         sprite = entity.GameEntity('alienBlue.png')
         sprite.position.x = 2
-        sprite.position.y = 7
+        sprite.position.y = 2
         self.view.add(sprite)
         self.internal_event_group.add(sprite)
 
@@ -78,12 +70,19 @@ class LevelScene(Scene):
         self.velocity_updates.add(sprite)
 
         # "switch"
-        button = entity.Button('tileRock_tile.png')
+        button = entity.Button('tileRock_tile.png', 'testDoor')
         button.position.x = 2
-        button.position.y = 5
+        button.position.y = 4
         button.anchor = Point2(33, 30)
         self.view.add(button, layer=0)
         self.internal_event_group.add(button)
+
+        # "door"
+        coords = hex_model.evenr_to_axial((0, 0))
+        cell = self.view.data.get_cell(coords)
+        door = entity.Door('smallRockStone.png', 'testDoor', cell)
+        self.view.add(door)
+        self.internal_event_group.add(door)
 
         # this must come last
         self.mode = EditMode(self)
