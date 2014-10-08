@@ -103,4 +103,4 @@ class GameEntity(pygame.sprite.Sprite):
 class Button(GameEntity):
     def handle_internal_events(self, scene):
         for event in scene.state['events']:
-            print event
+            print(event)

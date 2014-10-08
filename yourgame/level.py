@@ -40,6 +40,8 @@ class LevelScene(Scene):
             self.model.add_cell(coords, cell)
 
         maze.build_maze_from_hex(self.model,
+                                 lower_limit=(1, 1),
+                                 upper_limit=(self.model.width-2, self.model.height-2),
                                  height=1.0,
                                  raised_tile='tileRock_full.png',
                                  lowered_tile='tileGrass.png')
