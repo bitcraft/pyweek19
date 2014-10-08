@@ -8,10 +8,11 @@ from yourgame.scenes import Scene
 from yourgame import hex_model
 from yourgame import hex_view
 from yourgame import entity
+from yourgame.environ import maze
 from yourgame import config
 from yourgame import resources
 from yourgame.modes.editor import EditMode
-from euclid import Point2
+from yourgame.euclid import Point2
 
 __all__ = ['LevelScene']
 
@@ -35,15 +36,13 @@ class LevelScene(Scene):
                 cell.raised = True
                 cell.height = config.getint('display', 'wall_height')
                 cell.filename = 'tileRock_full.png'
+                cell.kind = 'rock'
             self.model.add_cell(coords, cell)
 
-        # blacklist = {(1, 0), (4, 4)}
-        # impassable = {} #{'grass'}
-        # for c in (i for i in self.model.pathfind_evenr(
-        #         (0, 0), (5, 5), blacklist, impassable)[0]):
-        #     self.model._data[c].raised = True
-        #     self.model._data[c].height = 1
-        #     cell.filename = 'tileRock_full.png'
+        maze.build_maze_from_hex(self.model,
+                                 height=1.0,
+                                 raised_tile='tileRock_full.png',
+                                 lowered_tile='tileGrass.png')
 
         self.view = hex_view.HexMapView(self, self.model,
                                         config.getint('display', 'tile_size'))

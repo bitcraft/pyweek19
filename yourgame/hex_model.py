@@ -109,6 +109,23 @@ def dist_hex(cell0, cell1):
             abs(q0 + r0 - q1 - r1)) / 2.0
 
 
+def clip(vector, lowest, highest):
+            return type(vector)(map(min, map(max, vector, lowest), highest))
+
+
+def surrounding_clip(coord, limit):
+    x, y = coord
+    return (clip(i, (0, 0), limit) for i in
+            ((x - 1, y - 1), (x - 1, y), (x - 1, y + 1), (x, y - 1),
+           (x, y + 1), (x + 1, y)))
+
+
+def surrounding_noclip(coord, limit=None):
+    x, y = coord
+    return ((x - 1, y - 1), (x - 1, y), (x - 1, y + 1), (x, y - 1),
+           (x, y + 1), (x + 1, y))
+
+
 class Cell(object):
 
     def __init__(self):
@@ -240,20 +257,6 @@ class HexMapModel(object):
             return coord not in closed_set \
                 and coord not in blacklist \
                 and self.get_cell(coord).kind not in impassable
-
-        def clip(vector, lowest, highest):
-            return type(vector)(map(min, map(max, vector, lowest), highest))
-
-        def surrounding_clip(coord, limit):
-            x, y = coord
-            return (clip(i, (0, 0), limit) for i in
-                    ((x - 1, y - 1), (x - 1, y), (x - 1, y + 1), (x, y - 1),
-                     (x, y + 1), (x + 1, y)))
-
-        def surrounding_noclip(coord, limit):
-            x, y = coord
-            return ((x - 1, y - 1), (x - 1, y), (x - 1, y + 1), (x, y - 1),
-                   (x, y + 1), (x + 1, y))
 
         def retrace_path(c):
             path = [c]
