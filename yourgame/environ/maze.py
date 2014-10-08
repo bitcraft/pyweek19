@@ -6,7 +6,6 @@ from yourgame.hex_model import evenr_to_axial, clip
 
 def surrounding_clip(coord, lower, upper):
     x, y = coord
-    print(lower, upper)
     return (clip(i, lower, upper) for i in
             ((x - 1, y - 1), (x - 1, y), (x - 1, y + 1), (x, y - 1),
            (x, y + 1), (x + 1, y)))
