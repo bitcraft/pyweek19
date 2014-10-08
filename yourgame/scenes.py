@@ -57,8 +57,8 @@ class Game(object):
 
             delta = tick(tick_fps)
             fps_display_acc += delta
-            if fps_display_acc >= 1000:
-                set_caption("FPS ::: %.3f" % self.clock.get_fps())
+            if fps_display_acc >= 10000:
+                set_caption("FPS ::: %.4f" % self.clock.get_fps())
                 fps_display_acc = 0
             self.current_scene.update_events()
             self.current_scene.update(delta, events)
@@ -73,8 +73,6 @@ class Game(object):
                 dirty = self.current_scene.draw(main_surface)
 
                 if DEBUG:
-                    #rect = dirty[0].unionall(dirty)
-                    #print float(rect.w * rect.h) / (surface.get_width() * surface.get_height()) * 100
                     for rect in dirty:
                         draw_rect(main_surface, (0, 255, 0), rect, 1)
 

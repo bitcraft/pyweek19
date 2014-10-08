@@ -137,7 +137,7 @@ class Button(GameEntity):
                 members = [event['left'], event['right']]
                 members.remove(self)
                 other = members[0]
-            except IndexError:
+            except ValueError:
                 continue
 
             other.kill()

@@ -7,7 +7,7 @@ from math import sin, cos, pi, sqrt, radians, ceil
 from itertools import product
 from collections import defaultdict
 
-from yourgame.euclid import Point3, Vector3, Matrix4
+from yourgame.euclid import Vector2, Point3, Vector3, Matrix4
 from yourgame import resources
 from yourgame.hex_model import *
 
@@ -57,7 +57,11 @@ class HexMapView(pygame.sprite.LayeredUpdates):
         self.data = data
         self.hex_radius = None
         self.overlap_limit = None
-        self.tilt = 43
+        self.tilt = .84
+        self.size_ratio = 1.3
+
+        self.default_cell = Cell()
+        self.default_cell.filename = 'tileGrass.png'
 
         # this must be set to true when tile size or tilt changes
         self.needs_cache = None
@@ -65,18 +69,16 @@ class HexMapView(pygame.sprite.LayeredUpdates):
         # set this to True to trigger a map redraw
         self.needs_refresh = None
 
-        self.prj = None
-        self.inv_prj = None
         self.upper_cells = list()
         self.rect = None
         self.lost_sprites = list()
-        self._map_rect = None
+        self.map_rect = None
         self._old_hovered = None
         self._hovered = None
         self._selected = list()
         self._hex_draw = None
         self._hex_tile = None
-        self._project = None
+        self.project = None
         self._buffer = None
         self._thread = None
         self._blit_queue = None
@@ -116,61 +118,65 @@ class HexMapView(pygame.sprite.LayeredUpdates):
         for i in range(6):
             angle = temp * (i + .5)
             x, y = self.hex_radius * cos(angle), self.hex_radius * sin(angle)
-            xx, yy, zz = self.prj * Point3(x, y, 0)
-            points.append((xx, yy))
+            y *= self.tilt
+            points.append((x, y))
         outline = pygame.gfxdraw.aapolygon
         fill = pygame.gfxdraw.filled_polygon
         return draw_hex
 
     def get_hex_tile(self):
         def draw_tile(blit, cell, coords, layer):
-            x, y, z = coords
+            x, y, z = coords - (half_width, half_height, 0)
             tile = tile_dict[cell.filename]
-            return blit((tile, cell,
-                         (int(x - half_width), int(y - radius)), layer))
+            return blit((tile, cell, (int(x), int(y)), layer))
 
-        height = self.hex_radius * 2 + 1
-        width = (sqrt(3) / 2 * height)
-        half_width = int(width / 2)
-        size = (int(width), int(height))
         tile_dict = dict()
+        ph = self.hex_radius * 2
+        pw = (sqrt(3) / 2 * ph)
+        ph *= self.tilt
+        half_width = int(pw / 2.)
+        half_height = int(ph / 2.)
+        pw += 1
+
         for filename, image in resources.tiles.items():
             if filename.startswith('tile'):
-                if not size[0] == image.get_width():
-                    image = smoothscale(image, size)
+                iw, ih = image.get_size()
+                height = pw * (float(ih) / iw)
+                image = smoothscale(image, (int(pw), int(height)))
                 tile_dict[filename] = image
 
-        # this is a heck!
-        radius = self.hex_radius - 16
         return draw_tile
 
     def get_projection(self):
-        def project(i, cell):
-            # convert => cart
-            coords = size_sqrt3 * (i[0] + i[1] / 2.), size_ratio * i[1]
-
-            # project tilt and return
-            coords = self.prj * Vector3(*coords)
-
-            # translate on screen
+        def project(i, cell=None):
+            coords = Vector3(size_sqrt3*(i[0]+i[1]/2.), size_ratio*i[1], 0)
             coords += screen_offset
-
             return coords
-
-        w, h = self.rect.size
-        size_sqrt3 = self.hex_radius * sqrt(3)
-        size_ratio = self.hex_radius * (3. / 2.)
-        tile_h = self.hex_radius * 2
-        tile_w = (sqrt(3) / 2) * tile_h
-        mw = (self.data.width - 1) * tile_w
-        mh = (self.data.height - 1) * tile_h * 3 / 4
-        hw = (w / 2) - (mw / 2)
-        hh = (h / 2) - (mh / 2)
-        screen_offset = Vector3(hw, hh, 0)
-        map_rect = pygame.Rect((hw, hh), (mw, mh))
 
         # cache of the expensive axial => cart transform
         cache = dict()
+        size_sqrt3 = self.hex_radius * sqrt(3)
+        size_ratio = self.hex_radius * 3. / 2.
+
+        ph = self.hex_radius * 2
+        pw = (sqrt(3) / 2 * ph)
+        ph *= self.tilt
+
+        size_ratio = self.hex_radius * pw / ph * self.size_ratio
+        self._voff = size_ratio
+
+        rw, rh = self.rect.size
+        mw = pw * self.data.size[0] * 1.05
+        mh = ph * self.data.size[1] * 3. / 4. * 1.15
+        hw = int((rw / 2.) - (mw / 2.))
+        hh = int((rh / 2.) - (mh / 2.))
+
+        hh *= 1.6
+
+        screen_offset = Vector3(hw + pw, hh + ph / 2., 0)
+        map_rect = pygame.Rect((hw, hh), (mw, mh))
+
+        self._pixel_offset = Vector2(*screen_offset[:2])
 
         def cached_project(i, cell=None, use_cache=True):
             if use_cache:
@@ -186,9 +192,7 @@ class HexMapView(pygame.sprite.LayeredUpdates):
         return map_rect, cached_project
 
     def set_tilt(self, tilt):
-        self.prj = Matrix4()
-        self.prj.rotate_axis(radians(tilt), Vector3(1, 0, 0))
-        self.inv_prj = self.prj.inverse()
+        self.tilt = tilt
         self.needs_cache = True
         self.needs_refresh = True
 
@@ -208,19 +212,15 @@ class HexMapView(pygame.sprite.LayeredUpdates):
             self._hovered = cell
 
     def point_from_surface(self, point):
-        # # return a point in map space from the surface (broken!)
         if self.rect is None:
             return None
 
-        x, y = point[:2]
-        x -= self._map_rect.left
-        y -= self._map_rect.top
-        point = Vector3(x, y, 0)
-        point = self.inv_prj * point
+        x, y = point
+        x -= self._pixel_offset.x
+        y -= self._pixel_offset.y
+        y *= 1.1
 
-        # hack?  yes
-        point.y = point.y * (90.0 / (90 - self.tilt))
-
+        point = Point3(x, y, 0)
         x, y, z = Vector3(*pixel_to_axial(point, self.hex_radius))
         return x, y
 
@@ -246,14 +246,14 @@ class HexMapView(pygame.sprite.LayeredUpdates):
         if self.needs_cache:
             self.set_tilt(self.tilt)
             self._buffer = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
+            self.map_rect, self.project = self.get_projection()
             self._hex_draw = self.get_hex_draw()
             self._hex_tile = self.get_hex_tile()
-            self._map_rect, self._project = self.get_projection()
             self.needs_cache = False
             self.needs_refresh = True
 
         dirty = self.lost_sprites
-        project = self._project
+        project = self.project
         draw_tile = self._hex_tile
         draw_hex = self._hex_draw
         get_cell = self.data.get_cell
@@ -282,7 +282,9 @@ class HexMapView(pygame.sprite.LayeredUpdates):
             put_tile = self._blit_queue.put
 
             # get in draw order
-            for qq, rr in product(range(10), range(10)):
+            ww, hh = self.data.size
+            print ww, hh
+            for qq, rr in product(range(hh), range(ww)):
                 # convert => axial
                 q, r = evenr_to_axial((rr, qq))
                 cell = get_cell((q, r))
@@ -290,12 +292,14 @@ class HexMapView(pygame.sprite.LayeredUpdates):
                 # convert => screen
                 pos = Vector3(*project((q, r), cell))
 
+                draw_tile(put_tile, self.default_cell, pos, 0)
+
                 # draw tall columns
                 if cell.height > 0:
                     for i in range(int(ceil(cell.height))):
                         # translate the cell height
                         # pos.y -= self.hex_radius / 2 * float(cell.height)
-                        pos.y -= self.hex_radius / 2
+                        pos.y -= self._voff / 2
                         draw_tile(put_tile, cell, pos, i)
                 else:
                     draw_tile(put_tile, cell, pos, 0)
@@ -330,8 +334,6 @@ class HexMapView(pygame.sprite.LayeredUpdates):
         # draw cell lines (outlines and highlights) to the surface
         surface.lock()
         for pos, cell in self.data.cells:
-            old_rect = spritedict.get("hover", None)
-
             if cell in self._selected:
                 fill = self.select_color
 
@@ -341,7 +343,9 @@ class HexMapView(pygame.sprite.LayeredUpdates):
             else:
                 continue
 
-            pos = project(pos)
+            old_rect = spritedict.get("hover", None)
+            # convert => screen
+            pos = Vector3(*project(pos, cell))
             rect = draw_hex(surface, pos, self.border_color, fill)
             if not refreshed:
                 if old_rect:

@@ -24,31 +24,27 @@ class LevelScene(Scene):
 
         self.damage = list()
         self.needs_refresh = True
-        # these coordinates are a bit wonky, the draw order hack messes it up
-        raised = ((2, 3), (4, 5), (1, 7))
         self.model = hex_model.HexMapModel()
-        for q, r in itertools.product(range(10), range(10)):
-            coords = hex_model.evenr_to_axial((r, q))
+        w = config.getint('world', 'width')
+        h = config.getint('world', 'height')
+        for q, r in itertools.product(range(w), range(h)):
+            coords = hex_model.evenr_to_axial((q, r))
             cell = hex_model.Cell()
             cell.filename = 'tileGrass.png'
             cell.kind = 'grass'
-            if coords in raised:
-                cell.raised = True
-                cell.height = config.getint('display', 'wall_height')
-                cell.filename = 'tileRock_full.png'
-                cell.kind = 'rock'
             self.model.add_cell(coords, cell)
 
         maze.build_maze_from_hex(self.model,
                                  lower_limit=(1, 1),
-                                 upper_limit=(self.model.width-2, self.model.height-2),
+                                 upper_limit=(self.model.width-2,
+                                              self.model.height-2),
                                  height=1.0,
                                  raised_tile='tileRock_full.png',
                                  lowered_tile='tileGrass.png',
                                  num_adjacent=1)
 
         self.view = hex_view.HexMapView(self, self.model,
-                                        config.getint('display', 'tile_size'))
+                                        config.getint('display', 'hex_radius'))
 
         self.velocity_updates = entity.PhysicsGroup()
         self.internal_event_group = pygame.sprite.Group()
