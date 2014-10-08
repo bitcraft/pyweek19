@@ -16,13 +16,11 @@ if __name__ == "__main__":
         #    print pr.calibrate(10000)
 
         game = bootstrap_game()
-        #pr = cProfile.Profile(game.loop, 0.001)
         cProfile.run('game.loop()', "results.prof")
-
         p = pstats.Stats("results.prof")
         p.strip_dirs()
-        #p.sort_stats('time').print_stats(20, "^((?!pygame).)*$")
-        p.sort_stats('time').print_stats(20)
+        p.sort_stats('cumulative').print_stats(50)
+
     else:
         game = bootstrap_game()
         game.loop()
