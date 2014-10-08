@@ -44,7 +44,8 @@ class LevelScene(Scene):
                                  upper_limit=(self.model.width-2, self.model.height-2),
                                  height=1.0,
                                  raised_tile='tileRock_full.png',
-                                 lowered_tile='tileGrass.png')
+                                 lowered_tile='tileGrass.png',
+                                 num_adjacent=1)
 
         self.view = hex_view.HexMapView(self, self.model,
                                         config.getint('display', 'tile_size'))
