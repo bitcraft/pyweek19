@@ -398,6 +398,6 @@ class HexMapView(pygame.sprite.LayeredUpdates):
                         if overlap:
                             surface.set_clip(overlap)
                             surface_blit(up_surf, up_rect)
+                            surface.set_clip(None)
 
-        surface.set_clip(None)
         return dirty

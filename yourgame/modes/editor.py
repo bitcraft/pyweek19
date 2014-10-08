@@ -7,7 +7,6 @@ from pygame.locals import *
 
 __all__ = ['EditMode']
 
-
 class EditMode(LevelSceneMode):
     """
     states
@@ -118,30 +117,31 @@ class EditMode(LevelSceneMode):
     def update(self, delta, events):
         moved = False
         pressed = pygame.key.get_pressed()
-        movement_speed = .0001
+        movement_accel = config.getfloat('world', 'player_move_accel')
 
         if pressed[K_DOWN]:
-            self.sprite.acceleration.y = movement_speed
+            self.sprite.acceleration.y = movement_accel
             moved = True
         elif pressed[K_UP]:
-            self.sprite.acceleration.y = -movement_speed
+            self.sprite.acceleration.y = -movement_accel
             moved = True
         else:
             self.sprite.acceleration.y = 0
 
         if pressed[K_LEFT]:
-            self.sprite.acceleration.x = -movement_speed
+            self.sprite.acceleration.x = -movement_accel
             self.sprite.flipped = True
             moved = True
         elif pressed[K_RIGHT]:
-            self.sprite.acceleration.x = movement_speed
+            self.sprite.acceleration.x = movement_accel
             self.sprite.flipped = False
             moved = True
         else:
             self.sprite.acceleration.x = 0
 
         if pressed[K_SPACE]:
-            self.sprite.velocity.z = 2
+            if self.sprite.position.z == 0:
+                self.sprite.velocity.z = 5
 
         if moved and self.state == 2:
             self.change_state(3)
