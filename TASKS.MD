@@ -26,7 +26,7 @@ Phase 2:
  7. death/lose/retry scene
  8. win scene
 
-# complete scene sequence is not in place #
+# complete scene sequence is now in place #
 
 Phase 3:
  9. powerups
