@@ -4,7 +4,7 @@ from collections import defaultdict
 from pygame.time import Clock
 from pygame import event
 from pygame import QUIT
-from pygame.display import flip, update
+from pygame.display import flip, update, set_caption
 from pygame.draw import rect as draw_rect
 
 from yourgame import config
@@ -45,6 +45,7 @@ class Game(object):
         event_get = event.get
         tick = self.clock.tick
         main_surface = self.main_surface
+        fps_display_acc = 0
 
         while len(self.scene_stack) > 0:
             events = event_get()
@@ -55,6 +56,10 @@ class Game(object):
                     sys.exit()
 
             delta = tick(tick_fps)
+            fps_display_acc += delta
+            if fps_display_acc >= 1000:
+                set_caption("FPS ::: %.3f" % self.clock.get_fps())
+                fps_display_acc = 0
             self.current_scene.update_events()
             self.current_scene.update(delta, events)
 
