@@ -15,14 +15,16 @@ def surrounding_clip(coord, lower, upper):
 def build_maze_from_hex(model, lower_limit=None, upper_limit=None,
                         height=1.0,
                         raised_tile='tileRock_full.png',
-                        lowered_tile='tileGrass.png'):
+                        lowered_tile='tileGrass.png',
+                        num_adjacent=1):
     def coord_available(coord):
         cell = model.get_cell(evenr_to_axial(coord))
-        return cell.raised and len(open_neighbors(coord)) <= 2
+        return cell.raised and len(open_neighbors(coord)) <= num_adjacent
 
     def open_neighbors(coord):
         neighbors = set(c for c in
                         surrounding_clip(coord, lower_limit, upper_limit))
+        neighbors.discard(current)
         return neighbors & closed_set
 
     def raise_cell(cell):
