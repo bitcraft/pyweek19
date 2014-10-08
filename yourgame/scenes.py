@@ -1,9 +1,13 @@
 import sys
+from collections import defaultdict
 
 from pygame.time import Clock
 from pygame import event
 from pygame import QUIT
 from pygame.display import flip, update
+from pygame.draw import rect as draw_rect
+
+from yourgame import config
 
 
 class Game(object):
@@ -33,8 +37,10 @@ class Game(object):
             self.current_scene.resume()
 
     def loop(self):
+        DEBUG = config.getboolean('display', 'debug')
+
         draw_interval = 1 / float(self.target_fps)
-        tick_fps = self.target_fps * 2
+        tick_fps = self.target_fps
         draw_timer = 0
         event_get = event.get
         tick = self.clock.tick
@@ -54,9 +60,19 @@ class Game(object):
 
             draw_timer += delta
             if draw_timer >= draw_interval:
+                if DEBUG:
+                    main_surface.fill((0, 0, 0))
+
                 draw_timer -= draw_interval
                 self.current_scene.clear(main_surface)
                 dirty = self.current_scene.draw(main_surface)
+
+                if DEBUG:
+                    #rect = dirty[0].unionall(dirty)
+                    #print float(rect.w * rect.h) / (surface.get_width() * surface.get_height()) * 100
+                    for rect in dirty:
+                        draw_rect(main_surface, (0, 255, 0), rect, 1)
+
                 update(dirty)
 
 
@@ -87,19 +103,26 @@ class Scene(object):
         pass
 
     def raise_event(self, originator, event_name, **kwargs):
-        events = self.state["events"]
-        events[event_name] = dict(kwargs)
-        events[event_name]["originator"] = originator
-        events[event_name]["frames_left"] = 2
+        event = dict(kwargs)
+        event["originator"] = originator
+        event["frames_left"] = config.getint('general', 'event_life')
+        try:
+            events = self.state["events"][event_name]
+        except KeyError:
+            events = list()
+            self.state['events'][event_name] = events
+        finally:
+            events.append(event)
 
     def update_events(self):
         events = self.state["events"]
-        for event_list in events.values():
+        for event_type, event_list in events.items():
             dead = list()
             for e in event_list:
                 e["frames_left"] -= 1
-                if e["frame_left"] <= 0:
-                    dead.append(e["frame_left"])
+                if e["frames_left"] <= 0:
+                    dead.append(e)
+
             for e in dead:
                 event_list.remove(e)
 

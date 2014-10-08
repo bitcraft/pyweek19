@@ -80,7 +80,7 @@ class LevelScene(Scene):
         button.position.y = 5
         button.anchor = Point2(33, 30)
         self.view.add(button, layer=0)
-        self.internal_event_group.add(sprite)
+        self.internal_event_group.add(button)
 
         # this must come last
         self.mode = EditMode(self)

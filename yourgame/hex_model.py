@@ -96,15 +96,15 @@ def sprites_to_axial(coords):
 def collide_hex(left, right, radius=None):
     """ Fast approximation of collisions between hex cells in axial space
     """
-    distancesquared = dist_hex(left.position[:2], right.position[:2]) ** 2
+    distancesquared = dist_hex(left.position, right.position) ** 2
     leftradius = left.radius
     rightradius = right.radius
     return distancesquared <= (leftradius + rightradius) ** 2
 
 
 def dist_hex(cell0, cell1):
-    q0, r0 = cell0
-    q1, r1 = cell1
+    q0, r0, z0 = cell0
+    q1, r1, z1 = cell1
     return (abs(q0 - q1) + abs(r0 - r1) +
             abs(q0 + r0 - q1 - r1)) / 2.0
 
