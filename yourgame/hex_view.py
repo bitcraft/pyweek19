@@ -283,7 +283,7 @@ class HexMapView(pygame.sprite.LayeredUpdates):
 
             # get in draw order
             ww, hh = self.data.size
-            print ww, hh
+            print(ww, hh)
             for qq, rr in product(range(hh), range(ww)):
                 # convert => axial
                 q, r = evenr_to_axial((rr, qq))
