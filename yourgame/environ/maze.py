@@ -17,14 +17,13 @@ def build_maze_from_hex(model, lower_limit=None, upper_limit=None,
                         lowered_tile='tileGrass.png',
                         num_adjacent=1):
     def coord_available(coord):
-        cell = model.get_cell(evenr_to_axial(coord))
-        return cell.raised and len(open_neighbors(coord)) <= num_adjacent
+        return coord not in closed_set and len(closed_neighbors(coord)) <= num_adjacent
 
-    def open_neighbors(coord):
-        neighbors = set(c for c in
-                        surrounding_clip(coord, lower_limit, upper_limit))
-        neighbors.discard(current)
-        return neighbors & closed_set
+    def closed_neighbors(coord):
+        return set(neighbors(coord)) - {current} & closed_set
+
+    def neighbors(coord):
+        return (c for c in surrounding_clip(coord, lower_limit, upper_limit))
 
     def raise_cell(cell):
         cell.raised = True
@@ -43,29 +42,27 @@ def build_maze_from_hex(model, lower_limit=None, upper_limit=None,
     open_heap = []
     closed_set = set()
     if lower_limit is None:
-        lower_limit = (0, 0)
+        lower_limit = (1, 1)
 
     if upper_limit is None:
-        upper_limit = (model.width - 1, model.height - 1)
+        upper_limit = (model.width - 2, model.height - 2)
 
-    start = (random.randint(0, model.width - 1),
-             random.randint(0, model.height - 1))
+    start = (random.randint(lower_limit[0], upper_limit[0]),
+             random.randint(lower_limit[1], upper_limit[1]))
     current = start
     heappush(open_heap, start)
+    closed_set.add(start)
     lower_cell(model.get_cell(evenr_to_axial(start)))
 
-    while open_heap:
-        open_coords = set(
-            filter(coord_available,
-                   (coord for coord in
-                    surrounding_clip(current, lower_limit, upper_limit))))
-        if len(open_coords):
-            current = open_coords.pop()
+    open_neighbors = [coord for coord in neighbors(start) if coord_available(coord)]
+
+    while open_heap or open_neighbors:
+        try:
+            current = random.choice(open_neighbors)
             heappush(open_heap, current)
             closed_set.add(current)
             lower_cell(model.get_cell(evenr_to_axial(current)))
-        else:
+        except IndexError:
             current = heappop(open_heap)
-            closed_set.add(current)
-
+        open_neighbors = [coord for coord in neighbors(current) if coord_available(coord)]
     return
