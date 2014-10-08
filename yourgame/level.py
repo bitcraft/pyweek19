@@ -27,11 +27,17 @@ class LevelScene(Scene):
         self.model = hex_model.HexMapModel()
         w = config.getint('world', 'width')
         h = config.getint('world', 'height')
+        raised = {(2, 3), (4, 5), (1, 7)}
         for q, r in itertools.product(range(w), range(h)):
             coords = hex_model.evenr_to_axial((q, r))
             cell = hex_model.Cell()
             cell.filename = 'tileGrass.png'
             cell.kind = 'grass'
+            if coords in raised:
+                cell.raised = True
+                cell.height = config.getint('display', 'wall_height')
+                cell.filename = 'tileRock_full.png'
+                cell.kind = 'rock'
             self.model.add_cell(coords, cell)
 
         maze.build_maze_from_hex(self.model,
@@ -41,7 +47,8 @@ class LevelScene(Scene):
                                  height=1.0,
                                  raised_tile='tileRock_full.png',
                                  lowered_tile='tileGrass.png',
-                                 num_adjacent=1)
+                                 num_adjacent=1,
+                                 closed_set=raised)
 
         self.view = hex_view.HexMapView(self, self.model,
                                         config.getint('display', 'hex_radius'))

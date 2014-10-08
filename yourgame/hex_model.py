@@ -1,14 +1,13 @@
-from math import sqrt
-from yourgame.euclid import Vector2, Vector3
-import pygame
-
-from collections import defaultdict
 from heapq import heappush, heappop
-from itertools import chain
 from math import sqrt
-from functools import reduce
 from operator import itemgetter
 import time
+
+import pygame
+
+from yourgame.euclid import Vector2
+from yourgame.environ import util
+
 
 # even-r : 'pointy top'
 
@@ -109,23 +108,6 @@ def dist_hex(cell0, cell1):
             abs(q0 + r0 - q1 - r1)) / 2.0
 
 
-def clip(vector, lowest, highest):
-            return type(vector)(map(min, map(max, vector, lowest), highest))
-
-
-def surrounding_clip(coord, limit):
-    x, y = coord
-    return (clip(i, (0, 0), limit) for i in
-            ((x - 1, y - 1), (x - 1, y), (x - 1, y + 1), (x, y - 1),
-           (x, y + 1), (x + 1, y)))
-
-
-def surrounding_noclip(coord, limit=None):
-    x, y = coord
-    return ((x - 1, y - 1), (x - 1, y), (x - 1, y + 1), (x, y - 1),
-           (x, y + 1), (x + 1, y))
-
-
 class Cell(object):
 
     def __init__(self):
@@ -137,12 +119,6 @@ class Cell(object):
 
 
 class HexMapModel(object):
-
-    ### AXIAL
-    neighbor_mat = ((
-        (1, 0),  (1, -1), (0, -1),
-        (-1, 0), (-1, 1), (0, 1)
-    ))
 
     def __init__(self):
         self._data = dict()
@@ -213,14 +189,9 @@ class HexMapModel(object):
         return self._data.items()
 
     @staticmethod
-    def get_neighbors(cell):
-        for other in HexMapModel.neighbor_mat:
-            yield (other[0] + cell[0], other[1], cell[1])
-
-    @staticmethod
     def get_facing(cell, facing):
-        return (cell[0] + HexMapModel.neighbor_mat[facing],
-                cell[1] + HexMapModel.neighbor_mat[facing])
+        return (cell[0] + util.neighbor_mat[facing],
+                cell[1] + util.neighbor_mat[facing])
 
     def walls(self):
         walls = list()
@@ -248,7 +219,8 @@ class HexMapModel(object):
 
     def pathfind(self, current, end, blacklist=set(),
                  impassable=set()):
-        blacklist.update({coord for coord in self._data if self._data[coord].raised})
+        blacklist.update(
+            {coord for coord in self._data if self._data[coord].raised})
 
         def cell_available(cell):
             return coord_available(cell[1])
@@ -271,7 +243,7 @@ class HexMapModel(object):
         open_set = set()
         closed_set = set()
         limit = self.width - 1, self.height - 1
-        surrounding = surrounding_clip
+        surrounding = util.surrounding((0, 0), limit)
         current = current[0], current[1]
         open_set.add(current)
         open_heap.append(current)
@@ -289,9 +261,10 @@ class HexMapModel(object):
 
             open_set.remove(current)
             closed_set.add(current)
-            cells = filter(cell_available,
-                           ((self.dist(coord, end)+self.get_cell(coord).cost, coord)
-                            for coord in surrounding(current, limit)))
+            cells = filter(
+                cell_available,
+                ((self.dist(coord, end)+self.get_cell(coord).cost, coord)
+                 for coord in surrounding(current)))
             # Push the highest costing tiles first, so we'll check them last
             # Should keep working when there's a dead end
             for cell in sorted(cells, key=itemgetter(0), reverse=True):

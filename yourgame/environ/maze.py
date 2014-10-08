@@ -1,29 +1,29 @@
 from heapq import heappush, heappop
 import random
 
-from yourgame.hex_model import evenr_to_axial, clip
-
-
-def surrounding_clip(coord, lower, upper):
-    x, y = coord
-    return (clip(i, lower, upper) for i in
-            ((x - 1, y - 1), (x - 1, y), (x - 1, y + 1), (x, y - 1),
-           (x, y + 1), (x + 1, y)))
+from yourgame.hex_model import evenr_to_axial
+from yourgame.environ import util
 
 
 def build_maze_from_hex(model, lower_limit=None, upper_limit=None,
                         height=1.0,
                         raised_tile='tileRock_full.png',
                         lowered_tile='tileGrass.png',
-                        num_adjacent=1):
+                        num_adjacent=1,
+                        start_raised=True,
+                        closed_set=set()):
+    def available_neighbors(coord):
+        return [c for c in neighbors(coord) if coord_available(c)]
+
     def coord_available(coord):
-        return coord not in closed_set and len(closed_neighbors(coord)) <= num_adjacent
+        return coord not in closed_set and \
+            len(closed_neighbors(coord)) <= num_adjacent
 
     def closed_neighbors(coord):
         return set(neighbors(coord)) - {current} & closed_set
 
     def neighbors(coord):
-        return (c for c in surrounding_clip(coord, lower_limit, upper_limit))
+        return util.neighbors(coord, surrounding)
 
     def raise_cell(cell):
         cell.raised = True
@@ -35,12 +35,13 @@ def build_maze_from_hex(model, lower_limit=None, upper_limit=None,
         cell.height = 0.0
         cell.filename = lowered_tile
 
-    # Set all cells to raised
-    for cell in model._data.items():
-        raise_cell(cell[1])
+    if start_raised:
+        # Set all cells to raised
+        for cell in model.cells:
+            if cell[0] not in closed_set:
+                raise_cell(cell[1])
 
     open_heap = []
-    closed_set = set()
     if lower_limit is None:
         lower_limit = (1, 1)
 
@@ -49,12 +50,14 @@ def build_maze_from_hex(model, lower_limit=None, upper_limit=None,
 
     start = (random.randint(lower_limit[0], upper_limit[0]),
              random.randint(lower_limit[1], upper_limit[1]))
+    surrounding = util.surrounding(lower_limit, upper_limit)
+
     current = start
     heappush(open_heap, start)
     closed_set.add(start)
     lower_cell(model.get_cell(evenr_to_axial(start)))
 
-    open_neighbors = [coord for coord in neighbors(start) if coord_available(coord)]
+    open_neighbors = available_neighbors(start)
 
     while open_heap or open_neighbors:
         try:
@@ -64,5 +67,5 @@ def build_maze_from_hex(model, lower_limit=None, upper_limit=None,
             lower_cell(model.get_cell(evenr_to_axial(current)))
         except IndexError:
             current = heappop(open_heap)
-        open_neighbors = [coord for coord in neighbors(current) if coord_available(coord)]
+        open_neighbors = available_neighbors(current)
     return
