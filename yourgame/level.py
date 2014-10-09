@@ -54,10 +54,10 @@ class LevelScene(Scene):
         #sprite.position.x = 7
         # sprite.position.y = 2
         # self.view.add(sprite)
-        # sprite = entity.GameEntity('alienBlue.png')
-        # sprite.position.x = 9
-        # sprite.position.y = 9
-        # self.view.add(sprite)
+        sprite = entity.Enemy('alienBlue.png')
+        sprite.home = (9, 9)
+        self.view.add(sprite)
+        self.internal_event_group.add(sprite)
         sprite = entity.GameEntity('alienBlue.png')
         sprite.position.x = 2
         sprite.position.y = 2

@@ -1,3 +1,4 @@
+from fysom import Fysom
 import pygame
 from pygame.transform import flip, smoothscale
 from pygame.locals import *
@@ -98,7 +99,7 @@ class PhysicsGroup(pygame.sprite.Group):
                 return False
 
         pos = hex_model.evenr_to_axial((x, y))
-        print pos
+        print(pos)
         if self.data.collidecircle(pos, sprite.radius):
             sprite.position -= point
             return False
@@ -158,6 +159,63 @@ class GameEntity(pygame.sprite.DirtySprite):
         for group in self.groups():
             if hasattr(group, 'needs_refresh'):
                 group.needs_refresh = True
+
+
+class Enemy(GameEntity):
+    def __init__(self, filename):
+        super(Enemy, self).__init__(filename)
+        self._home = (None, None)
+        self.path = ()
+        self.fsm = Fysom({'initial': 'home',
+                          'events': [
+                              {'name': 'go_home',
+                               'src': 'seeking',
+                               'dst': 'going_home'},
+                              {'name': 'ramble',
+                               'src': ['home', 'seeking'],
+                               'dst': 'rambling'},
+                              {'name': 'seek_player',
+                               'src': ['home', 'going_home', 'rambling'],
+                               'dst': 'seeking'}
+                          ]})
+
+    @property
+    def home(self):
+        return self._home
+
+    @home.setter
+    def home(self, coord):
+        self._home = Vector3(coord[0], coord[1], self.position[2])
+        self.position = Vector3(coord[0], coord[1], self.position[2])
+
+    def handle_internal_events(self, scene):
+        fsm = self.fsm
+        if fsm.isstate('home'):
+            fsm.ramble()
+        if fsm.isstate('going_home'):
+            if self.position == self.home:
+                print("Now rambling")
+                fsm.ramble()
+        if fsm.isstate('rambling'):
+            blacklist = {(sprite.position[0], sprite.position[1])
+                         for sprite in scene.internal_event_group}
+            pos = self.position[0], self.position[1]
+            home = self.home[0], self.home[1]
+            self.path = scene.model.pathfind_ramble(pos, home, 1, blacklist)
+            print(self.path)
+        '''interested = scene.state['events'].get('Collision', None)
+        if not interested:
+            return
+
+        for event in interested:
+            try:
+                members = [event['left'], event['right']]
+                members.remove(self)
+                other = members[0]
+            except ValueError:
+                continue
+
+            scene.raise_event(self, 'Switch', key=self.key, state=True)'''
 
 
 class Button(GameEntity):

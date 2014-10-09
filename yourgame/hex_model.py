@@ -156,10 +156,10 @@ class HexMapModel(object):
         :return: iterator of coords
         """
         retval = list()
-        print coords
+        print(coords)
         coords = cube_to_axial(
             [int(round(i, 0)) for i in axial_to_cube(coords)])
-        print coords
+        print(coords)
         for n in self.surrounding(coords):
             try:
                 cell = self._data[coords]
@@ -277,6 +277,15 @@ class HexMapModel(object):
         end = evenr_to_axial(end)
         blacklist = {evenr_to_axial(coord) for coord in blacklist}
         return self.pathfind(current, end, blacklist, impassable)
+
+    def pathfind_ramble(self, current, home, radius, blacklist=set()):
+        neighbors = {home, home}
+        for i in range(radius):
+            tmp = set()
+            for n in neighbors:
+                tmp.update(set(self.surrounding(n)))
+            neighbors.update(tmp)
+        return neighbors
 
     def pathfind(self, current, end, blacklist=set(),
                  impassable=set()):
