@@ -1,5 +1,4 @@
 __all__ = ['clip',
-           'neighbors',
            'surrounding',
            'surrounding_clip',
            'surrounding_noclip']

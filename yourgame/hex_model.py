@@ -106,15 +106,15 @@ def collide_hex(left, right, left_radius=1.0, right_radius=1.0):
 
 # returns x and y
 def dist_axial2(cell0, cell1):
-    q0, r0, z0 = cell0
-    q1, r1, z1 = cell1
+    q0, r0 = cell0[:2]
+    q1, r1 = cell1[:2]
     return abs(q0 - q1) + abs(r0 - r1), abs(q0 + r0 - q1 - r1) / 2.0
 
 
 # returns x + y
 def dist_axial(cell0, cell1):
-    q0, r0, z0 = cell0
-    q1, r1, z1 = cell1
+    q0, r0 = cell0[:2]
+    q1, r1 = cell1[:2]
     return (abs(q0 - q1) + abs(r0 - r1) +
             abs(q0 + r0 - q1 - r1)) / 2.0
 
@@ -156,6 +156,10 @@ class HexMapModel(object):
         :return: iterator of coords
         """
         retval = list()
+        print coords
+        coords = cube_to_axial(
+            [int(round(i, 0)) for i in axial_to_cube(coords)])
+        print coords
         for n in self.surrounding(coords):
             try:
                 cell = self._data[coords]
