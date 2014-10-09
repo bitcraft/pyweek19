@@ -5,12 +5,7 @@ import json
 import codecs
 import time
 
-import pygame
-
-from yourgame import config, quadtree
-from yourgame.euclid import Vector2
 from yourgame.environ import util
-
 
 
 # even-r : 'pointy top'
@@ -23,8 +18,13 @@ __all__ = ['HexMapModel',
            'collide_hex']
 
 
+def axial_to_pixel(coords, size):
+    return size * sqrt(3) * (coords[0] - 0.5 * (coords[1] & 1)), \
+           size * 3/2 * coords[1]
+
+
 def pixel_to_axial(coords, size):
-    x, y, z = coords
+    x, y = coords[:2]
     return (1. / 3. * sqrt(3) * x - 1. / 3. * y) / size, (2. / 3.) * y / size
 
 
@@ -91,21 +91,28 @@ def evenr_to_axial(coords):
 
 
 def sprites_to_axial(coords):
-    x, y = coords
+    x, y = coords[:2]
     x -= y / 2 + 1
     return x, y
 
 
-def collide_hex(left, right, radius=None):
+def collide_hex(left, right, left_radius=1.0, right_radius=1.0):
     """ Fast approximation of collisions between hex cells in axial space
     """
-    distancesquared = dist_hex(left.position, right.position) ** 2
-    leftradius = left.radius
-    rightradius = right.radius
-    return distancesquared <= (leftradius + rightradius) ** 2
+    dx, dy = dist_axial2(left, right)
+    rr = left_radius + right_radius
+    return (dx * dx) + (dy * dy) < rr * rr
 
 
-def dist_hex(cell0, cell1):
+# returns x and y
+def dist_axial2(cell0, cell1):
+    q0, r0, z0 = cell0
+    q1, r1, z1 = cell1
+    return abs(q0 - q1) + abs(r0 - r1), abs(q0 + r0 - q1 - r1) / 2.0
+
+
+# returns x + y
+def dist_axial(cell0, cell1):
     q0, r0, z0 = cell0
     q1, r1, z1 = cell1
     return (abs(q0 - q1) + abs(r0 - r1) +
@@ -113,7 +120,6 @@ def dist_hex(cell0, cell1):
 
 
 class Cell(object):
-
     def __init__(self, **kwargs):
         self.kind = kwargs.get("kind", None)
         self.cost = int(kwargs.get("cost", 0))
@@ -137,39 +143,43 @@ class HexMapModel(object):
         self._width = None
         self._height = None
         self._dirty = False
-        self.quadtree = None
-        self.needs_refresh = True
 
-    def test_collide(self, rect):
-        if self.needs_refresh:
-            self.update_quadtree()
-            self.needs_refresh = False
+    def surrounding(self):
+        return util.surrounding((0, 0), (self.width-1, self.height-1))
 
-        hits = self.quadtree.hit_rect(rect)
-        return hits
+    def neighbors(self, cell):
+        return util.neighbors(cell[0], self.surrounding())
 
-    def update_quadtree(self):
-        ph = config.getint('display', 'hex_radius') * 2
-        pw = (sqrt(3) / 2 * ph)
-        rects = list()
-        for pos, cell in self._data.items():
-            rect = pygame.Rect(pos, (1,1)).inflate(pw, pw)
-            rects.append(rect)
+    def collidecircle(self, coords, radius):
+        """test if circle overlaps level geometry above layer 0 only
 
-        self.quadtree = quadtree.FastQuadTree(rects, 4)
+        :param coords: axial coords
+        :param radius: axial coords
+        :return: iterator of coords
+        """
+        for n in self.neighbors(coords):
+            try:
+                cell = self._data[coords]
+            except KeyError:
+                continue
 
+            if cell.height <= 0:
+                continue
+
+            if collide_hex(coords, n, .1, 1):
+                yield coords
 
     def _make_file_data(self):
         return {
             "width": self._width,
             "height": self._height,
-            "data": {str(key): value.to_json() for key, value in self._data.items()}
+            "data": {str(key): value.to_json() for key, value in
+                     self._data.items()}
         }
 
     def save_to_disk(self, path):
         with codecs.open(path, "wb", encoding="utf-8") as fob:
             data = self._make_file_data()
-            print(data)
             json.dump(data, fob, indent=2)
 
     def load_from_disk(self, path):
@@ -256,10 +266,6 @@ class HexMapModel(object):
         q1, r1 = cell1
         return (abs(q0 - q1) + abs(r0 - r1) +
                 abs(q0 + r0 - q1 - r1)) / 2.0
-
-    def surrounding(self, coord):
-        return util.surrounding_clip(coord,
-                                     (0, 0), (self.width-1, self.height-1))
 
     def pathfind_evenr(self, current, end, blacklist=set(),
                        impassable=set()):

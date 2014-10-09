@@ -5,7 +5,7 @@ import pygame
 import pygame.gfxdraw
 from pygame.transform import smoothscale
 
-from yourgame.euclid import Vector2, Point3, Vector3
+from yourgame.euclid import Vector2, Vector3
 from yourgame import resources
 from yourgame.hex_model import *
 from yourgame import quadtree
@@ -23,6 +23,7 @@ class UpperLayerRect():
         self.right = rect.right
         self.top = rect.top
         self.bottom = rect.bottom
+
 
 class HexMapView(pygame.sprite.LayeredUpdates):
     border_color = 61, 55, 42, 64
@@ -59,14 +60,10 @@ class HexMapView(pygame.sprite.LayeredUpdates):
         self._hex_tile = None
         self.project = None
         self.map_buffer = None
-        self._thread = None
-        self._blit_queue = None
-        self._return_queue = None
         self.voff = None
         self.pixel_offset = None
         self.layer_quadtree = None
         self.set_radius(radius)
-
         self.spritedict["hover"] = None
 
     def test_sprite_collisions(self):
@@ -76,7 +73,9 @@ class HexMapView(pygame.sprite.LayeredUpdates):
             for right in sprites:
                 if left is right:
                     continue
-                if collide_hex(left, right) and (left, right) not in stale:
+                if collide_hex(left.position, right.position,
+                               left.radius, right.radius) \
+                        and (left, right) not in stale:
                     stale.add((right, left))
                     self.scene.raise_event("HexMapView",
                                            "Collision",
@@ -107,7 +106,7 @@ class HexMapView(pygame.sprite.LayeredUpdates):
 
     def get_hex_tile(self):
         def draw_tile(blit, cell, coords):
-            x, y, z = coords - (half_width, half_height, 0)
+            x, y = coords - (half_width, half_height)
             tile = tile_dict[cell.filename]
             return blit(tile, (int(x), int(y)))
 
@@ -130,7 +129,7 @@ class HexMapView(pygame.sprite.LayeredUpdates):
 
     def get_projection(self):
         def project(i, cell=None):
-            coords = Vector3(size_sqrt3*(i[0]+i[1]/2.), size_ratio*i[1], 0)
+            coords = Vector2(size_sqrt3 * (i[0] + i[1] / 2.), size_ratio * i[1])
             coords += screen_offset
             return coords
 
@@ -153,11 +152,11 @@ class HexMapView(pygame.sprite.LayeredUpdates):
         hh = int((rh / 2.) - (mh / 2.))
         hh *= 1.6
 
-        screen_offset = Vector3(hw + pw, hh + ph / 2., 0)
+        screen_offset = Vector2(hw + pw, hh + ph / 2.)
         map_rect = pygame.Rect((hw, hh), (mw, mh))
 
         self.map_rect = map_rect
-        self.pixel_offset = Vector2(*screen_offset[:2])
+        self.pixel_offset = screen_offset
 
         def cached_project(i, cell=None, use_cache=True):
             if use_cache:
@@ -181,7 +180,6 @@ class HexMapView(pygame.sprite.LayeredUpdates):
         self._selected.append(cell)
 
     def highlight_cell(self, cell):
-        # hightlight cell (like for picking with mouse)
         if self._old_hovered is not cell:
             self._old_hovered = self._hovered
             self._hovered = cell
@@ -195,17 +193,9 @@ class HexMapView(pygame.sprite.LayeredUpdates):
         y -= self.pixel_offset.y
         y *= 1.1
 
-        point = Point3(x, y, 0)
+        point = Vector3(x, y, 0)
         x, y, z = Vector3(*pixel_to_axial(point, self.hex_radius))
         return x, y
-
-    def point_from_local(self, point):
-        # if self._rect is None:
-        # return None
-        #
-        # point = Vector3(*point) - (self._rect.left, self._rect.top, 0)
-        # return point[0] + self._hw, point[1] + self._hh
-        raise NotImplementedError
 
     def clear(self, surface, bgk=None):
         if self.map_buffer is None:
@@ -252,7 +242,7 @@ class HexMapView(pygame.sprite.LayeredUpdates):
             for qq, rr in product(range(hh), range(ww)):
                 q, r = evenr_to_axial((rr, qq))
                 cell = get_cell((q, r))
-                pos = Vector3(*project((q, r), cell))
+                pos = Vector2(*project((q, r), cell))
 
                 # draw tall columns
                 if cell.height > 0:
@@ -311,7 +301,7 @@ class HexMapView(pygame.sprite.LayeredUpdates):
 
             old_rect = spritedict[sprite]
             pos = sprites_to_axial(sprite.position[:2])
-            x, y, z = project(pos, use_cache=False)
+            x, y = project(pos, use_cache=False)
             pos = (int(round(x - sprite.anchor.x, 0)),
                    int(round(y - sprite.anchor.y - sprite.position.z, 0)))
 
@@ -327,14 +317,14 @@ class HexMapView(pygame.sprite.LayeredUpdates):
                     dirty_append(rect)
             spritedict[sprite] = rect
 
-            sprite_layer = sprite._layer
-            for up in self.layer_quadtree.hit(rect):
-                if sprite_layer <= up.layer+1:
-                    if rect.bottom < up.bottom - overlap_limit:
-                        overlap = rect.clip(up.rect)
-                        if overlap:
-                            surface.set_clip(overlap)
-                            surface_blit(up.surface, up.rect)
-                            surface.set_clip(None)
+            # sprite_layer = sprite._layer
+            # for up in self.layer_quadtree.hit(rect):
+            #     if sprite_layer <= up.layer + 1:
+            #         if rect.bottom < up.bottom - overlap_limit:
+            #             overlap = rect.clip(up.rect)
+            #             if overlap:
+            #                 surface.set_clip(overlap)
+            #                 surface_blit(up.surface, up.rect)
+            #                 surface.set_clip(None)
 
         return dirty

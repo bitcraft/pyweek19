@@ -1,3 +1,9 @@
+__all__ = ['clip',
+           'neighbors',
+           'surrounding',
+           'surrounding_clip',
+           'surrounding_noclip']
+
 ### AXIAL
 neighbor_mat = ((
     (1, 0),  (1, -1), (0, -1),

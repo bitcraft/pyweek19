@@ -7,6 +7,7 @@ from pygame.locals import *
 
 __all__ = ['EditMode']
 
+
 class EditMode(LevelSceneMode):
     """
     states
@@ -28,7 +29,8 @@ class EditMode(LevelSceneMode):
 
         self.sprite = scene.sprite
 
-    def handle_click(self, button, view, cell):
+    def handle_click(self, button, cell):
+        view = self.scene.view
 
         # left click
         if button == 1:
@@ -114,7 +116,26 @@ class EditMode(LevelSceneMode):
 
         return dirty
 
+    def get_nearest_cell(self, coords):
+        view = self.scene.view
+        point = view.point_from_surface(coords)
+        if point:
+            return view.data.get_nearest_cell(point)
+
     def update(self, delta, events):
+        view = self.scene.view
+
+        for event in events:
+            if event.type == MOUSEMOTION:
+                cell = self.get_nearest_cell(event.pos)
+                if cell:
+                    view.highlight_cell(cell)
+
+            if event.type == MOUSEBUTTONUP:
+                cell = self.get_nearest_cell(event.pos)
+                if cell:
+                    self.handle_click(event.button, cell)
+
         moved = False
         pressed = pygame.key.get_pressed()
         movement_accel = config.getfloat('world', 'player_move_accel')

@@ -38,6 +38,6 @@ def bootstrap_game():
     game.register_scene(TitleScene(game))
     game.register_scene(LevelScene(game))
     game.push_scene("level")
-    game.scenes["level"].view.data.save_to_disk("/tmp/foo.json")
-    game.scenes["level"].view.data.load_from_disk("/tmp/foo.json")
+    #game.scenes["level"].view.data.save_to_disk("/tmp/foo.json")
+    #game.scenes["level"].view.data.load_from_disk("/tmp/foo.json")
     return game

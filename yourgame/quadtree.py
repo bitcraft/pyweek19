@@ -147,12 +147,12 @@ class FastQuadTree(object):
 
         # Recursively check the lower quadrants.
         if self.nw and rect.left <= self.cx and rect.top <= self.cy:
-            hits |= self.nw.hit(rect)
+            hits |= self.nw.hit_rect(rect)
         if self.sw and rect.left <= self.cx and rect.bottom >= self.cy:
-            hits |= self.sw.hit(rect)
+            hits |= self.sw.hit_rect(rect)
         if self.ne and rect.right >= self.cx and rect.top <= self.cy:
-            hits |= self.ne.hit(rect)
+            hits |= self.ne.hit_rect(rect)
         if self.se and rect.right >= self.cx and rect.bottom >= self.cy:
-            hits |= self.se.hit(rect)
+            hits |= self.se.hit_rect(rect)
 
         return hits

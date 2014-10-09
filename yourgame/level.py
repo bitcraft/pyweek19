@@ -27,7 +27,6 @@ class LevelScene(Scene):
         self.model = hex_model.HexMapModel()
         w = config.getint('world', 'width')
         h = config.getint('world', 'height')
-        print(w, h)
         for q, r in itertools.product(range(w), range(h)):
             coords = hex_model.evenr_to_axial((q, r))
             cell = hex_model.Cell()
@@ -48,7 +47,7 @@ class LevelScene(Scene):
         self.view = hex_view.HexMapView(self, self.model,
                                         config.getint('display', 'hex_radius'))
 
-        self.velocity_updates = entity.PhysicsGroup()
+        self.velocity_updates = entity.PhysicsGroup(data=self.model)
         self.internal_event_group = pygame.sprite.Group()
 
         sprite = entity.GameEntity('alienBlue.png')
@@ -95,11 +94,6 @@ class LevelScene(Scene):
         print("Tearing down level scene")
         pygame.mixer.music.fadeout(500)
 
-    def get_nearest_cell(self, coords):
-        point = self.view.point_from_surface(coords)
-        if point:
-            return self.view.data.get_nearest_cell(point)
-
     def draw(self, surface):
         dirty = list()
         refreshed = False
@@ -134,21 +128,7 @@ class LevelScene(Scene):
     def clear(self, surface):
         self.view.clear(surface)
 
-    def handle_click(self, button, cell):
-        self.mode.handle_click(button, self.view, cell)
-
     def update(self, delta, events):
-        for event in events:
-            if event.type == MOUSEMOTION:
-                cell = self.get_nearest_cell(event.pos)
-                if cell:
-                    self.view.highlight_cell(cell)
-
-            if event.type == MOUSEBUTTONUP:
-                cell = self.get_nearest_cell(event.pos)
-                if cell:
-                    self.handle_click(event.button, cell)
-
         self.mode.update(delta, events)
 
         for sprite in self.internal_event_group:

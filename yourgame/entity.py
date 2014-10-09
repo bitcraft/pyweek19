@@ -2,6 +2,7 @@ import pygame
 from pygame.transform import flip, smoothscale
 from pygame.locals import *
 
+from yourgame import hex_model
 from yourgame import resources
 from yourgame import config
 from yourgame.euclid import Vector2, Vector3
@@ -14,15 +15,15 @@ __all__ = ['PhysicsGroup'
 
 class PhysicsGroup(pygame.sprite.Group):
 
-    def __init__(self):
+    def __init__(self, data):
         super(PhysicsGroup, self).__init__()
-        gravity = config.getfloat('world', 'gravity')
+        self.data = data
 
+        self.gravity = Vector3(0, 0, config.getfloat('world', 'gravity'))
         self.timestep = config.getfloat('world', 'physics_tick')
         self.gravity_delta = None
         self.ground_friction = None
         self.sleeping = set()
-        self.gravity = Vector3(0, 0, gravity)
 
     def update(self, delta):
         delta = self.timestep
@@ -89,11 +90,16 @@ class PhysicsGroup(pygame.sprite.Group):
                     velocity.y = -max_velocity[1]
 
     def move_sprite(self, sprite, point, clip=True):
-        z, y, z = point
+
+        x, y, z = sprite.position + point
         if z < 0:
             if sprite.position.z < 0:
                 sprite.position.z = 0
                 return False
+
+        pos = hex_model.evenr_to_axial((x, y))
+        if self.data.collidecircle(pos, .1):
+            return False
 
         return True
 
@@ -107,7 +113,7 @@ class GameEntity(pygame.sprite.DirtySprite):
         self.velocity = Vector3(0, 0, 0)
         self.original_image = resources.tiles[filename]
         self.anchor = Vector2(16, 57)
-        self.radius = .5
+        self.radius = .1
         self._layer = 1
         self.event_handlers = list()
         self.max_velocity = [.15, .15, 100]
