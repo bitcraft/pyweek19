@@ -1,18 +1,28 @@
+from math import sin, cos, pi, sqrt, ceil
+from itertools import product
+
 import pygame
 import pygame.gfxdraw
-import threading
-from pygame.transform import smoothscale, scale
-from math import sin, cos, pi, sqrt, radians, ceil
-from itertools import product
-from collections import defaultdict
+from pygame.transform import smoothscale
 
-from yourgame.euclid import Vector2, Point3, Vector3, Matrix4
+from yourgame.euclid import Vector2, Point3, Vector3
 from yourgame import resources
 from yourgame.hex_model import *
+from yourgame import quadtree
 
 
 __all__ = ['HexMapView']
 
+
+class UpperLayerRect():
+    def __init__(self, surface, rect, layer):
+        self.rect = rect
+        self.surface = surface
+        self.layer = layer
+        self.left = rect.left
+        self.right = rect.right
+        self.top = rect.top
+        self.bottom = rect.bottom
 
 class HexMapView(pygame.sprite.LayeredUpdates):
     border_color = 61, 55, 42, 64
@@ -39,7 +49,6 @@ class HexMapView(pygame.sprite.LayeredUpdates):
         self.needs_refresh = None
 
         self.overlap_limit = None
-        self.upper_cells = list()
         self.rect = None
         self.lostsprites = list()
         self.map_rect = None
@@ -55,6 +64,7 @@ class HexMapView(pygame.sprite.LayeredUpdates):
         self._return_queue = None
         self.voff = None
         self.pixel_offset = None
+        self.layer_quadtree = None
         self.set_radius(radius)
 
         self.spritedict["hover"] = None
@@ -235,7 +245,7 @@ class HexMapView(pygame.sprite.LayeredUpdates):
         if self.needs_refresh:
             upper_buffer = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
             buffer2_blit = upper_buffer.blit
-            self.upper_cells = list()
+            upper_cells = list()
 
             # get in draw order
             ww, hh = self.data.size
@@ -254,14 +264,16 @@ class HexMapView(pygame.sprite.LayeredUpdates):
                         pos.y -= self.voff / 2
                         draw_tile(buffer_blit, cell, pos)
                         rect = draw_tile(buffer2_blit, cell, pos)
+                        rects.append(rect)
 
-                    rect = rect.unionall(rects)
+                    rect = rects[0].unionall(rects[:1])
                     surf = pygame.Surface(rect.size, pygame.SRCALPHA)
                     surf.blit(upper_buffer, (0, 0), rect)
-                    self.upper_cells.append((surf, rect, 1))
+                    upper_cells.append(UpperLayerRect(surf, rect, 1))
                 else:
                     draw_tile(buffer_blit, cell, pos)
 
+            self.layer_quadtree = quadtree.FastQuadTree(upper_cells, 4)
             rect = surface_blit(self.map_buffer, self.rect)
             dirty_append(rect)
             self.needs_refresh = False
@@ -315,15 +327,14 @@ class HexMapView(pygame.sprite.LayeredUpdates):
                     dirty_append(rect)
             spritedict[sprite] = rect
 
-            # TODO: quadtree or somthing similar would be good here
             sprite_layer = sprite._layer
-            for up_surf, up_rect, layer in self.upper_cells:
-                if sprite_layer <= layer+1:
-                    if rect.bottom < up_rect.bottom - overlap_limit:
-                        overlap = rect.clip(up_rect)
+            for up in self.layer_quadtree.hit(rect):
+                if sprite_layer <= up.layer+1:
+                    if rect.bottom < up.bottom - overlap_limit:
+                        overlap = rect.clip(up.rect)
                         if overlap:
                             surface.set_clip(overlap)
-                            surface_blit(up_surf, up_rect)
+                            surface_blit(up.surface, up.rect)
                             surface.set_clip(None)
 
         return dirty
