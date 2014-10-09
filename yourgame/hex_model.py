@@ -96,7 +96,7 @@ def oddr_to_axial(coords):
 def evenr_to_axial(coords):
     # even-r => cube
     q, r = coords
-    x = q - (r + (int(round(r, 0)) & 1)) / 2
+    x = q - (r + (r & 1)) / 2
     z = r
     # y = -x-z
 
@@ -107,9 +107,10 @@ def evenr_to_axial(coords):
     return q, r
 
 
+# special purpose function for sprites only
 def sprites_to_axial(coords):
     x, y = coords[:2]
-    x -= 1
+    x -= 0
     coords = pixel_to_axial((x, y), 1.)
     #x, y = coords[:2]
     #x -= y / 2 +2
@@ -145,6 +146,7 @@ def collide_hex2(cell0, cell1, left_radius=1.0, right_radius=1.0):
     dx = x1 - x0
     dy = y1 - y0
     rr = (left_radius * 100.) + (right_radius * 100.)
+    print left_radius * 100, right_radius * 100., dx + dy
     return (dx * dx) + (dy * dy) < rr * rr
 
 
@@ -152,7 +154,7 @@ def collide_hex2(cell0, cell1, left_radius=1.0, right_radius=1.0):
 def dist_axial2(cell0, cell1):
     q0, r0 = cell0[:2]
     q1, r1 = cell1[:2]
-    return abs(q0 - q1) + abs(r0 - r1), abs(q0 + r0 - q1 - r1) / 2.0
+    return abs(q0 - q1) + abs(r0 - r1), abs(q0 + r0 - q1 - r1) / 2
 
 
 # returns x + y

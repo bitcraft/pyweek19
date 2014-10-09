@@ -1,5 +1,6 @@
 import itertools
 import pygame
+import random
 from pygame.locals import *
 
 from yourgame.scenes import Scene
@@ -15,13 +16,37 @@ from yourgame.euclid import Point2
 __all__ = ['LevelScene']
 
 
+class Task(pygame.sprite.Sprite):
+    def __init__(self, callback, interval=0, loops=1, args=None, kwargs=None):
+        assert(callable(callback))
+        assert(loops >= -1)
+        super(Task, self).__init__()
+        self.interval = interval
+        self.loops = loops
+        self.callback = callback
+        self._timer = 0
+        self._args = args if args else list()
+        self._kwargs = kwargs if kwargs else dict()
+        self._loops = loops
+
+    def update(self, delta):
+        self._timer += delta
+        if self._timer >= self.interval:
+            self._timer -= self.interval
+            self.callback(*self._args, **self._kwargs)
+            if not self._loops == -1:
+                self._loops -= 1
+                if self._timer <= 0:
+                    self.kill()
+
 class LevelScene(Scene):
 
     def __init__(self, game):
         super(LevelScene, self).__init__("level", game)
 
-        self.damage = list()
+        self.damage = dict()
         self.needs_refresh = True
+        self.lost_damage = list()
 
         # build a basic flat map
         self.model = hex_model.HexMapModel()
@@ -49,6 +74,7 @@ class LevelScene(Scene):
 
         self.velocity_updates = entity.PhysicsGroup(data=self.model)
         self.internal_event_group = pygame.sprite.Group()
+        self.timers = pygame.sprite.Group()
 
         #sprite = entity.GameEntity('alienBlue.png')
         #sprite.position.x = 7
@@ -59,8 +85,8 @@ class LevelScene(Scene):
         # sprite.position.y = 9
         # self.view.add(sprite)
         sprite = entity.GameEntity('alienBlue.png')
-        sprite.position.x = 2
-        sprite.position.y = 2
+        sprite.position.x = 1
+        sprite.position.y = 1
         self.view.add(sprite)
         self.internal_event_group.add(sprite)
 
@@ -71,9 +97,11 @@ class LevelScene(Scene):
         button = entity.Button('tileRock_tile.png', 'testDoor')
         button.position.x = 2
         button.position.y = 4
+        button.position.z = 900
         button.anchor = Point2(33, 30)
         self.view.add(button, layer=0)
         self.internal_event_group.add(button)
+        self.velocity_updates.add(button)
 
         # "door"
         coords = hex_model.evenr_to_axial((0, 0))
@@ -83,8 +111,26 @@ class LevelScene(Scene):
         self.view.add(door)
         self.internal_event_group.add(door)
 
+        # start the silly timer to drop powerups
+        timer = Task(self.new_powerup, 2000, -1)
+        self.timers.add(timer)
+
         # this must come last
         self.mode = EditMode(self)
+
+    def new_powerup(self):
+        w = self.view.data.width - 1
+        h = self.view.data.height - 1
+
+        # generic powerup
+        sprite = entity.GameEntity('smallRockSnow.png')
+        sprite.position.x = random.randint(0, w)
+        sprite.position.y = random.randint(0, h)
+        sprite.position.z = 900
+        sprite.anchor = Point2(33, 30)
+        self.view.add(sprite, layer=0)
+        self.internal_event_group.add(sprite)
+        self.velocity_updates.add(sprite)
 
     def setup(self):
         print("Setting up level scene")
@@ -97,9 +143,9 @@ class LevelScene(Scene):
     def draw(self, surface):
         dirty = list()
         refreshed = False
+        damage = self.damage
 
         if self.needs_refresh:
-            surface.blit(resources.images["backdrop"], (0, 0))
             dirty = [surface.get_rect()]
             self.view.needs_refresh = True
             self.mode.needs_refresh = True
@@ -108,36 +154,40 @@ class LevelScene(Scene):
 
         _dirty = self.view.draw(surface)
         if _dirty:
+            _damage = _dirty[0].unionall(_dirty)
+            damage[self.view] = _damage
+            for key, value in self.damage.items():
+                if key is self.view:
+                    continue
+                if _damage.colliderect(value):
+                    key.needs_refresh = True
+
             if not refreshed:
                 dirty.extend(_dirty)
-
-            damage = _dirty[0].unionall(_dirty)
-            if self.damage:
-                if damage.colliderect(self.damage):
-                    self.mode.needs_refresh = True
 
         _dirty = self.mode.draw(surface)
         if _dirty:
+            _damage = _dirty[0].unionall(_dirty)
+            damage[self.mode] = _damage
             if not refreshed:
                 dirty.extend(_dirty)
 
-            self.damage = _dirty[0].unionall(_dirty)
-
+        self.damage = damage
         return dirty
 
     def clear(self, surface):
         self.view.clear(surface)
 
     def update(self, delta, events):
-        self.mode.update(delta, events)
+        self.timers.update(delta)
 
+        self.internal_event_group.update(self)
         for sprite in self.internal_event_group:
             if hasattr(sprite, "handle_internal_events"):
                 sprite.handle_internal_events(self)
 
-        self.internal_event_group.update(self)
-        self.velocity_updates.update(delta)
-        self.view.test_sprite_collisions()
+        self.mode.update(delta, events)
+        self.velocity_updates.update(self, delta)
 
     def resume(self):
         print("Resuming level scene")

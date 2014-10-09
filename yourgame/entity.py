@@ -1,11 +1,11 @@
 import pygame
 from pygame.transform import flip, smoothscale
-from pygame.locals import *
 
-from yourgame import hex_model
+from yourgame.hex_model import collide_hex2, sprites_to_axial
 from yourgame import resources
 from yourgame import config
 from yourgame.euclid import Vector2, Vector3
+
 
 __all__ = ['PhysicsGroup'
            'GameEntity',
@@ -14,7 +14,6 @@ __all__ = ['PhysicsGroup'
 
 
 class PhysicsGroup(pygame.sprite.Group):
-
     def __init__(self, data):
         super(PhysicsGroup, self).__init__()
         self.data = data
@@ -24,16 +23,24 @@ class PhysicsGroup(pygame.sprite.Group):
         self.gravity_delta = None
         self.ground_friction = None
         self.sleeping = set()
+        self.wake = set()
 
-    def update(self, delta):
+    def update(self, scene, delta):
+        stale = set()
         delta = self.timestep
         gravity_delta = self.gravity * delta
         ground_friction = pow(.9, delta)
+        collide = self.data.collidecircle
+        self.sleeping = self.sleeping - self.wake
+        self.wake = set()
+        all_sprites = self.sprites()
 
-        for sprite in self.sprites():
-            velocity = sprite.velocity
+        for sprite in set(self.sprites()) - self.sleeping:
+            sleeping = True
+            sprite.dirty = 1
             acceleration = sprite.acceleration
             position = sprite.position
+            velocity = sprite.velocity
             max_velocity = sprite.max_velocity
 
             if not position.z == 0:
@@ -41,27 +48,38 @@ class PhysicsGroup(pygame.sprite.Group):
 
             velocity += acceleration * delta
             dv = velocity * delta
-            position += dv
+            if dv.z > 100:
+                dv.z = 100
             x, y, z = dv
 
             if not z == 0:
-                if not self.move_sprite(sprite, (0, 0, z)):
+                position.z += z
+                if position.z < 0:
+                    position.z = 0.0
                     if abs(velocity.z) > .2:
+                        sleeping = False
                         acceleration.z = 0.0
                         velocity.z = -velocity.z * .05
                     else:
                         position.z = 0.0
                         acceleration.z = 0.0
                         velocity.z = 0.0
+                else:
+                    sleeping = False
 
             if not x == 0:
                 if not position.z:
                     velocity.x *= ground_friction
 
-                if not self.move_sprite(sprite, (x, 0, 0)):
+                new_position = position + (x, 0, 0)
+                axial = sprites_to_axial(new_position)
+                if collide(axial, sprite.radius):
                     if abs(velocity.x) > .00002:
                         acceleration.x = 0.0
                         velocity.x = 0.0
+                else:
+                    sleeping = False
+                    position.x += x
 
                 if abs(round(x, 5)) < .005:
                     acceleration.x = 0.0
@@ -76,10 +94,15 @@ class PhysicsGroup(pygame.sprite.Group):
                 if not position.z:
                     velocity.y *= ground_friction
 
-                if not self.move_sprite(sprite, (0, y, 0)):
+                new_position = position + (0, y, 0)
+                axial = sprites_to_axial(new_position)
+                if collide(axial, sprite.radius):
                     if abs(velocity.y) > .00002:
                         acceleration.y = 0.0
                         velocity.y = 0.0
+                else:
+                    sleeping = False
+                    position.y += y
 
                 if abs(round(y, 5)) < .005:
                     acceleration.y = 0.0
@@ -90,23 +113,28 @@ class PhysicsGroup(pygame.sprite.Group):
                 elif velocity.y < -max_velocity[1]:
                     velocity.y = -max_velocity[1]
 
-    def move_sprite(self, sprite, point, clip=True):
-        x, y, z = sprite.position
-        if z < 0:
-            if sprite.position.z < 0:
-                sprite.position.z = 0
-                return False
+            if sleeping:
+                self.sleeping.add(sprite)
+                return
 
-        pos = hex_model.evenr_to_axial((x, y))
-        if self.data.collidecircle(pos, sprite.radius):
-            sprite.position -= point
-            return False
+            axial0 = sprites_to_axial(position)
+            for other in all_sprites:
+                if other is sprite:
+                    continue
 
-        return True
+                if collide_hex2(axial0, sprites_to_axial(other.position),
+                               sprite.radius, other.radius) \
+                               and (sprite, other) not in stale:
+                    stale.add((other, sprite))
+                    scene.raise_event("PhysicsGroup", "Collision",
+                                      left=sprite, right=other)
+
+    def wake_sprite(self, sprite):
+        assert (sprite in self.sprites())
+        self.wake.add(sprite)
 
 
 class GameEntity(pygame.sprite.DirtySprite):
-
     def __init__(self, filename):
         super(GameEntity, self).__init__()
         self.position = Vector3(0, 0, 0)
@@ -125,6 +153,12 @@ class GameEntity(pygame.sprite.DirtySprite):
         self.rect = self.image.get_rect()
         self.move_sound = resources.sounds['scifidrone.wav']
         self._playing_move_sound = False
+        self.dirty = 1
+
+    def wake(self):
+        for g in self.groups():
+            if hasattr(g, 'wake'):
+                g.wake_sprite(self)
 
     def update_image(self):
         w, h = self.original_image.get_size()
@@ -162,7 +196,7 @@ class GameEntity(pygame.sprite.DirtySprite):
 class Button(GameEntity):
     def __init__(self, filename, key):
         super(Button, self).__init__(filename)
-        assert(key is not None)
+        assert (key is not None)
         self.key = key
 
     def handle_internal_events(self, scene):
@@ -184,8 +218,8 @@ class Button(GameEntity):
 class Door(GameEntity):
     def __init__(self, filename, key, cell):
         super(Door, self).__init__(filename)
-        assert(key is not None)
-        assert(cell is not None)
+        assert (key is not None)
+        assert (cell is not None)
         self.key = key
         self.cell = cell
         self.visible = False

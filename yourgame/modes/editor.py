@@ -164,6 +164,9 @@ class EditMode(LevelSceneMode):
             if self.sprite.position.z == 0:
                 self.sprite.velocity.z = .5
 
-        if moved and self.state == 2:
-            self.change_state(3)
+        if moved:
+            self.sprite.wake()
+
+            if self.state == 2:
+                self.change_state(3)
 
