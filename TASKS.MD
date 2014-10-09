@@ -12,6 +12,21 @@ work down this list in priority order.  -wkmanire
 
 ---
 
+---
+
+WALL COLLISIONS
+
+While it is priority #1, I am going to hold off on it and we can focus on the
+other items on the list.  The reason being, I need to rethink a few things, and
+I also need to change my current task so I don't go crazy.  Sprite to Sprite
+collision works, so we can still implement items and enemies.
+
+
+For now, wall collision check is disabled.  -abraham lincoln
+
+---
+
+
 Phase 1:
  1. wall collisions
  X. pre-build level areas

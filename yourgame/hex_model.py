@@ -1,10 +1,9 @@
 from heapq import heappush, heappop
-from math import sqrt
+from math import sqrt, ceil
 from operator import itemgetter
 import json
 import codecs
 import time
-
 from yourgame.environ import util
 
 
@@ -18,13 +17,31 @@ __all__ = ['HexMapModel',
            'collide_hex']
 
 
+# round axial coordinates
+def hex_round(coords):
+    x, y, z = axial_to_cube(coords)
+    rx, ry, rz = [round(i, 0) for i in (x, y, z)]
+    dx = abs(rx - x)
+    dy = abs(ry - y)
+    dz = abs(rz - z)
+    if dx > dy and dx > dz:
+        rx = -ry-rz
+    elif dy > dz:
+        ry = -rx-rz
+    else:
+        rz = -rx-ry
+    assert (rx + ry + rz == 0)
+    return cube_to_axial((rx, ry, rz))
+
+
 def axial_to_pixel(coords, size):
     return size * sqrt(3) * (coords[0] - 0.5 * (coords[1] & 1)), \
            size * 3/2 * coords[1]
 
 
 def pixel_to_axial(coords, size):
-    x, y = coords[:2]
+    x, y = [float(i) for i in coords[:2]]
+    size = float(size)
     return (1. / 3. * sqrt(3) * x - 1. / 3. * y) / size, (2. / 3.) * y / size
 
 
@@ -57,7 +74,7 @@ def axial_to_evenr(coords):
 
     # cube => evenr
     q = x + (z + (z & 1)) / 2
-    r = z
+    #r = z
 
     return q, z
 
@@ -92,15 +109,42 @@ def evenr_to_axial(coords):
 
 def sprites_to_axial(coords):
     x, y = coords[:2]
-    x -= y / 2 + 1
+    x -= 1
+    coords = pixel_to_axial((x, y), 1.)
+    #x, y = coords[:2]
+    #x -= y / 2 +2
+    return coords
+    return x, y
+
+
+ratio = 3./2
+sqrt_3 = sqrt(3)
+def cube_to_pixel(coords, radius):
+    cx, cy, cz = coords
+    y = ratio * radius * cz
+    #b = 2/3 * y / s
+    #x = sqrt_3 * radius * (cz / 2. + cx)
+    x = - sqrt_3 * radius * (cz / 2. + cy)
+    #r = (sqrt(3)/3 * x - y/3 ) / s
+    #g = -(sqrt(3)/3 * x + y/3 ) / s
     return x, y
 
 
 def collide_hex(left, right, left_radius=1.0, right_radius=1.0):
-    """ Fast approximation of collisions between hex cells in axial space
+    """ Fast approximation of collisions between circles in axial space
     """
     dx, dy = dist_axial2(left, right)
     rr = left_radius + right_radius
+    return (dx * dx) + (dy * dy) < rr * rr
+
+
+# slower collision test for testing level geometry
+def collide_hex2(cell0, cell1, left_radius=1.0, right_radius=1.0):
+    x0, y0 = cube_to_pixel(axial_to_cube(cell0), 100.)
+    x1, y1 = cube_to_pixel(axial_to_cube(cell1), 100.)
+    dx = x1 - x0
+    dy = y1 - y0
+    rr = (left_radius * 100.) + (right_radius * 100.)
     return (dx * dx) + (dy * dy) < rr * rr
 
 
@@ -155,11 +199,9 @@ class HexMapModel(object):
         :param radius: axial coords
         :return: iterator of coords
         """
+        return []
         retval = list()
-        print coords
-        coords = cube_to_axial(
-            [int(round(i, 0)) for i in axial_to_cube(coords)])
-        print coords
+        coords = hex_round(coords)
         for n in self.surrounding(coords):
             try:
                 cell = self._data[coords]
@@ -169,7 +211,7 @@ class HexMapModel(object):
             if cell.height <= 0:
                 continue
 
-            if collide_hex(coords, n, radius, .8):
+            if collide_hex2(coords, n, radius, .8):
                 retval.append(coords)
         return retval
 
@@ -200,9 +242,7 @@ class HexMapModel(object):
 
     def get_nearest_cell(self, coords):
         # expects coords in fractional axial coordinates
-        coords = cube_to_axial(
-            [int(round(i, 0)) for i in axial_to_cube(coords)])
-        return self.get_cell(coords)
+        return hex_round(coords)
 
     def add_cell(self, coords, cell):
         coords = tuple(coords)

@@ -98,7 +98,6 @@ class PhysicsGroup(pygame.sprite.Group):
                 return False
 
         pos = hex_model.evenr_to_axial((x, y))
-        print pos
         if self.data.collidecircle(pos, sprite.radius):
             sprite.position -= point
             return False
@@ -115,7 +114,7 @@ class GameEntity(pygame.sprite.DirtySprite):
         self.velocity = Vector3(0, 0, 0)
         self.original_image = resources.tiles[filename]
         self.anchor = Vector2(16, 57)
-        self.radius = .4
+        self.radius = .2
         self._layer = 1
         self.event_handlers = list()
         self.max_velocity = [.15, .15, 100]
