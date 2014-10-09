@@ -144,11 +144,9 @@ class HexMapModel(object):
         self._height = None
         self._dirty = False
 
-    def surrounding(self):
-        return util.surrounding((0, 0), (self.width-1, self.height-1))
-
-    def neighbors(self, cell):
-        return util.neighbors(cell[0], self.surrounding())
+    def surrounding(self, coord):
+        return util.surrounding_clip(coord,
+                                     (0, 0), (self.width-1, self.height-1))
 
     def collidecircle(self, coords, radius):
         """test if circle overlaps level geometry above layer 0 only
@@ -157,7 +155,8 @@ class HexMapModel(object):
         :param radius: axial coords
         :return: iterator of coords
         """
-        for n in self.neighbors(coords):
+        retval = list()
+        for n in self.surrounding(coords):
             try:
                 cell = self._data[coords]
             except KeyError:
@@ -167,7 +166,8 @@ class HexMapModel(object):
                 continue
 
             if collide_hex(coords, n, radius, .8):
-                yield coords
+                retval.append(coords)
+        return retval
 
     def _make_file_data(self):
         return {
