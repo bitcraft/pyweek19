@@ -114,7 +114,7 @@ def play_music(name):
 
     try:
         track = music[name]
-        print track
+        print(track)
         logger.info("playing %s", track)
         vol = config.getint('sound', 'music-volume') / 100.
         if vol > 0:
