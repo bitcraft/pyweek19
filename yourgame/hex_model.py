@@ -7,8 +7,10 @@ import time
 
 import pygame
 
+from yourgame import config, quadtree
 from yourgame.euclid import Vector2
 from yourgame.environ import util
+
 
 
 # even-r : 'pointy top'
@@ -27,7 +29,7 @@ def pixel_to_axial(coords, size):
 
 
 def axial_to_cube(coords):
-    return coords[0], coords[1], -coords[0]-coords[1]
+    return coords[0], coords[1], -coords[0] - coords[1]
 
 
 def cube_to_axial(coords):
@@ -38,7 +40,7 @@ def axial_to_oddr(coords):
     # axial => cube
     x = coords[0]
     z = coords[1]
-    #y = -x-z
+    # y = -x-z
 
     # cube => odd-r
     q = x + (z - (z & 1)) / 2
@@ -51,7 +53,7 @@ def axial_to_evenr(coords):
     # axial => cube
     x = coords[0]
     z = coords[1]
-    #y = -x-z
+    # y = -x-z
 
     # cube => evenr
     q = x + (z + (z & 1)) / 2
@@ -65,7 +67,7 @@ def oddr_to_axial(coords):
     q, r = coords
     x = q - (r - (r & 1)) / 2
     z = r
-    #y = -z-x
+    # y = -z-x
 
     # cube => axial
     q = x
@@ -79,7 +81,7 @@ def evenr_to_axial(coords):
     q, r = coords
     x = q - (r + (int(round(r, 0)) & 1)) / 2
     z = r
-    #y = -x-z
+    # y = -x-z
 
     # cube => axial
     q = x
@@ -130,12 +132,31 @@ class Cell(object):
 
 
 class HexMapModel(object):
-
     def __init__(self):
         self._data = dict()
         self._width = None
         self._height = None
         self._dirty = False
+        self.quadtree = None
+        self.needs_refresh = True
+
+    def test_collide(self, rect):
+        if self.needs_refresh:
+            self.update_quadtree()
+            self.needs_refresh = False
+
+        hits = self.quadtree.hit_rect(rect)
+        return hits
+
+    def update_quadtree(self):
+        ph = config.getint('display', 'hex_radius') * 2
+        pw = (sqrt(3) / 2 * ph)
+        rects = list()
+        for pos, cell in self._data.items():
+            rect = pygame.Rect(pos, (1,1)).inflate(pw, pw)
+            rects.append(rect)
+
+        self.quadtree = quadtree.FastQuadTree(rects, 4)
 
 
     def _make_file_data(self):
@@ -165,12 +186,13 @@ class HexMapModel(object):
 
     def get_nearest_cell(self, coords):
         # expects coords in fractional axial coordinates
-        coords = cube_to_axial([int(round(i, 0)) for i in axial_to_cube(coords)])
+        coords = cube_to_axial(
+            [int(round(i, 0)) for i in axial_to_cube(coords)])
         return self.get_cell(coords)
 
     def add_cell(self, coords, cell):
         coords = tuple(coords)
-        assert(len(coords) == 2)
+        assert (len(coords) == 2)
         self._data[coords] = cell
         self._trigger_bounds_update()
 
@@ -181,6 +203,7 @@ class HexMapModel(object):
     def _trigger_bounds_update(self):
         self._width = None
         self._height = None
+        self.quadtree = None
 
     def _calc_bounds(self):
         x_list = list()
@@ -227,16 +250,6 @@ class HexMapModel(object):
         return (cell[0] + util.neighbor_mat[facing],
                 cell[1] + util.neighbor_mat[facing])
 
-    def walls(self):
-        walls = list()
-        for pos, cell in self._data.items():
-            if cell.raised:
-                sprite = pygame.sprite.Sprite()
-                sprite.position = Vector2(*pos)
-                sprite.radius = .25
-                walls.append(sprite)
-        return walls
-
     @staticmethod
     def dist(cell0, cell1):
         q0, r0 = cell0
@@ -261,8 +274,8 @@ class HexMapModel(object):
 
         def coord_available(coord):
             return coord not in closed_set \
-                and coord not in blacklist \
-                and self.get_cell(coord).kind not in impassable
+                   and coord not in blacklist \
+                   and self.get_cell(coord).kind not in impassable
 
         def retrace_path(c):
             path = [c]
@@ -297,7 +310,7 @@ class HexMapModel(object):
             closed_set.add(current)
             cells = filter(
                 cell_available,
-                ((self.dist(coord, end)+self.get_cell(coord).cost, coord)
+                ((self.dist(coord, end) + self.get_cell(coord).cost, coord)
                  for coord in surrounding(current)))
             # Push the highest costing tiles first, so we'll check them last
             # Should keep working when there's a dead end

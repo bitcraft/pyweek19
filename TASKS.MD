@@ -14,7 +14,7 @@ work down this list in priority order.  -wkmanire
 
 Phase 1:
  1. wall collisions
- 2. pre-build level areas
+ X. pre-build level areas
  3. level save/load
  4. "end level" item
  5. enemy ai

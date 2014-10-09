@@ -149,10 +149,6 @@ class LevelScene(Scene):
                 if cell:
                     self.handle_click(event.button, cell)
 
-        # collisions with walls (broken!)
-        #c = groupcollide(self.view, self.view.data.walls(),
-        #                 False, False, hex_model.collide_hex)
-
         self.mode.update(delta, events)
 
         for sprite in self.internal_event_group:
