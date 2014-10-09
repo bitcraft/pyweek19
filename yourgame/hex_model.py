@@ -257,6 +257,10 @@ class HexMapModel(object):
         return (abs(q0 - q1) + abs(r0 - r1) +
                 abs(q0 + r0 - q1 - r1)) / 2.0
 
+    def surrounding(self, coord):
+        return util.surrounding_clip(coord,
+                                     (0, 0), (self.width-1, self.height-1))
+
     def pathfind_evenr(self, current, end, blacklist=set(),
                        impassable=set()):
         current = evenr_to_axial(current)
@@ -289,8 +293,6 @@ class HexMapModel(object):
         open_heap = []
         open_set = set()
         closed_set = set()
-        limit = self.width - 1, self.height - 1
-        surrounding = util.surrounding((0, 0), limit)
         current = current[0], current[1]
         open_set.add(current)
         open_heap.append(current)

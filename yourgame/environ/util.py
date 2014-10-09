@@ -9,10 +9,6 @@ def clip(vector, lowest, highest):
     return type(vector)(map(min, map(max, vector, lowest), highest))
 
 
-def neighbors(coord, surrounding):
-    return (c for c in surrounding(coord))
-
-
 def surrounding_clip(coord, lower, upper):
     return (clip(i, lower, upper) for i in
             surrounding_noclip(coord))

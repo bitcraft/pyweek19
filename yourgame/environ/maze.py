@@ -23,7 +23,7 @@ def build_maze_from_hex(model, lower_limit=None, upper_limit=None,
         return set(neighbors(coord)) - {current} & closed_set
 
     def neighbors(coord):
-        return util.neighbors(coord, surrounding)
+        return surrounding(coord)
 
     def raise_cell(cell):
         cell.raised = True
