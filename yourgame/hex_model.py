@@ -166,7 +166,7 @@ class HexMapModel(object):
             if cell.height <= 0:
                 continue
 
-            if collide_hex(coords, n, .1, 1):
+            if collide_hex(coords, n, radius, .8):
                 yield coords
 
     def _make_file_data(self):

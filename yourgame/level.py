@@ -50,14 +50,14 @@ class LevelScene(Scene):
         self.velocity_updates = entity.PhysicsGroup(data=self.model)
         self.internal_event_group = pygame.sprite.Group()
 
-        sprite = entity.GameEntity('alienBlue.png')
-        sprite.position.x = 7
-        sprite.position.y = 2
-        self.view.add(sprite)
-        sprite = entity.GameEntity('alienBlue.png')
-        sprite.position.x = 9
-        sprite.position.y = 9
-        self.view.add(sprite)
+        #sprite = entity.GameEntity('alienBlue.png')
+        #sprite.position.x = 7
+        # sprite.position.y = 2
+        # self.view.add(sprite)
+        # sprite = entity.GameEntity('alienBlue.png')
+        # sprite.position.x = 9
+        # sprite.position.y = 9
+        # self.view.add(sprite)
         sprite = entity.GameEntity('alienBlue.png')
         sprite.position.x = 2
         sprite.position.y = 2

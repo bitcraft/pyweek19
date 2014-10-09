@@ -40,8 +40,9 @@ class PhysicsGroup(pygame.sprite.Group):
                 acceleration += gravity_delta
 
             velocity += acceleration * delta
-            position += velocity * delta
-            x, y, z = velocity
+            dv = velocity * delta
+            position += dv
+            x, y, z = dv
 
             if not z == 0:
                 if not self.move_sprite(sprite, (0, 0, z)):
@@ -90,8 +91,7 @@ class PhysicsGroup(pygame.sprite.Group):
                     velocity.y = -max_velocity[1]
 
     def move_sprite(self, sprite, point, clip=True):
-
-        x, y, z = sprite.position + point
+        x, y, z = sprite.position
         if z < 0:
             if sprite.position.z < 0:
                 sprite.position.z = 0
@@ -99,6 +99,7 @@ class PhysicsGroup(pygame.sprite.Group):
 
         pos = hex_model.evenr_to_axial((x, y))
         if self.data.collidecircle(pos, .1):
+            sprite.position -= point
             return False
 
         return True
