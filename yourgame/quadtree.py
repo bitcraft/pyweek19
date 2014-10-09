@@ -129,3 +129,30 @@ class FastQuadTree(object):
             hits |= self.se.hit(rect)
 
         return hits
+
+    def hit_rect(self, rect):
+        """Returns the items that overlap a bounding rectangle.
+
+        Returns the set of all items in the quad-tree that overlap with a
+        bounding rectangle.
+
+        @param rect:
+            The bounding rectangle being tested against the quad-tree. This
+            must possess left, top, right and bottom attributes.
+        """
+
+        # Find the hits at the current level.
+        hits = set(
+            tuple(self.items[i]) for i in rect.collidelistall(self.items))
+
+        # Recursively check the lower quadrants.
+        if self.nw and rect.left <= self.cx and rect.top <= self.cy:
+            hits |= self.nw.hit(rect)
+        if self.sw and rect.left <= self.cx and rect.bottom >= self.cy:
+            hits |= self.sw.hit(rect)
+        if self.ne and rect.right >= self.cx and rect.top <= self.cy:
+            hits |= self.ne.hit(rect)
+        if self.se and rect.right >= self.cx and rect.bottom >= self.cy:
+            hits |= self.se.hit(rect)
+
+        return hits
