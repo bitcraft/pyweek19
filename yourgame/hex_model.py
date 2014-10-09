@@ -1,6 +1,8 @@
 from heapq import heappush, heappop
 from math import sqrt
 from operator import itemgetter
+import json
+import codecs
 import time
 
 import pygame
@@ -110,12 +112,21 @@ def dist_hex(cell0, cell1):
 
 class Cell(object):
 
-    def __init__(self):
-        self.kind = None
-        self.cost = 0
-        self.filename = None
-        self.raised = False
-        self.height = 0.0
+    def __init__(self, **kwargs):
+        self.kind = kwargs.get("kind", None)
+        self.cost = int(kwargs.get("cost", 0))
+        self.filename = kwargs.get("filename", None)
+        self.raised = kwargs.get("raised", False)
+        self.height = float(kwargs.get("height", 0.0))
+
+    def to_json(self):
+        return {
+            "kind": self.kind,
+            "cost": self.cost,
+            "filename": self.filename,
+            "raised": self.raised,
+            "height": self.height
+        }
 
 
 class HexMapModel(object):
@@ -125,6 +136,29 @@ class HexMapModel(object):
         self._width = None
         self._height = None
         self._dirty = False
+
+
+    def _make_file_data(self):
+        return {
+            "width": self._width,
+            "height": self._height,
+            "data": {str(key): value.to_json() for key, value in self._data.items()}
+        }
+
+    def save_to_disk(self, path):
+        with codecs.open(path, "wb", encoding="utf-8") as fob:
+            data = self._make_file_data()
+            print(data)
+            json.dump(data, fob, indent=2)
+
+    def load_from_disk(self, path):
+        with codecs.open(path, "rb", encoding="utf-8") as fob:
+            data = json.load(fob)
+            self._width = data["width"]
+            self._height = data["height"]
+            self._data = dict()
+            for key, cell_data in data["data"].items():
+                self._data[eval(key)] = Cell(**cell_data)
 
     def get_cell(self, coords):
         return self._data.get(tuple(coords), None)

@@ -27,6 +27,7 @@ class LevelScene(Scene):
         self.model = hex_model.HexMapModel()
         w = config.getint('world', 'width')
         h = config.getint('world', 'height')
+        print(w, h)
         for q, r in itertools.product(range(w), range(h)):
             coords = hex_model.evenr_to_axial((q, r))
             cell = hex_model.Cell()
