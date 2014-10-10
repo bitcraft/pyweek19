@@ -84,11 +84,13 @@ def new_maze(map_width=10,
         cell = Cell()
         cell.filename = lowered_tile
         model.add_cell(coords, cell)
-    return build_maze_from_hex(model,
-                                 lower_limit=(1, 1),
-                                 upper_limit=(model.width - 2,
-                                              model.height - 2),
-                                 height=tile_height,
-                                 raised_tile=raised_tile,
-                                 lowered_tile=lowered_tile,
-                                 num_adjacent=num_adjacent)
+    build_maze_from_hex(
+        model,
+        lower_limit=(1, 1),
+        upper_limit=(model.width - 2,
+                     model.height - 2),
+        height=tile_height,
+        raised_tile=raised_tile,
+        lowered_tile=lowered_tile,
+        num_adjacent=num_adjacent)
+    return model

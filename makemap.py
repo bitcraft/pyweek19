@@ -10,9 +10,16 @@ python makemap.py file_path [--num-adjacent=1] [--width=10] [--height=10]
 
 from argparse import ArgumentParser
 
+from yourgame.environ.maze import new_maze
+
 
 def main(args):
-    pass
+    hex_maze = new_maze(map_width=args.width,
+                        map_height=args.height,
+                        num_adjacent=args.num_adjacent)
+
+    hex_maze.save_to_disk(args.file_path)
+    print("Wrote maze to %s" % args.file_path)
 
 
 if __name__ == "__main__":
@@ -32,7 +39,7 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--width", required=False, default=10, type=int,
-        help="The width of map in hex tiles")
+        help="The width of the map in hex tiles")
 
     parser.add_argument(
         "--height", required=False, default=10, type=int,
