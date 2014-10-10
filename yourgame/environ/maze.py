@@ -1,7 +1,8 @@
 from heapq import heappush, heappop
+import itertools
 import random
 
-from yourgame.hex_model import evenr_to_axial
+from yourgame.hex_model import HexMapModel, Cell, evenr_to_axial
 from yourgame.environ import util
 
 
@@ -69,3 +70,25 @@ def build_maze_from_hex(model, lower_limit=None, upper_limit=None,
             current = heappop(open_heap)
         open_neighbors = available_neighbors(current)
     return
+
+
+def new_maze(map_width=10,
+             map_height=10,
+             tile_height=1.0,
+             raised_tile='tileRock_full.png',
+             lowered_tile='tileGrass.png',
+             num_adjacent=1):
+    model = HexMapModel()
+    for q, r in itertools.product(range(map_width), range(map_height)):
+        coords = evenr_to_axial((q, r))
+        cell = Cell()
+        cell.filename = lowered_tile
+        model.add_cell(coords, cell)
+    return build_maze_from_hex(model,
+                                 lower_limit=(1, 1),
+                                 upper_limit=(model.width - 2,
+                                              model.height - 2),
+                                 height=tile_height,
+                                 raised_tile=raised_tile,
+                                 lowered_tile=lowered_tile,
+                                 num_adjacent=num_adjacent)

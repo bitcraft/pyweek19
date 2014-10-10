@@ -16,6 +16,7 @@ class Enemy(GameEntity):
         super(Enemy, self).__init__(filename)
         self._home = (None, None)
         self.path = ()
+        self.radius = 2
         self.fsm = Fysom({'initial': 'home',
                           'events': [
                               {'name': 'go_home',
@@ -44,15 +45,15 @@ class Enemy(GameEntity):
             fsm.ramble()
         if fsm.isstate('going_home'):
             if self.position == self.home:
-                print("Now rambling")
                 fsm.ramble()
         if fsm.isstate('rambling'):
             blacklist = {sprites_to_hex(sprite.position)
                          for sprite in scene.internal_event_group}
             pos = sprites_to_hex(self.position)
             home = sprites_to_hex(self.home)
-            self.path = scene.model.pathfind_ramble(pos, home, 2, blacklist)
-            print(list(self.path[0]))
+            if not self.path:
+                self.path = scene.model.pathfind_ramble(
+                    pos, home, self.radius, blacklist)[0]
 
 
 class Stalker(GameEntity):
