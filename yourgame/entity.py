@@ -7,10 +7,11 @@ from yourgame import config
 from yourgame.euclid import Vector2, Vector3
 
 
-__all__ = ['PhysicsGroup'
+__all__ = ['PhysicsGroup',
            'GameEntity',
            'Button',
-           'Door']
+           'Door',
+           'CallbackEntity']
 
 
 class PhysicsGroup(pygame.sprite.Group):
@@ -123,8 +124,8 @@ class PhysicsGroup(pygame.sprite.Group):
                     continue
 
                 if collide_hex2(axial0, sprites_to_axial(other.position),
-                               sprite.radius, other.radius) \
-                               and (sprite, other) not in stale:
+                                sprite.radius, other.radius) \
+                        and (sprite, other) not in stale:
                     stale.add((other, sprite))
                     scene.raise_event("PhysicsGroup", "Collision",
                                       left=sprite, right=other)
@@ -151,9 +152,9 @@ class GameEntity(pygame.sprite.DirtySprite):
         self.image = None
         self.update_image()
         self.rect = self.image.get_rect()
-        self.move_sound = resources.sounds['scifidrone.wav']
-        self._playing_move_sound = False
         self.dirty = 1
+        self.move_sound = None
+        self._playing_move_sound = False
 
     def wake(self):
         for g in self.groups():
@@ -167,15 +168,16 @@ class GameEntity(pygame.sprite.DirtySprite):
         self.image = self.image.convert_alpha()
 
     def update(self, delta):
-        if abs(self.acceleration) > 0:
-            if not self._playing_move_sound:
-                self.move_sound.set_volume(.1)
-                self.move_sound.play(-1, fade_ms=200)
-                self._playing_move_sound = True
-        else:
-            if self._playing_move_sound:
-                self.move_sound.fadeout(200)
-                self._playing_move_sound = False
+        if self.move_sound:
+            if abs(self.acceleration) > 0:
+                if not self._playing_move_sound:
+                    self.move_sound.set_volume(.1)
+                    self.move_sound.play(-1, fade_ms=200)
+                    self._playing_move_sound = True
+            else:
+                if self._playing_move_sound:
+                    self.move_sound.fadeout(200)
+                    self._playing_move_sound = False
 
     @property
     def flipped(self):
@@ -193,11 +195,9 @@ class GameEntity(pygame.sprite.DirtySprite):
                 group.needs_refresh = True
 
 
-class Button(GameEntity):
-    def __init__(self, filename, key):
-        super(Button, self).__init__(filename)
-        assert (key is not None)
-        self.key = key
+class Collider(GameEntity):
+    def on_collide(self, scene, other):
+        pass
 
     def handle_internal_events(self, scene):
         interested = scene.state['events'].get('Collision', None)
@@ -212,7 +212,17 @@ class Button(GameEntity):
             except ValueError:
                 continue
 
-            scene.raise_event(self, 'Switch', key=self.key, state=True)
+            self.on_collide(scene, other)
+
+
+class Button(Collider):
+    def __init__(self, filename, key):
+        super(Button, self).__init__(filename)
+        assert (key is not None)
+        self.key = key
+
+    def on_collide(self, scene, other):
+        scene.raise_event(self, 'Switch', key=self.key, state=True)
 
 
 class Door(GameEntity):
@@ -246,3 +256,15 @@ class Door(GameEntity):
                     cell.height = 0
                     cell.raised = False
                     self.trigger_view_refresh()
+
+
+class CallbackEntity(Collider):
+    def __init__(self, filename, callback, args=None, kwargs=None):
+
+        super(CallbackEntity, self).__init__(filename)
+        self._callback = callback
+        self._args = args if args else list()
+        self._kwargs = kwargs if kwargs else dict()
+
+    def on_collide(self, scene, other):
+        self._callback(*self._args, **self._kwargs)

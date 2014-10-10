@@ -1,25 +1,27 @@
 import itertools
-import pygame
 import random
-from pygame.locals import *
 
-from yourgame.scenes import Scene
+import pygame
+
 from yourgame import hex_model
 from yourgame import hex_view
-from yourgame import entity
-from yourgame.environ import maze
 from yourgame import config
 from yourgame import resources
-from yourgame.modes.editor import EditMode
+from yourgame.scenes import Scene
+from yourgame.environ import maze
 from yourgame.euclid import Point2
+from yourgame.entity import *
+from yourgame.modes.editor import EditMode
+from yourgame.hero import Hero
+from yourgame.enemies import *
 
 __all__ = ['LevelScene']
 
 
 class Task(pygame.sprite.Sprite):
     def __init__(self, callback, interval=0, loops=1, args=None, kwargs=None):
-        assert(callable(callback))
-        assert(loops >= -1)
+        assert (callable(callback))
+        assert (loops >= -1)
         super(Task, self).__init__()
         self.interval = interval
         self.loops = loops
@@ -36,11 +38,11 @@ class Task(pygame.sprite.Sprite):
             self.callback(*self._args, **self._kwargs)
             if not self._loops == -1:
                 self._loops -= 1
-                if self._timer <= 0:
+                if self._loops <= 0:
                     self.kill()
 
-class LevelScene(Scene):
 
+class LevelScene(Scene):
     def __init__(self, game):
         super(LevelScene, self).__init__("level", game)
 
@@ -62,8 +64,8 @@ class LevelScene(Scene):
         # build a maze
         maze.build_maze_from_hex(self.model,
                                  lower_limit=(1, 1),
-                                 upper_limit=(self.model.width-2,
-                                              self.model.height-2),
+                                 upper_limit=(self.model.width - 2,
+                                              self.model.height - 2),
                                  height=1.0,
                                  raised_tile='tileRock_full.png',
                                  lowered_tile='tileGrass.png',
@@ -72,29 +74,42 @@ class LevelScene(Scene):
         self.view = hex_view.HexMapView(self, self.model,
                                         config.getint('display', 'hex_radius'))
 
-        self.velocity_updates = entity.PhysicsGroup(data=self.model)
+        self.velocity_updates = PhysicsGroup(data=self.model)
         self.internal_event_group = pygame.sprite.Group()
         self.timers = pygame.sprite.Group()
 
-        #sprite = entity.GameEntity('alienBlue.png')
-        #sprite.position.x = 7
-        # sprite.position.y = 2
-        # self.view.add(sprite)
+        def f(klass, filename):
+            sprite = klass(filename)
+            sprite.position.x = random.randint(0, w)
+            sprite.position.y = random.randint(0, h)
+            sprite.position.z = 900
+            self.view.add(sprite)
+            self.internal_event_group.add(sprite)
+            self.velocity_updates.add(sprite)
+
+        enemies = ((Stalker, 'alienGreen.png'),
+                   (Rambler, 'alienYellow.png'),
+                   (Tosser, 'alienPink.png'))
+
+        for i, args in enumerate(enemies*2):
+            t = Task(f, i*500, 1, args)
+            self.timers.add(t)
+
         # sprite = entity.GameEntity('alienBlue.png')
         # sprite.position.x = 9
         # sprite.position.y = 9
         # self.view.add(sprite)
-        sprite = entity.GameEntity('alienBlue.png')
-        sprite.position.x = 1
-        sprite.position.y = 1
-        self.view.add(sprite)
-        self.internal_event_group.add(sprite)
-
-        self.sprite = sprite
-        self.velocity_updates.add(sprite)
+        hero = Hero('alienBlue.png')
+        hero.position.x = 1
+        hero.position.y = 1
+        hero._layer = 99
+        self.view.add(hero)
+        self.internal_event_group.add(hero)
+        self.velocity_updates.add(hero)
+        self.hero = hero
 
         # "switch"
-        button = entity.Button('tileRock_tile.png', 'testDoor')
+        button = Button('tileRock_tile.png', 'testDoor')
         button.position.x = 2
         button.position.y = 4
         button.position.z = 900
@@ -106,13 +121,13 @@ class LevelScene(Scene):
         # "door"
         coords = hex_model.evenr_to_axial((0, 0))
         cell = self.view.data.get_cell(coords)
-        door = entity.Door('smallRockStone.png', 'testDoor', cell)
+        door = Door('smallRockStone.png', 'testDoor', cell)
         # it must be added to the view group so it can trigger map refreshes
         self.view.add(door)
         self.internal_event_group.add(door)
 
         # start the silly timer to drop powerups
-        timer = Task(self.new_powerup, 2000, -1)
+        timer = Task(self.new_powerup, 5000, -1)
         self.timers.add(timer)
 
         # this must come last
@@ -123,7 +138,7 @@ class LevelScene(Scene):
         h = self.view.data.height - 1
 
         # generic powerup
-        sprite = entity.GameEntity('smallRockSnow.png')
+        sprite = CallbackEntity('smallRockSnow.png', self.next_level)
         sprite.position.x = random.randint(0, w)
         sprite.position.y = random.randint(0, h)
         sprite.position.z = 900
@@ -131,6 +146,9 @@ class LevelScene(Scene):
         self.view.add(sprite, layer=0)
         self.internal_event_group.add(sprite)
         self.velocity_updates.add(sprite)
+
+    def next_level(self):
+        pass
 
     def setup(self):
         print("Setting up level scene")

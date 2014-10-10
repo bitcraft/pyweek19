@@ -146,7 +146,6 @@ def collide_hex2(cell0, cell1, left_radius=1.0, right_radius=1.0):
     dx = x1 - x0
     dy = y1 - y0
     rr = (left_radius * 100.) + (right_radius * 100.)
-    print left_radius * 100, right_radius * 100., dx + dy
     return (dx * dx) + (dy * dy) < rr * rr
 
 

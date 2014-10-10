@@ -65,7 +65,6 @@ class HexMapView(pygame.sprite.LayeredUpdates):
         self.layer_quadtree = None
         self.set_radius(radius)
         self.spritedict["hover"] = None
-        self.dirtydict = dict()
 
         self.background = resources.images['backdrop']
 
@@ -231,7 +230,6 @@ class HexMapView(pygame.sprite.LayeredUpdates):
         buffer_blit = self.map_buffer.blit
         dirty_append = dirty.append
         spritedict = self.spritedict
-        dirtydict = self.dirtydict
 
         self.lostsprites = list()
         refreshed = False
@@ -239,6 +237,12 @@ class HexMapView(pygame.sprite.LayeredUpdates):
         # draw the cell tiles, a thread will blit the tiles in the background
         # this is rendering the background and all hex tiles
         if self.needs_refresh:
+            for sprite in spritedict.keys():
+                try:
+                    sprite.dirty = 1
+                except:
+                    pass
+
             upper_buffer = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
             buffer2_blit = upper_buffer.blit
             upper_cells = list()
@@ -323,7 +327,6 @@ class HexMapView(pygame.sprite.LayeredUpdates):
             assert(rect)
             old_rect = spritedict[sprite]
             spritedict[sprite] = rect
-            dirtydict[sprite] = tuple(rect)
 
             for _sprite, _rect in spritedict.items():
                 if _sprite is sprite or not _rect:

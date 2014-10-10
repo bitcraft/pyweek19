@@ -27,7 +27,7 @@ class EditMode(LevelSceneMode):
         self._dialog = None
         self.needs_refresh = False
 
-        self.sprite = scene.sprite
+        self.hero = scene.hero
 
     def handle_click(self, button, cell):
         view = self.scene.view
@@ -141,31 +141,31 @@ class EditMode(LevelSceneMode):
         movement_accel = config.getfloat('world', 'player_move_accel')
 
         if pressed[K_DOWN]:
-            self.sprite.acceleration.y = movement_accel
+            self.hero.acceleration.y = movement_accel
             moved = True
         elif pressed[K_UP]:
-            self.sprite.acceleration.y = -movement_accel
+            self.hero.acceleration.y = -movement_accel
             moved = True
         else:
-            self.sprite.acceleration.y = 0
+            self.hero.acceleration.y = 0
 
         if pressed[K_LEFT]:
-            self.sprite.acceleration.x = -movement_accel
-            self.sprite.flipped = True
+            self.hero.acceleration.x = -movement_accel
+            self.hero.flipped = True
             moved = True
         elif pressed[K_RIGHT]:
-            self.sprite.acceleration.x = movement_accel
-            self.sprite.flipped = False
+            self.hero.acceleration.x = movement_accel
+            self.hero.flipped = False
             moved = True
         else:
-            self.sprite.acceleration.x = 0
+            self.hero.acceleration.x = 0
 
         if pressed[K_SPACE]:
-            if self.sprite.position.z == 0:
-                self.sprite.velocity.z = .5
+            if self.hero.position.z == 0:
+                self.hero.velocity.z = .5
 
         if moved:
-            self.sprite.wake()
+            self.hero.wake()
 
             if self.state == 2:
                 self.change_state(3)
