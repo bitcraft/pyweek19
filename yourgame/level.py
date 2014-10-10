@@ -51,6 +51,7 @@ class LevelScene(Scene):
         self.damage = dict()
         self.needs_refresh = True
         self.lost_damage = list()
+        self.current_level_module = None
 
         # build a basic flat map
         self.model = hex_model.HexMapModel()
@@ -209,6 +210,8 @@ class LevelScene(Scene):
         self.timers.update(delta)
 
         self.internal_event_group.update(self)
+        if self.current_level_module:
+            self.current_level_module.handle_internal_events(self)
         for sprite in self.internal_event_group:
             if hasattr(sprite, "handle_internal_events"):
                 sprite.handle_internal_events(self)
@@ -221,4 +224,4 @@ class LevelScene(Scene):
 
     def load_level(level_name):
         # teardown whatever needs to be torn down here
-        loader.load_level(level_name, level_scene)
+        self.current_level_module = loader.load_level(level_name, level_scene)

@@ -22,7 +22,7 @@ I also need to change my current task so I don't go crazy.  Sprite to Sprite
 collision works, so we can still implement items and enemies.
 
 
-For now, wall collision check is disabled.  -abraham lincoln
+For now, wall collision check is disabled.  -abroham lincoln
 
 ---
 
@@ -30,7 +30,7 @@ For now, wall collision check is disabled.  -abraham lincoln
 Phase 1:
  1. wall collisions
  X. pre-build level areas
- 3. level save/load
+ DONE level save/load
  4. "end level" item
  5. enemy ai
 
