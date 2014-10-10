@@ -171,7 +171,6 @@ def dist_axial(cell0, cell1):
 
 class Cell(object):
     def __init__(self, **kwargs):
-        self.kind = kwargs.get("kind", None)
         self.cost = int(kwargs.get("cost", 0))
         self.filename = kwargs.get("filename", None)
         self.raised = kwargs.get("raised", False)
@@ -179,7 +178,6 @@ class Cell(object):
 
     def to_json(self):
         return {
-            "kind": self.kind,
             "cost": self.cost,
             "filename": self.filename,
             "raised": self.raised,
@@ -317,12 +315,11 @@ class HexMapModel(object):
         return (abs(q0 - q1) + abs(r0 - r1) +
                 abs(q0 + r0 - q1 - r1)) / 2.0
 
-    def pathfind_evenr(self, current, end, blacklist=set(),
-                       impassable=set()):
+    def pathfind_evenr(self, current, end, blacklist=set()):
         current = evenr_to_axial(current)
         end = evenr_to_axial(end)
         blacklist = {evenr_to_axial(coord) for coord in blacklist}
-        return self.pathfind(current, end, blacklist, impassable)
+        return self.pathfind(current, end, blacklist)
 
     def pathfind_ramble(self, current, home, radius, blacklist=set()):
         neighbors = {home, home}
@@ -339,8 +336,7 @@ class HexMapModel(object):
 
         return self.pathfind(current, random.choice(list(neighbors)), blacklist)
 
-    def pathfind(self, current, end, blacklist=set(),
-                 impassable=set()):
+    def pathfind(self, current, end, blacklist=set()):
         blacklist.update(
             {(coord[0], 1.0*coord[1])
              for coord in self._data if self._data[coord].raised})
@@ -350,8 +346,7 @@ class HexMapModel(object):
 
         def coord_available(coord):
             return coord not in closed_set \
-                   and coord not in blacklist \
-                   and self.get_cell(coord).kind not in impassable
+                   and coord not in blacklist
 
         def retrace_path(c):
             path = [c]
