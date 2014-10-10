@@ -354,4 +354,26 @@ class HexMapView(pygame.sprite.LayeredUpdates):
                     #                 surface_blit(up.surface, up.rect)
                     #                 surface.set_clip(None)
 
+        coords = hex_round(sprites_to_axial(self.scene.hero.position))
+        neighbors = list(self.data.surrounding(coords))
+        for n in neighbors:
+            cell = self.data._data.get(n, None)
+            if not cell:
+                continue
+
+            pos = project(n)
+            rect = pygame.Rect((0, 0), (20, 20))
+            rect.center = pos
+            rect = pygame.draw.ellipse(surface, (255, 128, 128), rect, 0)
+            dirty.append(rect)
+
+        for pos, cell in self.data._data.items():
+            if cell.height < 1:
+                continue
+            pos = project(pos)
+            rect = pygame.Rect((0, 0), (22, 22))
+            rect.center = pos
+            rect = pygame.draw.ellipse(surface, (255, 0, 0), rect, 2)
+            dirty.append(rect)
+
         return dirty

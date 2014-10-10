@@ -17,7 +17,8 @@ __all__ = ['HexMapModel',
            'sprites_to_axial',
            'axial_to_sprites',
            'sprites_to_hex',
-           'collide_hex']
+           'collide_hex',
+           'hex_round']
 
 
 ratio_13 = 1./3.
@@ -200,24 +201,21 @@ class HexMapModel(object):
 
         :param coords: axial coords
         :param radius: axial coords
-        :return: iterator of coords
+        :return: list of coords
         """
         #return []
         retval = list()
         coords = hex_round(coords)
         neighbors = list(self.surrounding(coords))
-        print coords, neighbors
         for n in neighbors:
-            try:
-                cell = self._data[coords]
-            except KeyError:
-                print "error?", coords
+            cell = self._data.get(n, None)
+            if not cell:
                 continue
 
-            if cell.height <= 0:
-                continue
+            #if cell.height <= 0:
+            #    continue
 
-            if collide_hex2(coords, n, radius, .8):
+            if collide_hex2(coords, n, radius, .5):
                 retval.append(coords)
         return retval
 
