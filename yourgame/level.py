@@ -95,7 +95,7 @@ class LevelScene(Scene):
             t = Task(f, i*500, 1, args)
             self.timers.add(t)
 
-        sprite = entity.Enemy('alienBlue.png')
+        sprite = Enemy('alienBlue.png')
         sprite.home = (9, 9)
         self.view.add(sprite)
         self.internal_event_group.add(sprite)
