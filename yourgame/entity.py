@@ -172,7 +172,8 @@ class GameEntity(pygame.sprite.DirtySprite):
         self.acceleration = Vector3(0, 0, 0)
         self.velocity = Vector3(0, 0, 0)
         self.original_image = resources.tiles[filename]
-        self.anchor = Vector2(16, 57)
+        self.original_anchor = Vector2(16, 57)
+        self.anchor = None
         self.radius = .4
         self._layer = 1
         self.event_handlers = list()
@@ -188,7 +189,7 @@ class GameEntity(pygame.sprite.DirtySprite):
         self.carried = set()
         self.pickup_item_sound = resources.sounds['woosh1.ogg']
         self.drop_item_sound = resources.sounds['woosh2.ogg']
-        self.bounce_sound = resources.sounds['boing.ogg']
+        self.bounce_sound = resources.sounds['boing-slow.ogg']
         self.bounce_sound.set_volume(.2)
         # self.drop_sound = resources.sounds['']
         #self.injure = resources.sounds['']
@@ -223,6 +224,7 @@ class GameEntity(pygame.sprite.DirtySprite):
         w, h = self.original_image.get_size()
         self.image = smoothscale(flip(self.original_image, self._flipped, 0),
                                  (int(w * self.scale), int(h * self.scale)))
+        self.anchor = self.original_anchor * self.scale
         self.image = self.image.convert_alpha()
 
     def update(self, delta):
@@ -302,6 +304,15 @@ class Button(Collider):
 
     def on_seperate(self, scene, other):
         scene.raise_event(self, 'Switch', key=self.key, state=False)
+
+
+class Rock(GameEntity):
+    def __init__(self, filename):
+        super(Rock, self).__init__(filename)
+        self.bounce_sound = resources.sounds['stoneHit3.ogg']
+
+    def handle_internal_events(self, scene):
+        pass
 
 
 class Door(GameEntity):

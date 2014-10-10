@@ -145,7 +145,7 @@ class HexMapView(pygame.sprite.LayeredUpdates):
         self.map_rect = map_rect
         self.pixel_offset = screen_offset
 
-        def cached_project(i, cell=None, use_cache=True):
+        def cached_project(i, cell=None, use_cache=False):
             if use_cache:
                 try:
                     return cache[i]
@@ -248,10 +248,10 @@ class HexMapView(pygame.sprite.LayeredUpdates):
 
             # get in draw order
             ww, hh = self.data.size
-            for qq, rr in product(range(hh), range(ww)):
-                q, r = evenr_to_axial((rr, qq))
-                cell = get_cell((q, r))
-                pos = Vector2(*project((q, r), cell))
+            for rr, qq in product(range(hh), range(ww)):
+                pos = evenr_to_axial((qq, rr))
+                cell = get_cell(pos)
+                pos = Vector2(*project(pos, cell))
 
                 # draw tall columns
                 if cell.height > 0:
@@ -323,7 +323,6 @@ class HexMapView(pygame.sprite.LayeredUpdates):
             if not clipped_rect:
                 continue
 
-            assert (rect)
             old_rect = spritedict[sprite]
             spritedict[sprite] = rect
 

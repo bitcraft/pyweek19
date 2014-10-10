@@ -24,7 +24,6 @@ def surrounding_noclip(coord):
 
 
 def surrounding(lower=None, upper=None):
-
     if lower is not None or upper is not None:
         def f(coord):
             return surrounding_clip(coord, lower, upper)
