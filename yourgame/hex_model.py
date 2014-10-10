@@ -113,10 +113,7 @@ def sprites_to_axial(coords):
     x, y = coords[:2]
     x -= 0
     coords = pixel_to_axial((x, y), 1.)
-    #x, y = coords[:2]
-    #x -= y / 2 +2
     return coords
-    return x, y
 
 
 def sprites_to_hex(coords):

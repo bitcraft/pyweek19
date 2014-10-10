@@ -66,7 +66,7 @@ def load():
     resource_path = config.get('paths', 'resource-path')
     resource_path = abspath(resource_path)
     border_path = jpath(resource_path, 'dialog.png')
-    sounds_path = jpath(resource_path, 'sounds', '*.wav')
+    sounds_path = jpath(resource_path, 'sounds', '*')
 
     # load the tiles
     tile_path = jpath(resource_path, 'tiles', '*png')

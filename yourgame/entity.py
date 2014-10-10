@@ -26,7 +26,7 @@ class PhysicsGroup(pygame.sprite.Group):
         self.sleeping = set()
         self.wake = set()
 
-    def update(self, scene, delta):
+    def update(self, delta, scene):
         stale = set()
         delta = self.timestep
         gravity_delta = self.gravity * delta
@@ -143,7 +143,7 @@ class GameEntity(pygame.sprite.DirtySprite):
         self.velocity = Vector3(0, 0, 0)
         self.original_image = resources.tiles[filename]
         self.anchor = Vector2(16, 57)
-        self.radius = .2
+        self.radius = .4
         self._layer = 1
         self.event_handlers = list()
         self.max_velocity = [.15, .15, 100]
@@ -155,11 +155,36 @@ class GameEntity(pygame.sprite.DirtySprite):
         self.dirty = 1
         self.move_sound = None
         self._playing_move_sound = False
+        self.carried = set()
+        self.pickup_item_sound = resources.sounds['woosh1.ogg']
+        self.drop_item_sound = resources.sounds['woosh2.ogg']
+        #self.drop_sound = resources.sounds['']
+        #self.injure = resources.sounds['']
+        #self.surprise_sound = resources.sounds['']
+        #self.chase_sound = resources.sounds['']
+        self._collided = set()
+        self._pickup_cooldown = 0
+
+    def pickup(self):
+        if not self._pickup_cooldown:
+            self._pickup_cooldown = 200
+            if not self.carried:
+                self.pickup_item_sound.play()
+                self.carried = set(self._collided)
+            else:
+                self.drop_item_sound.play()
+                for entity in self.carried:
+                    entity.wake()
+                self.carried = set()
+
+    @property
+    def physics_group(self):
+        for g in self.groups():
+            if isinstance(g, PhysicsGroup):
+                return g
 
     def wake(self):
-        for g in self.groups():
-            if hasattr(g, 'wake'):
-                g.wake_sprite(self)
+        self.physics_group.wake_sprite(self)
 
     def update_image(self):
         w, h = self.original_image.get_size()
@@ -168,6 +193,15 @@ class GameEntity(pygame.sprite.DirtySprite):
         self.image = self.image.convert_alpha()
 
     def update(self, delta):
+        if self._pickup_cooldown:
+            self._pickup_cooldown -= delta
+            if self._pickup_cooldown < 0:
+                self._pickup_cooldown = 0
+
+        for entity in self.carried:
+            entity.dirty = 1
+            entity.position = self.position + (0, 0, 80)
+
         if self.move_sound:
             if abs(self.acceleration) > 0:
                 if not self._playing_move_sound:
@@ -193,6 +227,22 @@ class GameEntity(pygame.sprite.DirtySprite):
         for group in self.groups():
             if hasattr(group, 'needs_refresh'):
                 group.needs_refresh = True
+
+    def handle_internal_events(self, scene):
+        interested = scene.state['events'].get('Collision', None)
+        if not interested:
+            return
+
+        others = set()
+        for event in interested:
+            try:
+                members = [event['left'], event['right']]
+                members.remove(self)
+                others.add(members[0])
+            except ValueError:
+                continue
+
+        self._collided = others
 
 
 class Collider(GameEntity):

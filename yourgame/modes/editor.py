@@ -17,8 +17,7 @@ class EditMode(LevelSceneMode):
     1 - no intro dialog
     """
     def __init__(self, scene):
-        super(EditMode, self).__init__()
-        self.scene = scene
+        super(EditMode, self).__init__(scene)
         self.border = gui.GraphicBox(resources.border_path, False)
         self.state = None
         self._font = pygame.font.Font(resources.fonts['rez'], 32)
@@ -27,7 +26,7 @@ class EditMode(LevelSceneMode):
         self._dialog = None
         self.needs_refresh = False
 
-        self.hero = scene.hero
+        self.hero = self.scene.hero
 
     def handle_click(self, button, cell):
         view = self.scene.view
@@ -116,26 +115,8 @@ class EditMode(LevelSceneMode):
 
         return dirty
 
-    def get_nearest_cell(self, coords):
-        view = self.scene.view
-        point = view.point_from_surface(coords)
-        if point:
-            return view.data.get_nearest_cell(point)
-
     def update(self, delta, events):
-        view = self.scene.view
-
-        for event in events:
-            if event.type == MOUSEMOTION:
-                cell = self.get_nearest_cell(event.pos)
-                if cell:
-                    view.highlight_cell(cell)
-
-            if event.type == MOUSEBUTTONUP:
-                cell = self.get_nearest_cell(event.pos)
-                if cell:
-                    self.handle_click(event.button, cell)
-
+        super(EditMode, self).update(delta, events)
         moved = False
         pressed = pygame.key.get_pressed()
         movement_accel = config.getfloat('world', 'player_move_accel')
@@ -160,13 +141,12 @@ class EditMode(LevelSceneMode):
         else:
             self.hero.acceleration.x = 0
 
-        if pressed[K_SPACE]:
-            if self.hero.position.z == 0:
-                self.hero.velocity.z = .5
+        for e in events:
+            if e.type == KEYDOWN:
+                if e.key == K_SPACE:
+                    self.hero.pickup()
 
         if moved:
             self.hero.wake()
-
             if self.state == 2:
                 self.change_state(3)
-
