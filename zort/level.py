@@ -63,7 +63,7 @@ class LevelScene(Scene):
         #timer = Task(self.new_powerup, 5000, -1)
         #self.timers.add(timer)
 
-        self.hero = self.add_entity(Hero, 'alienBlue.png', (0, 9))
+        self.hero = self.add_entity(Hero, 'alienBlue.png', (1, 1))
         self.add_entity(Hero, 'alienBlue.png', (0, 8))
 
         # this must come last

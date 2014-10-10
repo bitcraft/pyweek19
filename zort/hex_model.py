@@ -13,6 +13,7 @@ from zort.environ import util
 __all__ = ['HexMapModel',
            'Cell',
            'evenr_to_axial',
+           'axial_to_evenr',
            'pixel_to_axial',
            'sprites_to_axial',
            'axial_to_sprites',
@@ -107,16 +108,12 @@ def evenr_to_axial(coords):
 # special purpose function for sprites only
 def sprites_to_axial(coords):
     x, y = coords[:2]
-    #size = 1.
-    #return (ratio_13 * sqrt_3 * x - ratio_13 * y) / size, ratio_23 * y / size
     return (ratio_13 * sqrt_3 * x - ratio_13 * y), ratio_23 * y
 
 
 # special purpose function for sprites only
 def axial_to_sprites(coords):
     q, r = coords[:2]
-    #size = 1.
-    #return size * sqrt_3 * (q + r/2.), size * ratio_32 * r
     return sqrt_3 * (q + r/2.), ratio_32 * r
 
 
@@ -192,9 +189,14 @@ class HexMapModel(object):
         self._height = None
         self._dirty = False
 
-    def surrounding(self, coord):
-        return util.surrounding_clip(coord,
-                                    (0, 0), (self.width-1, self.height-1))
+    def surrounding(self, coords):
+        # this is some gigantic hack
+        #s = util.surrounding_clip(coord, (0, 0), (self.width, self.height))
+        s = util.surrounding_noclip(coords)
+        for coords in s:
+            coords = [int(i) for i in coords]
+            coords = [int(i) for i in evenr_to_axial(coords)]
+            yield tuple(coords)
 
     def collidecircle(self, coords, radius):
         """test if circle overlaps level geometry above layer 0 only
@@ -203,20 +205,21 @@ class HexMapModel(object):
         :param radius: axial coords
         :return: list of coords
         """
-        #return []
         retval = list()
-        coords = hex_round(coords)
-        neighbors = list(self.surrounding(coords))
+        round_coords = [int(i) for i in hex_round(coords)]
+        neighbors = list(self.surrounding(round_coords))
         for n in neighbors:
-            cell = self._data.get(n, None)
+            neigh = tuple([int(i) for i in n])
+            cell = self._data.get(neigh, None)
             if not cell:
                 continue
 
-            #if cell.height <= 0:
-            #    continue
+            if cell.height <= 0:
+                continue
 
-            if collide_hex2(coords, n, radius, .5):
-                retval.append(coords)
+            if collide_hex2(coords, neigh, radius, .75):
+                retval.append(neigh)
+        print retval
         return retval
 
     def _make_file_data(self):
@@ -251,6 +254,7 @@ class HexMapModel(object):
     def add_cell(self, coords, cell):
         coords = tuple(coords)
         assert (len(coords) == 2)
+        coords = tuple(int(i) for i in coords)
         self._data[coords] = cell
         self._trigger_bounds_update()
 
