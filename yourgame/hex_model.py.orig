@@ -118,10 +118,6 @@ def sprites_to_axial(coords):
     return x, y
 
 
-def sprites_to_hex(coords):
-    return hex_round(sprites_to_axial(coords))
-
-
 ratio = 3./2
 sqrt_3 = sqrt(3)
 def cube_to_pixel(coords, radius):
@@ -206,7 +202,14 @@ class HexMapModel(object):
         """
         return []
         retval = list()
+<<<<<<< HEAD
+        print(coords)
+        coords = cube_to_axial(
+            [int(round(i, 0)) for i in axial_to_cube(coords)])
+        print(coords)
+=======
         coords = hex_round(coords)
+>>>>>>> master
         for n in self.surrounding(coords):
             try:
                 cell = self._data[coords]
@@ -330,12 +333,7 @@ class HexMapModel(object):
             for n in neighbors:
                 tmp.update(set(self.surrounding(n)))
             neighbors.update(tmp)
-        neighbors.discard(blacklist)
-        blacklist.update(
-            {coord for coord in self._data if self._data[coord]})
-        blacklist.discard(neighbors)
-
-        return self.pathfind(current, neighbors.pop(), blacklist)
+        return neighbors
 
     def pathfind(self, current, end, blacklist=set(),
                  impassable=set()):
@@ -382,7 +380,7 @@ class HexMapModel(object):
             cells = filter(
                 cell_available,
                 ((self.dist(coord, end) + self.get_cell(coord).cost, coord)
-                 for coord in self.surrounding(current)))
+                 for coord in surrounding(current)))
             # Push the highest costing tiles first, so we'll check them last
             # Should keep working when there's a dead end
             for cell in sorted(cells, key=itemgetter(0), reverse=True):
