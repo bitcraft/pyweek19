@@ -15,6 +15,9 @@ class Enemy(GameEntity):
     def __init__(self, filename):
         super(Enemy, self).__init__(filename)
         self._home = (None, None)
+        self.accel = 10
+        self.moving = False
+        self.radius = 2
         self.path = ()
         self.fsm = Fysom({'initial': 'home',
                           'events': [
@@ -54,8 +57,8 @@ class Enemy(GameEntity):
             pos = sprites_to_hex(self.position)
             home = sprites_to_hex(self.home)
             if not self.path:
-                self.path = scene.model.pathfind_ramble(
-                    pos, home, self.radius, blacklist)[0]
+                self.path = list(scene.model.pathfind_ramble(
+                    pos, home, self.radius, blacklist)[0])
 
 
 class Stalker(GameEntity):
