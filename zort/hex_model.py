@@ -108,7 +108,7 @@ def evenr_to_axial(coords):
 # special purpose function for sprites only
 def sprites_to_axial(coords):
     x, y = coords[:2]
-    return (ratio_13 * sqrt_3 * x - ratio_13 * y), ratio_23 * y
+    return int(ratio_13 * sqrt_3 * x - ratio_13 * y), int(ratio_23 * y)
 
 
 # special purpose function for sprites only
@@ -192,7 +192,7 @@ class HexMapModel(object):
     def surrounding(self, coords):
         # this is some gigantic hack
         #s = util.surrounding_clip(coord, (0, 0), (self.width, self.height))
-        s = util.surrounding_noclip(coords)
+        s = util.surrounding_clip(coords, (0, 0), (self.width, self.height))
         for coords in s:
             coords = [int(i) for i in coords]
             coords = [int(i) for i in evenr_to_axial(coords)]
@@ -219,7 +219,7 @@ class HexMapModel(object):
 
             if collide_hex2(coords, neigh, radius, .75):
                 retval.append(neigh)
-        print retval
+        #print retval
         return retval
 
     def _make_file_data(self):
@@ -320,14 +320,16 @@ class HexMapModel(object):
                 abs(q0 + r0 - q1 - r1)) / 2.0
 
     def neighboring_radius(self, center, radius, blacklist=set()):
-        neighbors = {center, center}
+        center = {center, center}
+        neighbors = center
         for i in range(radius):
             tmp = set()
             for n in neighbors:
                 tmp.update(set(self.surrounding(n)))
             neighbors.update(tmp)
 
-        neighbors.difference_update(blacklist)
+        neighbors.difference_update(blacklist-center)
+        #neighbors.update({center, center})
 
         return neighbors
 
@@ -341,29 +343,34 @@ class HexMapModel(object):
         neighbors = self.neighboring_radius(home, radius, blacklist)
 
         blacklist.update(
-            {(coord[0], 1.0*coord[1]) for coord in self._data})
+            {coord for coord in self._data})
+        print(len(blacklist), blacklist)
         blacklist.difference_update(neighbors)
-
-        return self.pathfind(current, random.choice(list(neighbors)), blacklist)
+        print(len(blacklist), blacklist)
+        end = random.choice(list(neighbors)) \
+            if len(neighbors) > 1 else neighbors
+        return self.pathfind(current, end, blacklist)
 
     def pathfind(self, current, end, blacklist=set()):
         blacklist.update(
-            {(coord[0], 1.0*coord[1])
+            {coord
              for coord in self._data if self._data[coord].raised})
+        print(len(blacklist), blacklist)
 
         def cell_available(cell):
             return coord_available(cell[1])
 
         def coord_available(coord):
-            return coord not in closed_set \
-                   and coord not in blacklist
+            print(coord, coord in closed_set, coord in blacklist)
+
+            return coord not in closed_set and coord not in blacklist
 
         def retrace_path(c):
             path = [c]
             while parent.get(c, None) is not None:
                 c = parent[c]
                 path.append(c)
-            return reversed(path)
+            return path
 
         start_time = time.time()
         parent = {}
@@ -373,6 +380,7 @@ class HexMapModel(object):
         current = current[0], current[1]
         open_set.add(current)
         open_heap.append(current)
+
         while open_set:
             if time.time() - start_time > .0125:
                 try:
@@ -387,6 +395,7 @@ class HexMapModel(object):
 
             open_set.remove(current)
             closed_set.add(current)
+            print(closed_set)
             cells = filter(
                 cell_available,
                 ((self.dist(coord, end) + self.get_cell(coord).cost, coord)
@@ -398,5 +407,5 @@ class HexMapModel(object):
                 if cell[1] not in open_set:
                     open_set.add(cell[1])
                     heappush(open_heap, cell[1])
-
+        print()
         return (), True
