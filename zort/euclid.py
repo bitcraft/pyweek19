@@ -33,6 +33,8 @@ import math
 import operator
 import types
 
+long = int
+
 # Some magic here.  If _use_slots is True, the classes will derive from
 # object and will define a __slots__ class variable.  If _use_slots is
 # False, classes will be old-style and will not define __slots__.

@@ -16,7 +16,7 @@ class Enemy(GameEntity):
     def __init__(self, filename):
         super(Enemy, self).__init__(filename)
         self._home = (None, None)
-        self.accel = .0001
+        self.accel = .00025
         self.moving = False
         self.radius = 2
         self.path = ()
@@ -42,7 +42,6 @@ class Enemy(GameEntity):
     @home.setter
     def home(self, coord):
         self._home = coord
-        self.position.x, self.position.y = coord
 
     def handle_internal_events(self, scene):
         self.update_ai(scene, None)
@@ -61,8 +60,8 @@ class Enemy(GameEntity):
                          for sprite in scene.internal_event_group}
                 pos = sprites_to_hex(self.position)
                 home = sprites_to_hex(self.home)
-                self.path = list(scene.model.pathfind_ramble(
-                    pos, home, self.radius, blacklist)[0])
+                self.path = scene.model.pathfind_ramble(
+                    pos, home, self.radius, blacklist)[0]
 
     def update(self, delta):
         super(GameEntity, self).update(delta)
@@ -73,7 +72,7 @@ class Enemy(GameEntity):
                 self.moving = False
 
         if self.path and not self.moving and round(self.position.z) == 0:
-            self.target_cell = self.path.pop(0)
+            self.target_cell = self.path.pop(-1)
             self.direction = Vector2(self.target_cell[0]-current_position[0],
                                      self.target_cell[1]-current_position[1])
             self.moving = True

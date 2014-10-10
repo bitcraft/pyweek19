@@ -7,6 +7,7 @@ from zort import hex_view
 from zort import config
 from zort import resources
 from zort.hex_model import *
+from zort.enemies import *
 from zort.entity import *
 from zort.environ import maze
 from zort.scenes import Scene
@@ -64,7 +65,8 @@ class LevelScene(Scene):
         #self.timers.add(timer)
 
         self.hero = self.add_entity(Hero, 'alienBlue.png', (1, 1))
-        self.add_entity(Hero, 'alienBlue.png', (0, 8))
+        self.add_entity(Enemy, 'alienYellow.png', (1, 8))
+
 
         # this must come last
         self.mode = EditMode(self)
@@ -74,6 +76,8 @@ class LevelScene(Scene):
         sx, sy = axial_to_sprites(evenr_to_axial(position))
         sprite = enemy_class(enemy_sprite_file_name)
         sprite.position += (sx, sy, 900)
+        if hasattr(sprite, 'home'):
+            sprite.home = sprite.position[:2]
         sprite.update_image()
         self.view.add(sprite)
         self.internal_event_group.add(sprite)

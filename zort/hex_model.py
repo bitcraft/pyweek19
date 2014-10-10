@@ -183,8 +183,8 @@ class HexMapModel(object):
 
     def surrounding(self, coords):
         # this is some gigantic hack
-        #s = util.surrounding_clip(coord, (0, 0), (self.width, self.height))
-        s = util.surrounding_clip(coords, (0, 0), (self.width, self.height))
+        #s = util.surrounding_noclip(coord)
+        s = util.surrounding_clip(coords, (0, 0), (self.width-1, self.height-1))
         for coords in s:
             coords = [int(i) for i in coords]
             coords = [int(i) for i in evenr_to_axial(coords)]
@@ -320,7 +320,7 @@ class HexMapModel(object):
                 tmp.update(set(self.surrounding(n)))
             neighbors.update(tmp)
 
-        neighbors.difference_update(blacklist-center)
+        neighbors.difference_update(blacklist)
         #neighbors.update({center, center})
 
         return neighbors
@@ -336,25 +336,25 @@ class HexMapModel(object):
 
         blacklist.update(
             {coord for coord in self._data})
-        print(len(blacklist), blacklist)
         blacklist.difference_update(neighbors)
-        print(len(blacklist), blacklist)
         end = random.choice(list(neighbors)) \
             if len(neighbors) > 1 else neighbors
         return self.pathfind(current, end, blacklist)
 
     def pathfind(self, current, end, blacklist=set()):
-        blacklist.update(
-            {coord
-             for coord in self._data if self._data[coord].raised})
-        print(len(blacklist), blacklist)
+        #print()
+        #for coord in self._data:
+        #    print(self._data[coord].raised)
+        #print("Current raised", self._data[current].raised)
+        #blacklist.update(
+        #    {coord
+        #     for coord in self._data if self._data[coord].raised})
+        #print(len(blacklist))
 
         def cell_available(cell):
             return coord_available(cell[1])
 
         def coord_available(coord):
-            print(coord, coord in closed_set, coord in blacklist)
-
             return coord not in closed_set and coord not in blacklist
 
         def retrace_path(c):
@@ -387,7 +387,6 @@ class HexMapModel(object):
 
             open_set.remove(current)
             closed_set.add(current)
-            print(closed_set)
             cells = filter(
                 cell_available,
                 ((self.dist(coord, end) + self.get_cell(coord).cost, coord)
@@ -399,5 +398,4 @@ class HexMapModel(object):
                 if cell[1] not in open_set:
                     open_set.add(cell[1])
                     heappush(open_heap, cell[1])
-        print()
         return (), True
