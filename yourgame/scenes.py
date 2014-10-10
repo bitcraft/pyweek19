@@ -47,14 +47,18 @@ class Game(object):
         main_surface = self.main_surface
         fps_display_acc = 0
         get_fps = self.clock.get_fps
+        poll_event = event.poll
 
         while len(self.scene_stack) > 0:
-            events = event_get()
-            for e in events:
+            events = list()
+            e = poll_event()
+            while e:
+                events.append(e)
                 if e.type == QUIT:
                     while len(self.scene_stack) > 0:
                         self.pop_scene()
                     sys.exit()
+                e = poll_event()
 
             delta = tick(tick_fps)
             fps = get_fps()
@@ -63,6 +67,7 @@ class Game(object):
             if fps_display_acc >= 10000:
                 set_caption("FPS ::: %.4f" % fps)
                 fps_display_acc = 0
+
             self.current_scene.update_events()
             self.current_scene.update(delta, events)
 

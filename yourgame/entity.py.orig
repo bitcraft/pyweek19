@@ -119,10 +119,18 @@ class PhysicsGroup(pygame.sprite.Group):
                 self.sleeping.add(sprite)
                 return
 
+<<<<<<< HEAD
+        pos = hex_model.evenr_to_axial((x, y))
+        print(pos)
+        if self.data.collidecircle(pos, sprite.radius):
+            sprite.position -= point
+            return False
+=======
             axial0 = sprites_to_axial(position)
             for other in all_sprites:
                 if other is sprite:
                     continue
+>>>>>>> master
 
                 if collide_hex2(axial0, sprites_to_axial(other.position),
                                 sprite.radius, other.radius) \
@@ -196,6 +204,7 @@ class GameEntity(pygame.sprite.DirtySprite):
                 group.needs_refresh = True
 
 
+<<<<<<< HEAD
 class Enemy(GameEntity):
     def __init__(self, filename):
         super(Enemy, self).__init__(filename)
@@ -258,10 +267,11 @@ class Button(GameEntity):
         super(Button, self).__init__(filename)
         assert(key is not None)
         self.key = key
-
+=======
 class Collider(GameEntity):
     def on_collide(self, scene, other):
         pass
+>>>>>>> master
 
     def handle_internal_events(self, scene):
         interested = scene.state['events'].get('Collision', None)

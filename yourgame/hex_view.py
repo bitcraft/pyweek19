@@ -66,20 +66,7 @@ class HexMapView(pygame.sprite.LayeredUpdates):
         self.set_radius(radius)
         self.spritedict["hover"] = None
 
-    def test_sprite_collisions(self):
-        stale = set()
-        sprites = self.sprites()
-        for left in sprites:
-            for right in sprites:
-                if left is right:
-                    continue
-                if collide_hex(left.position, right.position,
-                               left.radius, right.radius) \
-                        and (left, right) not in stale:
-                    stale.add((right, left))
-                    self.scene.raise_event("HexMapView",
-                                           "Collision",
-                                           left=left, right=right)
+        self.background = resources.images['backdrop']
 
     def get_hex_draw(self):
         def draw_hex(surface, coords, border_color, fill_color):
@@ -202,13 +189,29 @@ class HexMapView(pygame.sprite.LayeredUpdates):
             return
         blit = surface.blit
         _buffer = self.map_buffer
+        spritedict = self.spritedict
         [blit(_buffer, r, r) for r in self.lostsprites]
-        [blit(_buffer, r, r) for r in filter(None, self.spritedict.values())]
+        for key, value in spritedict.items():
+            if value:
+                try:
+                    if key.dirty:
+                        blit(_buffer, value, value)
+                except AttributeError:
+                    pass
+
+
+    def remove_internal(self, sprite):
+        super(HexMapView, self).remove_internal(sprite)
+        try:
+            del self.dirtydict[sprite]
+        except:
+            pass
 
     def draw(self, surface):
         if self.needs_cache:
             buffer_size = surface.get_size()
             self.map_buffer = pygame.Surface(buffer_size, pygame.SRCALPHA)
+            self.map_buffer.blit(self.background, (0, 0))
             self.rect = self.map_buffer.get_rect()
             self.project = self.get_projection()
             self._hex_draw = self.get_hex_draw()
@@ -223,6 +226,7 @@ class HexMapView(pygame.sprite.LayeredUpdates):
         draw_hex = self._hex_draw
         get_cell = self.data.get_cell
         surface_blit = surface.blit
+        surface_rect = surface.get_rect()
         buffer_blit = self.map_buffer.blit
         dirty_append = dirty.append
         spritedict = self.spritedict
@@ -233,6 +237,12 @@ class HexMapView(pygame.sprite.LayeredUpdates):
         # draw the cell tiles, a thread will blit the tiles in the background
         # this is rendering the background and all hex tiles
         if self.needs_refresh:
+            for sprite in spritedict.keys():
+                try:
+                    sprite.dirty = 1
+                except:
+                    pass
+
             upper_buffer = pygame.Surface(surface.get_size(), pygame.SRCALPHA)
             buffer2_blit = upper_buffer.blit
             upper_cells = list()
@@ -294,18 +304,37 @@ class HexMapView(pygame.sprite.LayeredUpdates):
         surface.unlock()
 
         overlap_limit = self.overlap_limit
-        for sprite in [s for s in self.sprites() if s.visible]:
+        for sprite in [s for s in self.sprites() if s.visible & s.dirty]:
             # hover is the internal name for the tile cursor
             if sprite == "hover":
                 continue
 
-            old_rect = spritedict[sprite]
-            pos = sprites_to_axial(sprite.position[:2])
+            pos = sprites_to_axial(sprite.position)
             x, y = project(pos, use_cache=False)
             pos = (int(round(x - sprite.anchor.x, 0)),
                    int(round(y - sprite.anchor.y - sprite.position.z, 0)))
 
+            if not sprite.dirty == 2:
+                sprite.dirty -= 1
+
             rect = surface_blit(sprite.image, pos)
+            clipped_rect = rect.clip(surface_rect)
+
+            # this will be true if the sprite was blit off the surface
+            if not clipped_rect:
+                continue
+
+            assert(rect)
+            old_rect = spritedict[sprite]
+            spritedict[sprite] = rect
+
+            for _sprite, _rect in spritedict.items():
+                if _sprite is sprite or not _rect:
+                    continue
+
+                if rect.colliderect(_rect):
+                    _sprite.dirty = 1
+
             if not refreshed:
                 if old_rect:
                     if rect.colliderect(rect):
@@ -315,11 +344,10 @@ class HexMapView(pygame.sprite.LayeredUpdates):
                         dirty_append(rect)
                 else:
                     dirty_append(rect)
-            spritedict[sprite] = rect
 
             # sprite_layer = sprite._layer
             # for up in self.layer_quadtree.hit(rect):
-            #     if sprite_layer <= up.layer + 1:
+            # if sprite_layer <= up.layer + 1:
             #         if rect.bottom < up.bottom - overlap_limit:
             #             overlap = rect.clip(up.rect)
             #             if overlap:

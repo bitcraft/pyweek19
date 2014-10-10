@@ -202,7 +202,14 @@ class HexMapModel(object):
         """
         return []
         retval = list()
+<<<<<<< HEAD
+        print(coords)
+        coords = cube_to_axial(
+            [int(round(i, 0)) for i in axial_to_cube(coords)])
+        print(coords)
+=======
         coords = hex_round(coords)
+>>>>>>> master
         for n in self.surrounding(coords):
             try:
                 cell = self._data[coords]

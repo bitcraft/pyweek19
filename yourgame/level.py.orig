@@ -95,11 +95,28 @@ class LevelScene(Scene):
             t = Task(f, i*500, 1, args)
             self.timers.add(t)
 
+<<<<<<< HEAD
+        #sprite = entity.GameEntity('alienBlue.png')
+        #sprite.position.x = 7
+        # sprite.position.y = 2
+        # self.view.add(sprite)
         sprite = entity.Enemy('alienBlue.png')
         sprite.home = (9, 9)
         self.view.add(sprite)
         self.internal_event_group.add(sprite)
+        sprite = entity.GameEntity('alienBlue.png')
+        sprite.position.x = 2
+        sprite.position.y = 2
+        self.view.add(sprite)
+        self.internal_event_group.add(sprite)
 
+        self.sprite = sprite
+        self.velocity_updates.add(sprite)
+=======
+        # sprite = entity.GameEntity('alienBlue.png')
+        # sprite.position.x = 9
+        # sprite.position.y = 9
+        # self.view.add(sprite)
         hero = Hero('alienBlue.png')
         hero.position.x = 1
         hero.position.y = 1
@@ -108,6 +125,7 @@ class LevelScene(Scene):
         self.internal_event_group.add(hero)
         self.velocity_updates.add(hero)
         self.hero = hero
+>>>>>>> master
 
         # "switch"
         button = Button('tileRock_tile.png', 'testDoor')
