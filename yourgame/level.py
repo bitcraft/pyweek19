@@ -87,6 +87,7 @@ class LevelScene(Scene):
         self.view.add(button, layer=0)
         self.internal_event_group.add(button)
         self.velocity_updates.add(button)
+        return button
 
     def add_door(self, door_key, door_sprite_file_name, position):
         coords = hex_model.evenr_to_axial(position)
@@ -95,6 +96,7 @@ class LevelScene(Scene):
         # it must be added to the view group so it can trigger map refreshes
         self.view.add(door)
         self.internal_event_group.add(door)
+        return door
 
     def new_powerup(self):
         w = self.view.data.width - 1
