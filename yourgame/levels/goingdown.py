@@ -16,3 +16,11 @@ def setup_level(level_scene):
     Initialize your entities
     """
     pass
+
+
+def handle_internal_events(level_scene):
+    """
+    Handle non-entity specific events here
+    (or entity specific events if that means getting the game done on time)
+    """
+    pass
