@@ -14,7 +14,7 @@ from yourgame.entity import *
 from yourgame.modes.editor import EditMode
 from yourgame.hero import Hero
 from yourgame.enemies import *
-from levels import loader
+from yourgame.levels import loader
 
 __all__ = ['LevelScene']
 
