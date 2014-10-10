@@ -7,7 +7,7 @@ from pygame import QUIT
 from pygame.display import flip, update, set_caption
 from pygame.draw import rect as draw_rect
 
-from yourgame import config
+from zort import config
 
 
 class Game(object):

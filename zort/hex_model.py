@@ -5,7 +5,7 @@ import random
 import json
 import codecs
 import time
-from yourgame.environ import util
+from zort.environ import util
 
 
 # even-r : 'pointy top'
@@ -15,7 +15,15 @@ __all__ = ['HexMapModel',
            'evenr_to_axial',
            'pixel_to_axial',
            'sprites_to_axial',
+           'axial_to_sprites',
+           'sprites_to_hex',
            'collide_hex']
+
+
+ratio_13 = 1./3.
+ratio_23 = 2./3.
+ratio_32 = 3./2
+sqrt_3 = sqrt(3)
 
 
 # round axial coordinates
@@ -36,14 +44,14 @@ def hex_round(coords):
 
 
 def axial_to_pixel(coords, size):
-    return size * sqrt(3) * (coords[0] - 0.5 * (coords[1] & 1)), \
+    return size * sqrt_3 * (coords[0] - 0.5 * (coords[1] & 1)), \
            size * 3/2 * coords[1]
 
 
 def pixel_to_axial(coords, size):
     x, y = [float(i) for i in coords[:2]]
     size = float(size)
-    return (1. / 3. * sqrt(3) * x - 1. / 3. * y) / size, (2. / 3.) * y / size
+    return (ratio_13 * sqrt_3 * x - ratio_13 * y) / size, ratio_32 * y / size
 
 
 def axial_to_cube(coords):
@@ -83,48 +91,42 @@ def axial_to_evenr(coords):
 def oddr_to_axial(coords):
     # odd-r => cube
     q, r = coords
-    x = q - (r - (r & 1)) / 2
-    z = r
-    # y = -z-x
-
-    # cube => axial
-    q = x
-    r = z
-
-    return q, r
+    qq = q - (r - (r & 1)) / 2
+    rr = r
+    return qq, rr
 
 
 def evenr_to_axial(coords):
     # even-r => cube
     q, r = coords
-    x = q - (r + (r & 1)) / 2
-    z = r
-    # y = -x-z
-
-    # cube => axial
-    q = x
-    r = z
-
-    return q, r
+    qq = q - (r + (r & 1)) / 2
+    return qq, r
 
 
 # special purpose function for sprites only
 def sprites_to_axial(coords):
     x, y = coords[:2]
-    x -= 0
-    coords = pixel_to_axial((x, y), 1.)
-    return coords
+    #size = 1.
+    #return (ratio_13 * sqrt_3 * x - ratio_13 * y) / size, ratio_23 * y / size
+    return (ratio_13 * sqrt_3 * x - ratio_13 * y), ratio_23 * y
 
 
+# special purpose function for sprites only
+def axial_to_sprites(coords):
+    q, r = coords[:2]
+    #size = 1.
+    #return size * sqrt_3 * (q + r/2.), size * ratio_32 * r
+    return sqrt_3 * (q + r/2.), ratio_32 * r
+
+
+# special purpose function for sprites only
 def sprites_to_hex(coords):
     return hex_round(sprites_to_axial(coords))
 
 
-ratio = 3./2
-sqrt_3 = sqrt(3)
 def cube_to_pixel(coords, radius):
     cx, cy, cz = coords
-    y = ratio * radius * cz
+    y = ratio_32 * radius * cz
     #b = 2/3 * y / s
     #x = sqrt_3 * radius * (cz / 2. + cx)
     x = - sqrt_3 * radius * (cz / 2. + cy)
@@ -191,7 +193,7 @@ class HexMapModel(object):
 
     def surrounding(self, coord):
         return util.surrounding_clip(coord,
-                                     (0, 0), (self.width-1, self.height-1))
+                                    (0, 0), (self.width-1, self.height-1))
 
     def collidecircle(self, coords, radius):
         """test if circle overlaps level geometry above layer 0 only
@@ -200,13 +202,16 @@ class HexMapModel(object):
         :param radius: axial coords
         :return: iterator of coords
         """
-        return []
+        #return []
         retval = list()
         coords = hex_round(coords)
-        for n in self.surrounding(coords):
+        neighbors = list(self.surrounding(coords))
+        print coords, neighbors
+        for n in neighbors:
             try:
                 cell = self._data[coords]
             except KeyError:
+                print "error?", coords
                 continue
 
             if cell.height <= 0:

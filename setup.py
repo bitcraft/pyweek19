@@ -10,7 +10,7 @@ import os
 # the goods are placed in the dist dir for you to .zip up or whatever...
 
 
-APP_NAME = 'yourgameshortname'
+APP_NAME = 'zort'
 DESCRIPTION = open('README.txt').read()
 CHANGES = open('CHANGES.txt').read()
 TODO = open('TODO.txt').read()
@@ -47,16 +47,16 @@ METADATA = {
     'py2exe.target':'',
     #'py2exe.icon':'icon.ico', #64x64
     'py2exe.binary':APP_NAME, #leave off the .exe, it will be added
-    
+
     'py2app.target':APP_NAME,
     'py2app.icon':'icon.icns', #128x128
-    
+
     #'cx_freeze.cmd':'~/src/cx_Freeze-3.0.3/FreezePython',
     'cx_freeze.cmd':'cxfreeze',
     'cx_freeze.target':'%s_linux' % APP_NAME,
     'cx_freeze.binary':APP_NAME,
     }
-    
+
 files_to_remove = ['tk84.dll',
                     '_ssl.pyd',
                     'tcl84.dll',
@@ -75,11 +75,11 @@ cmdclass = {}
 PACKAGEDATA = {
     'cmdclass':    cmdclass,
 
-    'package_dir': {'yourgameshortname': 'yourgameshortname',
+    'package_dir': {'zort': 'zort',
                    },
-    'packages': ['yourgameshortname',
+    'packages': ['zort',
                 ],
-    'scripts': ['scripts/yourgameshortname'],
+    'scripts': ['scripts/zort'],
 }
 
 PACKAGEDATA.update(METADATA)
@@ -118,7 +118,7 @@ def add_files(dest,generator):
             dest.append(filename)
 
 # define what is our data
-_DATA_DIR = os.path.join('yourgameshortname', 'data')
+_DATA_DIR = os.path.join('zort', 'data')
 data = []
 add_files(data,os.walk(_DATA_DIR))
 
@@ -127,7 +127,7 @@ add_files(data,os.walk(_DATA_DIR))
 
 #data_dirs = [os.path.join(f2.replace(_DATA_DIR, 'data'), '*') for f2 in data]
 data_dirs = [os.path.join(f2.replace(_DATA_DIR, 'data')) for f2 in data]
-PACKAGEDATA['package_data'] = {'yourgameshortname': data_dirs}
+PACKAGEDATA['package_data'] = {'zort': data_dirs}
 
 
 
@@ -137,7 +137,7 @@ data.extend(glob.glob('*.txt'))
 #data.append('MANIFEST.in')
 # define what is our source
 src = []
-add_files(src,os.walk('yourgameshortname'))
+add_files(src,os.walk('zort'))
 src.extend(glob.glob('*.py'))
 
 
@@ -149,18 +149,18 @@ if cmd not in "py2exe py2app cx_freeze".split():
     for l in data: f.write("include "+l+"\n")
     for l in src: f.write("include "+l+"\n")
     f.close()
-    
+
     setup(**PACKAGEDATA)
 
 # build the py2exe target
 if cmd in ('py2exe',):
     dist_dir = os.path.join('dist',METADATA['py2exe.target'])
     data_dir = dist_dir
-    
+
     src = 'run_game.py'
     dest = METADATA['py2exe.binary']+'.py'
     shutil.copy(src,dest)
-    
+
     setup(
         options={'py2exe':{
             'dist_dir':dist_dir,
@@ -188,7 +188,7 @@ if cmd == 'py2app':
 
     APP = [dest]
     DATA_FILES = []
-    OPTIONS = {'argv_emulation': True, 
+    OPTIONS = {'argv_emulation': True,
                #'iconfile':METADATA['py2app.icon']
               }
 
@@ -212,9 +212,9 @@ if cmd == 'cx_freeze':
     os.system(sys_cmd)
 
     import shutil
-    if os.path.exists(os.path.join(data_dir, "tcl")): 
+    if os.path.exists(os.path.join(data_dir, "tcl")):
         shutil.rmtree( os.path.join(data_dir, "tcl") )
-    if os.path.exists(os.path.join(data_dir, "tk")): 
+    if os.path.exists(os.path.join(data_dir, "tk")):
         shutil.rmtree( os.path.join(data_dir, "tk") )
 
 
@@ -231,7 +231,7 @@ def make_dirs(dname_):
         if not os.path.isdir(dname):
             os.mkdir(dname)
 
-# copy data into the binaries 
+# copy data into the binaries
 if cmd in ('py2exe','cx_freeze','py2app'):
     dest = data_dir
     for fname in data:
@@ -243,7 +243,7 @@ if cmd in ('py2exe','cx_freeze','py2app'):
 
 # make a tgz files.
 if cmd == 'cx_freeze':
-    sys_cmd = "cd dist; tar -vczf %s.tgz %s/" % (app_dist_dir,app_dist_dir)  
+    sys_cmd = "cd dist; tar -vczf %s.tgz %s/" % (app_dist_dir,app_dist_dir)
     os.system(sys_cmd)
 
 

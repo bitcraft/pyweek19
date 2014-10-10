@@ -1,4 +1,4 @@
-from yourgame.scenes import Scene
+from zort.scenes import Scene
 
 
 class TitleScene(Scene):

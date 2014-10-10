@@ -3,17 +3,17 @@ import random
 
 import pygame
 
-from yourgame import hex_model
-from yourgame import hex_view
-from yourgame import config
-from yourgame import resources
-from yourgame.scenes import Scene
-from yourgame.environ import maze
-from yourgame.euclid import Point2
-from yourgame.entity import *
-from yourgame.modes.editor import EditMode
-from yourgame.hero import Hero
-from yourgame.enemies import *
+from zort import hex_model
+from zort import hex_view
+from zort import config
+from zort import resources
+from zort.scenes import Scene
+from zort.environ import maze
+from zort.euclid import Point2
+from zort.entity import *
+from zort.modes.editor import EditMode
+from zort.hero import Hero
+from zort.enemies import *
 
 __all__ = ['LevelScene']
 

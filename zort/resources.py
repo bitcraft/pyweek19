@@ -4,9 +4,9 @@ from os.path import isfile
 import pygame
 import logging
 import glob
-logger = logging.getLogger('yourgame.resources')
+logger = logging.getLogger('zort.resources')
 
-import yourgame.gui
+import zort.gui
 
 __all__ = ['load', 'sounds', 'images', 'music', 'maps', 'tiles', 'play_music',
            'border']
@@ -51,7 +51,7 @@ def load():
     pygame.font.init()
 
     logger.info("loading")
-    from yourgame import config
+    from zort import config
 
     global resource_path
     global sounds, images, music, fonts, maps, tiles
@@ -115,7 +115,7 @@ def load():
 
 
 def play_music(name):
-    from yourgame import config
+    from zort import config
 
     try:
         track = music[name]

@@ -1,9 +1,10 @@
-from yourgame import resources
-from yourgame import gui
-from yourgame.modes.mode import LevelSceneMode
-from yourgame import config
 import pygame
-from pygame.locals import *
+
+from zort import resources
+from zort import gui
+from zort.modes.mode import LevelSceneMode
+from zort import config
+
 
 __all__ = ['EditMode']
 
@@ -120,37 +121,4 @@ class EditMode(LevelSceneMode):
 
     def update(self, delta, events):
         super(EditMode, self).update(delta, events)
-        if self.hero:
-            moved = False
-            pressed = pygame.key.get_pressed()
-            movement_accel = config.getfloat('world', 'player_move_accel')
-
-            if pressed[K_DOWN]:
-                self.hero.acceleration.y = movement_accel
-                moved = True
-            elif pressed[K_UP]:
-                self.hero.acceleration.y = -movement_accel
-                moved = True
-            else:
-                self.hero.acceleration.y = 0
-
-            if pressed[K_LEFT]:
-                self.hero.acceleration.x = -movement_accel
-                self.hero.flipped = True
-                moved = True
-            elif pressed[K_RIGHT]:
-                self.hero.acceleration.x = movement_accel
-                self.hero.flipped = False
-                moved = True
-            else:
-                self.hero.acceleration.x = 0
-
-            for e in events:
-                if e.type == KEYDOWN:
-                    if e.key == K_SPACE:
-                        self.hero.pickup()
-
-            if moved:
-                self.hero.wake()
-                if self.state == 2:
-                    self.change_state(3)
+        pass

@@ -1,9 +1,9 @@
 from fysom import Fysom
-from yourgame.euclid import Vector2
+from zort.euclid import Vector2
 
-from yourgame.entity import GameEntity
-from yourgame.hex_model import sprites_to_hex
-from yourgame import resources
+from zort.entity import GameEntity
+from zort.hex_model import sprites_to_hex
+from zort import resources
 
 
 __all__ = ['Enemy',

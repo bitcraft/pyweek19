@@ -1,20 +1,19 @@
-import itertools
 import random
 
 import pygame
+from pygame.locals import *
 
-from yourgame import hex_model
-from yourgame import hex_view
-from yourgame import config
-from yourgame import resources
-from yourgame.scenes import Scene
-from yourgame.environ import maze
-from yourgame.euclid import Point2
-from yourgame.entity import *
-from yourgame.modes.editor import EditMode
-from yourgame.hero import Hero
-from yourgame.enemies import *
-from yourgame.levels import loader
+from zort import hex_view
+from zort import config
+from zort import resources
+from zort.hex_model import *
+from zort.entity import *
+from zort.environ import maze
+from zort.scenes import Scene
+from zort.euclid import Point2
+from zort.hero import Hero
+from zort.levels import loader
+from zort.modes.editor import EditMode
 
 __all__ = ['LevelScene']
 
@@ -44,15 +43,15 @@ class Task(pygame.sprite.Sprite):
 
 
 class LevelScene(Scene):
-
     def __init__(self, game):
         super(LevelScene, self).__init__("level", game)
 
+        self.movement_accel = config.getfloat('world', 'player_move_accel')
         self.damage = dict()
         self.needs_refresh = True
         self.lost_damage = list()
         self.current_level_module = None
-        self.model = hex_model.HexMapModel()
+        self.model = maze.new_maze(14, 10)
         self.view = hex_view.HexMapView(self, self.model,
                                         config.getint('display', 'hex_radius'))
 
@@ -61,59 +60,49 @@ class LevelScene(Scene):
         self.timers = pygame.sprite.Group()
 
         # start the silly timer to drop powerups
-        timer = Task(self.new_powerup, 5000, -1)
-        self.timers.add(timer)
+        #timer = Task(self.new_powerup, 5000, -1)
+        #self.timers.add(timer)
+
+        self.hero = self.add_entity(Hero, 'alienBlue.png', (0, 9))
+        self.add_entity(Hero, 'alienBlue.png', (0, 8))
 
         # this must come last
         self.mode = EditMode(self)
 
     def add_entity(self, enemy_class, enemy_sprite_file_name, position):
+        # send position in even r coordinates
+        sx, sy = axial_to_sprites(evenr_to_axial(position))
         sprite = enemy_class(enemy_sprite_file_name)
-        sprite.position.x = position[0]
-        sprite.position.y = position[1]
-        sprite.position.z = 900
+        sprite.position += (sx, sy, 900)
+        sprite.update_image()
         self.view.add(sprite)
         self.internal_event_group.add(sprite)
         self.velocity_updates.add(sprite)
         return sprite
 
     def add_button(self, door_key, door_sprite_file_name,
-                   position, anchor=Point2(33, 30)):
+                   position, anchor=None):
+        # send position in even r coordinates
+        if anchor is None:
+            anchor = Point2(30, 60)
+        sx, sy = axial_to_sprites(evenr_to_axial(position))
         button = Button(door_sprite_file_name, door_key)
-        button.position.x = position[0]
-        button.position.y = position[1]
-        button.position.z = 900
+        button.position += (sx, sy, 900)
         button.anchor = anchor
+        button.update_image()
         self.view.add(button, layer=0)
         self.internal_event_group.add(button)
         self.velocity_updates.add(button)
         return button
 
     def add_door(self, door_key, door_sprite_file_name, position):
-        coords = hex_model.evenr_to_axial(position)
+        # send position in even r coordinates
+        coords = evenr_to_axial(position)
         cell = self.view.data.get_cell(coords)
         door = Door(door_sprite_file_name, door_key, cell)
-        # it must be added to the view group so it can trigger map refreshes
         self.view.add(door)
         self.internal_event_group.add(door)
         return door
-
-    def new_powerup(self):
-        w = self.view.data.width - 1
-        h = self.view.data.height - 1
-
-        # generic powerup
-        sprite = CallbackEntity('smallRockSnow.png', self.next_level)
-        sprite.position.x = random.randint(0, w)
-        sprite.position.y = random.randint(0, h)
-        sprite.position.z = 900
-        sprite.anchor = Point2(33, 30)
-        self.view.add(sprite, layer=0)
-        self.internal_event_group.add(sprite)
-        self.velocity_updates.add(sprite)
-
-    def next_level(self):
-        self.raise_event(self, "LoadLevel", name='__NextLevel')
 
     def setup(self):
         print("Setting up level scene")
@@ -162,6 +151,37 @@ class LevelScene(Scene):
         self.view.clear(surface)
 
     def update(self, delta, events):
+        moved = False
+        pressed = pygame.key.get_pressed()
+
+        if pressed[K_DOWN]:
+            self.hero.acceleration.y = self.movement_accel
+            moved = True
+        elif pressed[K_UP]:
+            self.hero.acceleration.y = -self.movement_accel
+            moved = True
+        else:
+            self.hero.acceleration.y = 0
+
+        if pressed[K_LEFT]:
+            self.hero.acceleration.x = -self.movement_accel
+            self.hero.flipped = True
+            moved = True
+        elif pressed[K_RIGHT]:
+            self.hero.acceleration.x = self.movement_accel
+            self.hero.flipped = False
+            moved = True
+        else:
+            self.hero.acceleration.x = 0
+
+        for e in events:
+            if e.type == KEYDOWN:
+                if e.key == K_SPACE:
+                    self.hero.pickup()
+
+        if moved:
+            self.hero.wake()
+
         self.timers.update(delta)
 
         self.internal_event_group.update(delta)

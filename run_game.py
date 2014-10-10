@@ -1,5 +1,5 @@
-from yourgame.bootstrap import bootstrap_game
-from yourgame import config
+from zort.bootstrap import bootstrap_game
+from zort import config
 
 
 if __name__ == "__main__":

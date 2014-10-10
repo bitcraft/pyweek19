@@ -26,6 +26,12 @@ For now, wall collision check is disabled.  -abroham lincoln
 
 ---
 
+strings to change
+yourgameauthor
+youregamedescription
+yourgameurl
+
+
 
 Phase 1:
  1. wall collisions
