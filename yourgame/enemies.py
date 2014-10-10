@@ -45,7 +45,6 @@ class Enemy(GameEntity):
             fsm.ramble()
         if fsm.isstate('going_home'):
             if self.position == self.home:
-                print("Now rambling")
                 fsm.ramble()
         if fsm.isstate('rambling'):
             blacklist = {sprites_to_hex(sprite.position)
