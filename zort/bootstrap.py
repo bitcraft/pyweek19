@@ -3,15 +3,15 @@ import os
 import pygame
 from pygame.display import set_mode
 
-from yourgame import config
-from yourgame import gui
-from yourgame.scenes import Game
-from yourgame.title import TitleScene
-from yourgame.level import LevelScene
-from yourgame import resources
+from zort import config
+from zort import gui
+from zort.scenes import Game
+from zort.title import TitleScene
+from zort.level import LevelScene
+from zort import resources
 
-logger = logging.getLogger('yourgame.bootstrap')
-filename = os.path.join(os.path.dirname(__file__), '..', 'data', 'yourgame.ini')
+logger = logging.getLogger('zort.bootstrap')
+filename = os.path.join(os.path.dirname(__file__), '..', 'data', 'zort.ini')
 config.read(filename)
 
 

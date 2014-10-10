@@ -10,7 +10,7 @@ python makemap.py file_path [--num-adjacent=1] [--width=10] [--height=10]
 
 from argparse import ArgumentParser
 
-from yourgame.environ.maze import new_maze
+from zort.environ.maze import new_maze
 
 
 def main(args):

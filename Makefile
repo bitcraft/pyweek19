@@ -1,4 +1,4 @@
-#fake Makefile for yourgameshortname, to support the common
+#fake Makefile for zort, to support the common
 # ./configure;make;make install
 
 PYTHON = python
@@ -29,15 +29,15 @@ testall:
 
 clean:
 	rm -rf build dist MANIFEST .coverage
-	rm -f yourgameshortname/*~
-	rm -rf bin develop-eggs eggs parts .installed.cfg yourgameshortname.egg-info
+	rm -f zort/*~
+	rm -rf bin develop-eggs eggs parts .installed.cfg zort.egg-info
 	find . -name *.pyc -exec rm {} \;
 	find . -name *.swp -exec rm {} \;
 	$(PYTHON) setup.py clean
 
 # push changes
 push:
-	#bzr push lp:yourgameshortname
+	#bzr push lp:zort
 	svn commit
 
 # commit changes
@@ -49,7 +49,7 @@ commit:
 upload:
 	make clean
 	#if you have your gpg key set up... sign your release.
-	#$(PYTHON) setup.py sdist upload --sign --identity="Your Name <youremail@example.com>" 
+	#$(PYTHON) setup.py sdist upload --sign --identity="Your Name <youremail@example.com>"
 	$(PYTHON) setup.py sdist upload
 
 sdist:

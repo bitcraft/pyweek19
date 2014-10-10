@@ -5,7 +5,7 @@ import random
 import json
 import codecs
 import time
-from yourgame.environ import util
+from zort.environ import util
 
 
 # even-r : 'pointy top'

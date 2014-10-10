@@ -2,8 +2,8 @@ from heapq import heappush, heappop
 import itertools
 import random
 
-from yourgame.hex_model import HexMapModel, Cell, evenr_to_axial
-from yourgame.environ import util
+from zort.hex_model import HexMapModel, Cell, evenr_to_axial
+from zort.environ import util
 
 
 def build_maze_from_hex(model, lower_limit=None, upper_limit=None,

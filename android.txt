@@ -1,4 +1,4 @@
-title=yourgameshortname
+title=zort
 author=yourgameauthor
 api=1
 orientation=landscape

@@ -5,10 +5,10 @@ import pygame
 import pygame.gfxdraw
 from pygame.transform import smoothscale
 
-from yourgame.euclid import Vector2, Vector3
-from yourgame import resources
-from yourgame.hex_model import *
-from yourgame import quadtree
+from zort.euclid import Vector2, Vector3
+from zort import resources
+from zort.hex_model import *
+from zort import quadtree
 
 
 __all__ = ['HexMapView']

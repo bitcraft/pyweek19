@@ -10,10 +10,10 @@ an obvious path, one door and one switch to go through.
 # import your game entities here
 # implement any level specific enemies here
 
-from yourgame.entity import *
-from yourgame.hero import Hero
-from yourgame.level import Task
-from yourgame import hex_model
+from zort.entity import *
+from zort.hero import Hero
+from zort.level import Task
+from zort import hex_model
 
 
 def setup_level(level_scene):

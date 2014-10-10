@@ -1,5 +1,5 @@
-from yourgame.entity import GameEntity
-from yourgame import resources
+from zort.entity import GameEntity
+from zort import resources
 
 
 class Hero(GameEntity):

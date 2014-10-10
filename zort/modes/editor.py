@@ -1,9 +1,9 @@
 import pygame
 
-from yourgame import resources
-from yourgame import gui
-from yourgame.modes.mode import LevelSceneMode
-from yourgame import config
+from zort import resources
+from zort import gui
+from zort.modes.mode import LevelSceneMode
+from zort import config
 
 
 __all__ = ['EditMode']
