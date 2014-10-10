@@ -158,7 +158,7 @@ class LevelScene(Scene):
         self.velocity_updates.add(sprite)
 
     def next_level(self):
-        pass
+        self.raise_event(self, "LoadLevel", name='__NextLevel')
 
     def setup(self):
         print("Setting up level scene")
@@ -209,7 +209,7 @@ class LevelScene(Scene):
     def update(self, delta, events):
         self.timers.update(delta)
 
-        self.internal_event_group.update(self)
+        self.internal_event_group.update(delta)
         if self.current_level_module:
             self.current_level_module.handle_internal_events(self)
         for sprite in self.internal_event_group:
@@ -217,7 +217,7 @@ class LevelScene(Scene):
                 sprite.handle_internal_events(self)
 
         self.mode.update(delta, events)
-        self.velocity_updates.update(self, delta)
+        self.velocity_updates.update(delta, self)
 
     def resume(self):
         print("Resuming level scene")

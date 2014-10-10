@@ -16,7 +16,6 @@ class Enemy(GameEntity):
         super(Enemy, self).__init__(filename)
         self._home = (None, None)
         self.path = ()
-        self.radius = 2
         self.fsm = Fysom({'initial': 'home',
                           'events': [
                               {'name': 'go_home',
@@ -40,6 +39,9 @@ class Enemy(GameEntity):
         self.position.x, self.position.y = coord
 
     def handle_internal_events(self, scene):
+        pass
+
+    def update_ai(self, scene, event):
         fsm = self.fsm
         if fsm.isstate('home'):
             fsm.ramble()
@@ -61,7 +63,7 @@ class Stalker(GameEntity):
     """
     def __init__(self, filename):
         super(Stalker, self).__init__(filename)
-        self.move_sound = resources.sounds['scifidrone.wav']
+        self.move_sound = resources.sounds['lose7.ogg']
         self._playing_move_sound = False
 
 
@@ -70,7 +72,7 @@ class Rambler(GameEntity):
     """
     def __init__(self, filename):
         super(Rambler, self).__init__(filename)
-        self.move_sound = resources.sounds['scifidrone.wav']
+        self.move_sound = resources.sounds['lose7.ogg']
         self._playing_move_sound = False
 
 
@@ -79,5 +81,5 @@ class Tosser(GameEntity):
     """
     def __init__(self, filename):
         super(Tosser, self).__init__(filename)
-        self.move_sound = resources.sounds['scifidrone.wav']
+        self.move_sound = resources.sounds['lose7.ogg']
         self._playing_move_sound = False

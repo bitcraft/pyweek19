@@ -171,7 +171,7 @@ class HexMapView(pygame.sprite.LayeredUpdates):
             self._old_hovered = self._hovered
             self._hovered = cell
 
-    def point_from_surface(self, point):
+    def cell_from_surface(self, point):
         if self.rect is None:
             return None
 
@@ -182,7 +182,7 @@ class HexMapView(pygame.sprite.LayeredUpdates):
 
         point = Vector3(x, y, 0)
         x, y, z = Vector3(*pixel_to_axial(point, self.hex_radius))
-        return x, y
+        return self.data.get_cell((x, y))
 
     def clear(self, surface, bgk=None):
         if self.map_buffer is None:
@@ -198,7 +198,6 @@ class HexMapView(pygame.sprite.LayeredUpdates):
                         blit(_buffer, value, value)
                 except AttributeError:
                     pass
-
 
     def remove_internal(self, sprite):
         super(HexMapView, self).remove_internal(sprite)
@@ -324,7 +323,7 @@ class HexMapView(pygame.sprite.LayeredUpdates):
             if not clipped_rect:
                 continue
 
-            assert(rect)
+            assert (rect)
             old_rect = spritedict[sprite]
             spritedict[sprite] = rect
 
@@ -333,6 +332,7 @@ class HexMapView(pygame.sprite.LayeredUpdates):
                     continue
 
                 if rect.colliderect(_rect):
+                    sprite.dirty = 1
                     _sprite.dirty = 1
 
             if not refreshed:
@@ -345,14 +345,14 @@ class HexMapView(pygame.sprite.LayeredUpdates):
                 else:
                     dirty_append(rect)
 
-            # sprite_layer = sprite._layer
-            # for up in self.layer_quadtree.hit(rect):
-            # if sprite_layer <= up.layer + 1:
-            #         if rect.bottom < up.bottom - overlap_limit:
-            #             overlap = rect.clip(up.rect)
-            #             if overlap:
-            #                 surface.set_clip(overlap)
-            #                 surface_blit(up.surface, up.rect)
-            #                 surface.set_clip(None)
+                    # sprite_layer = sprite._layer
+                    # for up in self.layer_quadtree.hit(rect):
+                    # if sprite_layer <= up.layer + 1:
+                    # if rect.bottom < up.bottom - overlap_limit:
+                    # overlap = rect.clip(up.rect)
+                    #             if overlap:
+                    #                 surface.set_clip(overlap)
+                    #                 surface_blit(up.surface, up.rect)
+                    #                 surface.set_clip(None)
 
         return dirty

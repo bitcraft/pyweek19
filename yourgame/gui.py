@@ -1,7 +1,9 @@
 from math import ceil
 from itertools import product
+
 from pygame import Surface, Rect, RLEACCEL
 import pygame
+
 
 __all__ = ['GraphicBox',
            'draw_text',
@@ -14,6 +16,7 @@ class GraphicBox(object):
 
     load it, then draw it wherever needed
     """
+
     def __init__(self, filename, hollow=False):
         self.hollow = hollow
 
@@ -35,8 +38,9 @@ class GraphicBox(object):
         ox, oy, w, h = Rect(rect)
 
         if not self.hollow:
-            p = product(range(int(self.tw + ox), int(w - self.tw + ox), int(self.tw)),
-                        range(int(self.th + oy), int(h - self.th + oy), int(self.th)))
+            p = product(
+                range(int(self.tw + ox), int(w - self.tw + ox), int(self.tw)),
+                range(int(self.th + oy), int(h - self.th + oy), int(self.th)))
 
             [surface.blit(self.tiles['c'], (x, y)) for x, y in p]
 
@@ -47,7 +51,6 @@ class GraphicBox(object):
         for y in range(self.th + oy, h - self.th + oy, self.th):
             surface.blit(self.tiles['w'], (w - self.tw + ox, y))
             surface.blit(self.tiles['e'], (ox, y))
-
 
         surface.blit(self.tiles['nw'], (ox, oy))
         surface.blit(self.tiles['ne'], (w - self.tw + ox, oy))
@@ -115,7 +118,7 @@ def draw_text(surface, text, color, rect, font=None, aa=False, bkg=None):
 
 
 def render_outline_text(text, color, border, fontFilename, size,
-                      colorkey=(128, 128, 0)):
+                        colorkey=(128, 128, 0)):
     font = pygame.font.Font(fontFilename, size + 4)
     image = pygame.Surface(font.size(text), pygame.SRCALPHA)
     inner = pygame.font.Font(fontFilename, size - 4)
@@ -129,85 +132,4 @@ def render_outline_text(text, color, border, fontFilename, size,
             image.blit(outline, (x + cx, y + cy))
     image.blit(inner.render(text, 1, color), (cx, cy))
     return image
-
-
-class ScrollingTextPanel(object):
-    """
-    Area that can display text and maintains a buffer
-    """
-    def __init__(self, rect, maxlen):
-        self.rect = rect
-        self.maxlen = maxlen
-        self.background = (0, 0, 0)
-        self.text = list()
-
-    def add(self, text):
-        if len(self.text) == maxlen:
-            self.text.pop(0)
-        self.text.append(text)
-
-    def draw(self, surface):
-        for line in self.text:
-            banner = TextBanner(line, size=self.text_size)
-            surface.blit(banner.render(self.background), (x, y))
-            y += banner.font.size(line)[1]
-
-
-class VisualTimer(object):
-    """
-    Display a timer/progress bar
-    """
-    def __init__(self, finish, rect=None, color=(255, 255, 255)):
-        self.time = 0
-        self.finish = float(finish)
-
-        if rect == None:
-            rect = Rect(0, 0, 100, 16)
-
-        self.rect = Rect(rect)
-        self.size = self.rect.width
-        self.color = color
-        self.image = Surface(self.rect.size)
-        self.finished = 0
-
-    def set_alarm(self, time):
-        self.finish = float(time)
-        self.reset()
-
-    def reset(self):
-        self.time = 0
-        self.finished = 0
-
-    def update(self, time):
-        if self.finished: return
-
-        time += self.time
-
-        if time <= self.finish:
-            self.time = time
-        else:
-            self.finished = 1
-
-    def draw(self, surface):
-        if not self.finished:
-            self.render()
-
-        surface.blit(self.image, self.rect.topleft)
-
-    def render(self):
-        i = ceil(self.size * (self.time / self.finish))
-
-        w, h = self.rect.size
-        self.image.lock()
-
-        self.image.fill((32, 32, 32))
-        self.image.fill(self.color, (0, 0, i, self.rect.height))
-
-        # Make the corners look pretty
-        self.image.fill((0, 0, 0), (0, 0, 1, 1))
-        self.image.fill((0, 0, 0), (w - 1, 0, 1, 1))
-        self.image.fill((0, 0, 0), (w - 1, h - 1, 1, 1))
-        self.image.fill((0, 0, 0), (0, h - 1, 1, 1))
-
-        self.image.unlock()
 
