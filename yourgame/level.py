@@ -52,34 +52,7 @@ class LevelScene(Scene):
         self.needs_refresh = True
         self.lost_damage = list()
         self.current_level_module = None
-
-        # build a basic flat map
         self.model = hex_model.HexMapModel()
-        w = config.getint('world', 'width')
-        h = config.getint('world', 'height')
-        for q, r in itertools.product(range(w), range(h)):
-            coords = hex_model.evenr_to_axial((q, r))
-            cell = hex_model.Cell()
-            cell.filename = 'tileGrass.png'
-            cell.kind = 'grass'
-            self.model.add_cell(coords, cell)
-
-        # Introducing: The TODO Lightsaber!
-
-        """ ##############################################
-        TODO: Move the setup code below into goingdown.py##
-        """ ##############################################
-
-        # build a maze
-        maze.build_maze_from_hex(self.model,
-                                 lower_limit=(1, 1),
-                                 upper_limit=(self.model.width - 2,
-                                              self.model.height - 2),
-                                 height=1.0,
-                                 raised_tile='tileRock_full.png',
-                                 lowered_tile='tileGrass.png',
-                                 num_adjacent=1)
-
         self.view = hex_view.HexMapView(self, self.model,
                                         config.getint('display', 'hex_radius'))
 
@@ -87,61 +60,41 @@ class LevelScene(Scene):
         self.internal_event_group = pygame.sprite.Group()
         self.timers = pygame.sprite.Group()
 
-        def f(klass, filename):
-            sprite = klass(filename)
-            sprite.position.x = random.randint(0, w)
-            sprite.position.y = random.randint(0, h)
-            sprite.position.z = 900
-            self.view.add(sprite)
-            self.internal_event_group.add(sprite)
-            self.velocity_updates.add(sprite)
-
-        enemies = ((Stalker, 'alienGreen.png'),
-                   (Rambler, 'alienYellow.png'),
-                   (Tosser, 'alienPink.png'))
-
-        for i, args in enumerate(enemies*2):
-            t = Task(f, i*500, 1, args)
-            self.timers.add(t)
-
-        sprite = Enemy('alienBlue.png')
-        sprite.home = (9, 9)
-        self.view.add(sprite)
-        self.internal_event_group.add(sprite)
-
-        hero = Hero('alienBlue.png')
-        hero.position.x = 1
-        hero.position.y = 1
-        hero._layer = 99
-        self.view.add(hero)
-        self.internal_event_group.add(hero)
-        self.velocity_updates.add(hero)
-        self.hero = hero
-
-        # "switch"
-        button = Button('tileRock_tile.png', 'testDoor')
-        button.position.x = 2
-        button.position.y = 4
-        button.position.z = 900
-        button.anchor = Point2(33, 30)
-        self.view.add(button, layer=0)
-        self.internal_event_group.add(button)
-        self.velocity_updates.add(button)
-
-        # "door"
-        coords = hex_model.evenr_to_axial((0, 0))
-        cell = self.view.data.get_cell(coords)
-        door = Door('smallRockStone.png', 'testDoor', cell)
-        # it must be added to the view group so it can trigger map refreshes
-        self.view.add(door)
-        self.internal_event_group.add(door)
-
         # start the silly timer to drop powerups
         timer = Task(self.new_powerup, 5000, -1)
         self.timers.add(timer)
 
         # this must come last
         self.mode = EditMode(self)
+
+    def add_entity(self, enemy_class, enemy_sprite_file_name, position):
+        sprite = enemy_class(enemy_sprite_file_name)
+        sprite.position.x = position[0]
+        sprite.position.y = position[1]
+        sprite.position.z = 900
+        self.view.add(sprite)
+        self.internal_event_group.add(sprite)
+        self.velocity_updates.add(sprite)
+        return sprite
+
+    def add_button(self, door_key, door_sprite_file_name,
+                   position, anchor=Point2(33, 30)):
+        button = Button(door_sprite_file_name, door_key)
+        button.position.x = position[0]
+        button.position.y = position[1]
+        button.position.z = 900
+        button.anchor = anchor
+        self.view.add(button, layer=0)
+        self.internal_event_group.add(button)
+        self.velocity_updates.add(button)
+
+    def add_door(self, door_key, door_sprite_file_name, position):
+        coords = hex_model.evenr_to_axial(position)
+        cell = self.view.data.get_cell(coords)
+        door = Door(door_sprite_file_name, door_key, cell)
+        # it must be added to the view group so it can trigger map refreshes
+        self.view.add(door)
+        self.internal_event_group.add(door)
 
     def new_powerup(self):
         w = self.view.data.width - 1

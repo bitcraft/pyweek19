@@ -10,12 +10,17 @@ an obvious path, one door and one switch to go through.
 # import your game entities here
 # implement any level specific enemies here
 
+from yourgame.entity import Enemy, Hero
+
 
 def setup_level(level_scene):
     """
     Initialize your entities
     """
-    pass
+    level_scene.add_entity(Enemy, "alienGreen.png", (9, 9))
+    level_scene.add_entity(Hero, "alienBlue.png", (1, 1))
+    level_scene.add_button("testDoor", "tileRock_tile.png", (2, 4))
+    level_scene.add_door("testDoor", "smallRockStone.png", (0, 0))
 
 
 def handle_internal_events(level_scene):
