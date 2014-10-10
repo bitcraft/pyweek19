@@ -98,9 +98,9 @@ def load():
 
     for name, filename in config.items('map-files'):
         path = jpath(resource_path, 'maps', filename)
-        #logger.info("loading %s", path)
-        #maps[name] = map
-        #yield path, map
+        logger.info("loading %s", path)
+        maps[name] = path
+        yield path, map
 
     for name, filename in config.items('music-files'):
         path = jpath(resource_path, 'music', filename)

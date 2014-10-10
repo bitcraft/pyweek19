@@ -14,6 +14,7 @@ from yourgame.entity import *
 from yourgame.modes.editor import EditMode
 from yourgame.hero import Hero
 from yourgame.enemies import *
+from levels import loader
 
 __all__ = ['LevelScene']
 
@@ -43,6 +44,7 @@ class Task(pygame.sprite.Sprite):
 
 
 class LevelScene(Scene):
+
     def __init__(self, game):
         super(LevelScene, self).__init__("level", game)
 
@@ -60,6 +62,12 @@ class LevelScene(Scene):
             cell.filename = 'tileGrass.png'
             cell.kind = 'grass'
             self.model.add_cell(coords, cell)
+
+        # Introducing: The TODO Lightsaber!
+
+        """ ##############################################
+        TODO: Move the setup code below into goingdown.py##
+        """ ##############################################
 
         # build a maze
         maze.build_maze_from_hex(self.model,
@@ -210,3 +218,6 @@ class LevelScene(Scene):
     def resume(self):
         print("Resuming level scene")
 
+    def load_level(level_name):
+        # teardown whatever needs to be torn down here
+        loader.load_level(level_name, level_scene)
