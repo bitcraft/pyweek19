@@ -315,14 +315,8 @@ class HexMapModel(object):
         return (abs(q0 - q1) + abs(r0 - r1) +
                 abs(q0 + r0 - q1 - r1)) / 2.0
 
-    def pathfind_evenr(self, current, end, blacklist=set()):
-        current = evenr_to_axial(current)
-        end = evenr_to_axial(end)
-        blacklist = {evenr_to_axial(coord) for coord in blacklist}
-        return self.pathfind(current, end, blacklist)
-
-    def pathfind_ramble(self, current, home, radius, blacklist=set()):
-        neighbors = {home, home}
+    def neighboring_radius(self, center, radius, blacklist=set()):
+        neighbors = {center, center}
         for i in range(radius):
             tmp = set()
             for n in neighbors:
@@ -330,6 +324,18 @@ class HexMapModel(object):
             neighbors.update(tmp)
 
         neighbors.difference_update(blacklist)
+
+        return neighbors
+
+    def pathfind_evenr(self, current, end, blacklist=set()):
+        current = evenr_to_axial(current)
+        end = evenr_to_axial(end)
+        blacklist = {evenr_to_axial(coord) for coord in blacklist}
+        return self.pathfind(current, end, blacklist)
+
+    def pathfind_ramble(self, current, home, radius, blacklist=set()):
+        neighbors = self.neighboring_radius(home, radius, blacklist)
+
         blacklist.update(
             {(coord[0], 1.0*coord[1]) for coord in self._data})
         blacklist.difference_update(neighbors)
