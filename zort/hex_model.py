@@ -133,21 +133,13 @@ def cube_to_pixel(coords, radius):
     return x, y
 
 
-def collide_hex(left, right, left_radius=1.0, right_radius=1.0):
-    """ Fast approximation of collisions between circles in axial space
-    """
-    dx, dy = dist_axial2(left, right)
-    rr = left_radius + right_radius
-    return (dx * dx) + (dy * dy) < rr * rr
-
-
-# slower collision test for testing level geometry
-def collide_hex2(cell0, cell1, left_radius=1.0, right_radius=1.0):
-    x0, y0 = cube_to_pixel(axial_to_cube(cell0), 100.)
-    x1, y1 = cube_to_pixel(axial_to_cube(cell1), 100.)
+# collision test for testing level geometry
+def collide_hex(cell0, cell1, left_radius=1.0, right_radius=1.0):
+    x0, y0 = cube_to_pixel(axial_to_cube(cell0), 1)
+    x1, y1 = cube_to_pixel(axial_to_cube(cell1), 1)
     dx = x1 - x0
     dy = y1 - y0
-    rr = (left_radius * 100.) + (right_radius * 100.)
+    rr = left_radius + right_radius
     return (dx * dx) + (dy * dy) < rr * rr
 
 
@@ -205,6 +197,7 @@ class HexMapModel(object):
         :param radius: axial coords
         :return: list of coords
         """
+        return []
         retval = list()
         round_coords = [int(i) for i in hex_round(coords)]
         neighbors = list(self.surrounding(round_coords))
@@ -214,12 +207,11 @@ class HexMapModel(object):
             if not cell:
                 continue
 
-            if cell.height <= 0:
+            if not cell.raised:
                 continue
 
-            if collide_hex2(coords, neigh, radius, .75):
+            if collide_hex(coords, neigh, radius, .9):
                 retval.append(neigh)
-        #print retval
         return retval
 
     def _make_file_data(self):
