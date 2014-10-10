@@ -14,6 +14,26 @@ __all__ = ['PhysicsGroup',
            'CallbackEntity']
 
 
+def filter_interested(scene, interested):
+    retval = list()
+    for name in interested:
+        retval.extend(scene.state['events'].get(name, list()))
+    return retval
+
+
+def filter_belong(owner, events):
+    retval = list()
+    for event in events:
+        try:
+            members = [event['left'], event['right']]
+            members.remove(owner)
+            other = members[0]
+            retval.append((event, other))
+        except ValueError:
+            continue
+    return retval
+
+
 class PhysicsGroup(pygame.sprite.Group):
     def __init__(self, data):
         super(PhysicsGroup, self).__init__()
@@ -25,9 +45,10 @@ class PhysicsGroup(pygame.sprite.Group):
         self.ground_friction = None
         self.sleeping = set()
         self.wake = set()
+        self.stale = set()
 
     def update(self, delta, scene):
-        stale = set()
+        stale = self.stale
         delta = self.timestep
         gravity_delta = self.gravity * delta
         ground_friction = pow(.9, delta)
@@ -58,6 +79,7 @@ class PhysicsGroup(pygame.sprite.Group):
                 if position.z < 0:
                     position.z = 0.0
                     if abs(velocity.z) > .2:
+                        sprite.bounce_sound.play()
                         sleeping = False
                         acceleration.z = 0.0
                         velocity.z = -velocity.z * .05
@@ -123,12 +145,20 @@ class PhysicsGroup(pygame.sprite.Group):
                 if other is sprite:
                     continue
 
-                if collide_hex2(axial0, sprites_to_axial(other.position),
-                                sprite.radius, other.radius) \
-                        and (sprite, other) not in stale:
-                    stale.add((other, sprite))
-                    scene.raise_event("PhysicsGroup", "Collision",
-                                      left=sprite, right=other)
+                collided = collide_hex2(axial0, sprites_to_axial(other.position),
+                                        sprite.radius, other.radius)
+
+                t = (sprite, other)
+                if collided:
+                    if t not in stale:
+                        stale.add(t)
+                        scene.raise_event("PhysicsGroup", "Collision",
+                                          left=sprite, right=other)
+                else:
+                    if t in stale:
+                        stale.remove(t)
+                        scene.raise_event(self, "Separation",
+                                          left=sprite, right=other)
 
     def wake_sprite(self, sprite):
         assert (sprite in self.sprites())
@@ -158,7 +188,9 @@ class GameEntity(pygame.sprite.DirtySprite):
         self.carried = set()
         self.pickup_item_sound = resources.sounds['woosh1.ogg']
         self.drop_item_sound = resources.sounds['woosh2.ogg']
-        #self.drop_sound = resources.sounds['']
+        self.bounce_sound = resources.sounds['boing.ogg']
+        self.bounce_sound.set_volume(.2)
+        # self.drop_sound = resources.sounds['']
         #self.injure = resources.sounds['']
         #self.surprise_sound = resources.sounds['']
         #self.chase_sound = resources.sounds['']
@@ -175,6 +207,7 @@ class GameEntity(pygame.sprite.DirtySprite):
                 self.drop_item_sound.play()
                 for entity in self.carried:
                     entity.wake()
+                    entity.velocity.z = .25
                 self.carried = set()
 
     @property
@@ -200,7 +233,7 @@ class GameEntity(pygame.sprite.DirtySprite):
 
         for entity in self.carried:
             entity.dirty = 1
-            entity.position = self.position + (0, 0, 80)
+            entity.position = self.position + (0, 0, self.rect.height)
 
         if self.move_sound:
             if abs(self.acceleration) > 0:
@@ -229,20 +262,13 @@ class GameEntity(pygame.sprite.DirtySprite):
                 group.needs_refresh = True
 
     def handle_internal_events(self, scene):
-        interested = scene.state['events'].get('Collision', None)
-        if not interested:
-            return
+        events = filter_belong(self, filter_interested(scene, ('Collision',)))
+        if events:
+            self._collided = set(i[1] for i in events)
 
-        others = set()
-        for event in interested:
-            try:
-                members = [event['left'], event['right']]
-                members.remove(self)
-                others.add(members[0])
-            except ValueError:
-                continue
-
-        self._collided = others
+        events = filter_belong(self, filter_interested(scene, ('Separation',)))
+        if events:
+            self._collided = self._collided - set(i[1] for i in events)
 
 
 class Collider(GameEntity):
@@ -273,6 +299,9 @@ class Button(Collider):
 
     def on_collide(self, scene, other):
         scene.raise_event(self, 'Switch', key=self.key, state=True)
+
+    def on_seperate(self, scene, other):
+        scene.raise_event(self, 'Switch', key=self.key, state=False)
 
 
 class Door(GameEntity):
@@ -310,7 +339,6 @@ class Door(GameEntity):
 
 class CallbackEntity(Collider):
     def __init__(self, filename, callback, args=None, kwargs=None):
-
         super(CallbackEntity, self).__init__(filename)
         self._callback = callback
         self._args = args if args else list()

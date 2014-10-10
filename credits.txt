@@ -51,3 +51,14 @@ http://opengameart.org/content/funny-comic-cartoon-bounce-sound
 
 applause
 http://opengameart.org/content/applause
+
+-Hero_of_the_Winds-
+spring00.wav
+http://www.freesound.org/people/-Hero_of_the_Winds-/sounds/221875/
+
+
+zandernoriega
+http://www.freesound.org/people/zandernoriega/packs/10063/
+all sounds with 'z_' prefix
+attribution not required, but given anyway
+
