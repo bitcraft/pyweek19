@@ -16,7 +16,7 @@ class Enemy(GameEntity):
     def __init__(self, filename):
         super(Enemy, self).__init__(filename)
         self._home = (None, None)
-        self.accel = 10
+        self.accel = .0001
         self.moving = False
         self.radius = 2
         self.path = ()
@@ -45,6 +45,7 @@ class Enemy(GameEntity):
         self.position.x, self.position.y = coord
 
     def handle_internal_events(self, scene):
+        self.update_ai(scene, None)
         pass
 
     def update_ai(self, scene, event):
@@ -52,14 +53,14 @@ class Enemy(GameEntity):
         if fsm.isstate('home'):
             fsm.ramble()
         if fsm.isstate('going_home'):
-            if self.position == self.home:
+            if sprites_to_hex(self.position) == sprites_to_hex(self.home):
                 fsm.ramble()
         if fsm.isstate('rambling'):
-            blacklist = {sprites_to_hex(sprite.position)
-                         for sprite in scene.internal_event_group}
-            pos = sprites_to_hex(self.position)
-            home = sprites_to_hex(self.home)
             if not self.path:
+                blacklist = {sprites_to_hex(sprite.position)
+                         for sprite in scene.internal_event_group}
+                pos = sprites_to_hex(self.position)
+                home = sprites_to_hex(self.home)
                 self.path = list(scene.model.pathfind_ramble(
                     pos, home, self.radius, blacklist)[0])
 
@@ -71,13 +72,14 @@ class Enemy(GameEntity):
             if current_position == self.target_cell:
                 self.moving = False
 
-        if self.path and not self.moving:
+        if self.path and not self.moving and round(self.position.z) == 0:
             self.target_cell = self.path.pop(0)
             self.direction = Vector2(self.target_cell[0]-current_position[0],
                                      self.target_cell[1]-current_position[1])
             self.moving = True
 
         if self.moving:
+
             self.acceleration.y = self.direction[0]*self.accel
             self.acceleration.x = self.direction[1]*self.accel
             self.wake()
