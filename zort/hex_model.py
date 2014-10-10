@@ -19,7 +19,9 @@ __all__ = ['HexMapModel',
            'axial_to_sprites',
            'sprites_to_hex',
            'collide_hex',
-           'hex_round']
+           'hex_round',
+           'dist_axial',
+           'dist_axial2']
 
 
 ratio_13 = 1./3.
@@ -108,7 +110,8 @@ def evenr_to_axial(coords):
 # special purpose function for sprites only
 def sprites_to_axial(coords):
     x, y = coords[:2]
-    return int(ratio_13 * sqrt_3 * x - ratio_13 * y), int(ratio_23 * y)
+    #return int(ratio_13 * sqrt_3 * x - ratio_13 * y), int(ratio_23 * y)
+    return ratio_13 * sqrt_3 * x - ratio_13 * y, ratio_23 * y
 
 
 # special purpose function for sprites only

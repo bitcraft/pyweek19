@@ -190,6 +190,11 @@ class GameEntity(pygame.sprite.DirtySprite):
         self._collided = set()
         self._pickup_cooldown = 0
 
+    def stop(self):
+        self.velocity = Vector3(0, 0, 0)
+        self.acceleration = Vector3(0, 0, 0)
+        self.wake()
+
     def pickup(self):
         if not self._pickup_cooldown:
             self._pickup_cooldown = 200
