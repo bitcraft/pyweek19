@@ -1,5 +1,6 @@
 from os.path import join as jpath
 from os.path import basename, abspath
+from os.path import isfile
 import pygame
 import logging
 import glob
@@ -84,10 +85,14 @@ def load():
     vol = config.getint('sound', 'sound-volume') / 100.
     for filename in glob.glob(sounds_path):
         logger.info("loading %s", filename)
-        sound = pygame.mixer.Sound(filename)
-        sound.set_volume(vol)
-        sounds[basename(filename)] = sound
-        yield filename, sound
+        try:
+            if isfile(filename):
+                sound = pygame.mixer.Sound(filename)
+                sound.set_volume(vol)
+                sounds[basename(filename)] = sound
+                yield filename, sound
+        except pygame.error:
+            pass
 
     for name, filename in config.items('image-files'):
         path = jpath(resource_path, 'images', filename)

@@ -1,4 +1,5 @@
 from fysom import Fysom
+from yourgame.euclid import Vector2
 
 from yourgame.entity import GameEntity
 from yourgame.hex_model import sprites_to_hex
@@ -19,6 +20,8 @@ class Enemy(GameEntity):
         self.moving = False
         self.radius = 2
         self.path = ()
+        self.direction = Vector2(0, 0)
+        self.target_cell = (None, None)
         self.fsm = Fysom({'initial': 'home',
                           'events': [
                               {'name': 'go_home',
@@ -59,6 +62,25 @@ class Enemy(GameEntity):
             if not self.path:
                 self.path = list(scene.model.pathfind_ramble(
                     pos, home, self.radius, blacklist)[0])
+
+    def update(self, delta):
+        super(GameEntity, self).update(delta)
+
+        current_position = sprites_to_hex(self.position)
+        if self.moving:
+            if current_position == self.target_cell:
+                self.moving = False
+
+        if self.path and not self.moving:
+            self.target_cell = self.path.pop(0)
+            self.direction = Vector2(self.target_cell[0]-current_position[0],
+                                     self.target_cell[1]-current_position[1])
+            self.moving = True
+
+        if self.moving:
+            self.acceleration.y = self.direction[0]*self.accel
+            self.acceleration.x = self.direction[1]*self.accel
+            self.wake()
 
 
 class Stalker(GameEntity):
