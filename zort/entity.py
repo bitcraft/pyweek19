@@ -1,7 +1,7 @@
 import pygame
 from pygame.transform import flip, smoothscale
 
-from zort.hex_model import collide_hex2, sprites_to_axial
+from zort.hex_model import collide_hex, sprites_to_axial
 from zort import resources
 from zort import config
 from zort.euclid import Vector2, Vector3
@@ -96,11 +96,7 @@ class PhysicsGroup(pygame.sprite.Group):
 
                 new_position = position + (x, 0, 0)
                 axial = sprites_to_axial(new_position)
-                if collide(axial, sprite.radius):
-                    if abs(velocity.x) > .00002:
-                        acceleration.x = 0.0
-                        velocity.x = 0.0
-                else:
+                if not collide(axial, sprite.radius):
                     sleeping = False
                     position.x += x
 
@@ -119,11 +115,7 @@ class PhysicsGroup(pygame.sprite.Group):
 
                 new_position = position + (0, y, 0)
                 axial = sprites_to_axial(new_position)
-                if collide(axial, sprite.radius):
-                    if abs(velocity.y) > .00002:
-                        acceleration.y = 0.0
-                        velocity.y = 0.0
-                else:
+                if not collide(axial, sprite.radius):
                     sleeping = False
                     position.y += y
 
@@ -140,13 +132,13 @@ class PhysicsGroup(pygame.sprite.Group):
                 self.sleeping.add(sprite)
                 return
 
-            axial0 = sprites_to_axial(position)
+            axial = sprites_to_axial(position)
             for other in all_sprites:
                 if other is sprite:
                     continue
 
-                collided = collide_hex2(axial0, sprites_to_axial(other.position),
-                                        sprite.radius, other.radius)
+                collided = collide_hex(axial, sprites_to_axial(other.position),
+                                       sprite.radius, other.radius)
 
                 t = (sprite, other)
                 if collided:
