@@ -166,7 +166,7 @@ class GameEntity(pygame.sprite.DirtySprite):
         self.original_image = resources.tiles[filename]
         self.original_anchor = Vector2(16, 57)
         self.anchor = None
-        self.radius = .1
+        self.radius = .2
         self._layer = 1
         self.event_handlers = list()
         self.max_velocity = [.15, .15, 100]
@@ -205,7 +205,7 @@ class GameEntity(pygame.sprite.DirtySprite):
                 self.drop_item_sound.play()
                 for entity in self.carried:
                     entity.wake()
-                    entity.velocity.z = .25
+                    entity.acceleration.z = .000025
                 self.carried = set()
 
     @property
@@ -233,6 +233,7 @@ class GameEntity(pygame.sprite.DirtySprite):
         for entity in self.carried:
             entity.dirty = 1
             entity.position = self.position + (0, 0, self.rect.height)
+            entity.stop()
 
         if self.move_sound:
             if abs(self.acceleration) > 0:

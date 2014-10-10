@@ -15,14 +15,13 @@ __all__ = ['Enemy',
 class Enemy(GameEntity):
     def __init__(self, filename):
         super(Enemy, self).__init__(filename)
-        self.ramble_radius = 2
         self.target_position = None
         self.home_position = None
+        self.ramble_radius = 2
+        self.path = None
         self.cell_snap = .05
-        self.accel = .0001
+        self.accel_speed = .0001
         self.max_accel = .0004
-        self.moving = False
-        self.path = list()
         self.direction = Vector3(0, 0, 0)
         self.fsm = Fysom({'initial': 'home',
                           'events': [
@@ -47,13 +46,23 @@ class Enemy(GameEntity):
             fsm.ramble()
 
         if fsm.isstate('going_home'):
-            if sprites_to_hex(self.position) == sprites_to_hex(self.home):
-                fsm.ramble()
+            if self.home_position is None:
+                self.home_position = Vector3(*self.position)
+                fsm.home()
+
+            if not self.position == self.home_position:
+                start = sprites_to_hex(self.position)
+                home = sprites_to_hex(self.home_position)
+                self.path = scene.model.pathfind(start, home)[0]
+
+            else:
+                fsm.home()
 
         if fsm.isstate('rambling'):
             if not self.path:
-                if not self.home_position:
+                if self.home_position is None:
                     self.home_position = Vector3(*self.position)
+                    self.home_position.z = 0
 
                 blacklist = {sprites_to_hex(sprite.position)
                          for sprite in scene.internal_event_group}
@@ -70,23 +79,23 @@ class Enemy(GameEntity):
         grounded = self.position.z == self.velocity.z == 0
         moving = self.velocity.x or self.velocity.y or self.velocity.z
 
-        if fsm.isstate('rambling'):
+        if self.path is not None:
             if not moving and self.target_position is None:
-                self.acceleration = Vector3(0, 0, 0)
                 self.target_position = Vector3(*axial_to_sprites(self.path.pop(-1)))
                 #self.target_position = Vector3(*axial_to_sprites(
                 #    evenr_to_axial((5, 5))))
 
+            acc = self.acceleration
             if grounded and self.target_position is not None:
                 self.wake()
                 self.direction = self.target_position - self.position
-                self.acceleration += self.direction.normalized() * self.accel
-                if abs(self.acceleration) > self.max_accel:
-                    self.acceleration = self.acceleration.normalized() * self.max_accel
+                acc += self.direction.normalized() * self.accel_speed
+                if abs(acc) > self.max_accel:
+                    self.acceleration = acc.normalized() * self.max_accel
                 if abs(self.direction) <= self.cell_snap:
                     self.position = Vector3(*self.target_position)
-                    self.stop()
                     self.target_position = None
+                    self.stop()
 
 
 class Stalker(GameEntity):
