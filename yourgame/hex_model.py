@@ -1,6 +1,7 @@
 from heapq import heappush, heappop
 from math import sqrt, ceil
 from operator import itemgetter
+import random
 import json
 import codecs
 import time
@@ -330,17 +331,19 @@ class HexMapModel(object):
             for n in neighbors:
                 tmp.update(set(self.surrounding(n)))
             neighbors.update(tmp)
-        neighbors.discard(blacklist)
-        blacklist.update(
-            {coord for coord in self._data if self._data[coord]})
-        blacklist.discard(neighbors)
 
-        return self.pathfind(current, neighbors.pop(), blacklist)
+        neighbors.difference_update(blacklist)
+        blacklist.update(
+            {(coord[0], 1.0*coord[1]) for coord in self._data})
+        blacklist.difference_update(neighbors)
+
+        return self.pathfind(current, random.choice(list(neighbors)), blacklist)
 
     def pathfind(self, current, end, blacklist=set(),
                  impassable=set()):
         blacklist.update(
-            {coord for coord in self._data if self._data[coord].raised})
+            {(coord[0], 1.0*coord[1])
+             for coord in self._data if self._data[coord].raised})
 
         def cell_available(cell):
             return coord_available(cell[1])
