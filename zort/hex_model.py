@@ -185,13 +185,8 @@ class HexMapModel(object):
         self._dirty = False
 
     def surrounding(self, coords):
-        # this is some gigantic hack
-        #s = util.surrounding_noclip(coord)
-        s = util.surrounding_clip(coords, (0, 0), (self.width-1, self.height-1))
-        for coords in s:
-            coords = [int(i) for i in coords]
-            coords = [int(i) for i in evenr_to_axial(coords)]
-            yield tuple(coords)
+        return (coords for coords in util.surrounding_noclip(coords)
+                if coords in self._data)
 
     def collidecircle(self, coords, radius):
         """test if circle overlaps level geometry above layer 0 only
@@ -313,9 +308,10 @@ class HexMapModel(object):
         return (abs(q0 - q1) + abs(r0 - r1) +
                 abs(q0 + r0 - q1 - r1)) / 2.0
 
-    def neighboring_radius(self, center, radius, blacklist=set()):
-        center = {center, center}
-        neighbors = center
+    def neighboring_radius(self, center, radius,
+                           blacklist=set(), avoid_raised=True):
+        neighbors = set()
+        neighbors.add(center)
         for i in range(radius):
             tmp = set()
             for n in neighbors:
@@ -323,7 +319,11 @@ class HexMapModel(object):
             neighbors.update(tmp)
 
         neighbors.difference_update(blacklist)
-        #neighbors.update({center, center})
+        if avoid_raised:
+            neighbors.difference_update(
+                {coord for coord in neighbors
+                 if self._data[coord].raised})
+        neighbors.add(center)
 
         return neighbors
 
@@ -339,20 +339,9 @@ class HexMapModel(object):
         blacklist.update(
             {coord for coord in self._data})
         blacklist.difference_update(neighbors)
-        end = random.choice(list(neighbors)) \
-            if len(neighbors) > 1 else neighbors
-        return self.pathfind(current, end, blacklist)
+        return self.pathfind(current, random.choice(list(neighbors)), blacklist)
 
     def pathfind(self, current, end, blacklist=set()):
-        #print()
-        #for coord in self._data:
-        #    print(self._data[coord].raised)
-        #print("Current raised", self._data[current].raised)
-        #blacklist.update(
-        #    {coord
-        #     for coord in self._data if self._data[coord].raised})
-        #print(len(blacklist))
-
         def cell_available(cell):
             return coord_available(cell[1])
 
@@ -360,7 +349,8 @@ class HexMapModel(object):
             return coord not in closed_set and coord not in blacklist
 
         def retrace_path(c):
-            path = [c]
+            path = []
+            path.append(c)
             while parent.get(c, None) is not None:
                 c = parent[c]
                 path.append(c)
@@ -389,6 +379,8 @@ class HexMapModel(object):
 
             open_set.remove(current)
             closed_set.add(current)
+            for coord in self.surrounding(current):
+                print(coord, end)
             cells = filter(
                 cell_available,
                 ((self.dist(coord, end) + self.get_cell(coord).cost, coord)

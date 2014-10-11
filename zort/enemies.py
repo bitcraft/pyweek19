@@ -51,9 +51,10 @@ class Enemy(GameEntity):
                 fsm.home()
 
             if not self.position == self.home_position:
-                start = sprites_to_hex(self.position)
-                home = sprites_to_hex(self.home_position)
-                self.path = scene.model.pathfind(start, home)[0]
+                if not self.path:
+                    start = sprites_to_hex(self.position)
+                    home = sprites_to_hex(self.home_position)
+                    self.path = scene.model.pathfind(start, home)[0]
 
             else:
                 fsm.home()
@@ -81,9 +82,9 @@ class Enemy(GameEntity):
 
         if self.path is not None:
             if not moving and self.target_position is None:
-                self.target_position = Vector3(*axial_to_sprites(self.path.pop(-1)))
-                #self.target_position = Vector3(*axial_to_sprites(
-                #    evenr_to_axial((5, 5))))
+                self.target_position = Vector3(*axial_to_sprites(
+                    self.path.pop(-1)))
+
 
             acc = self.acceleration
             if grounded and self.target_position is not None:
