@@ -105,7 +105,7 @@ class Enemy(GameEntity):
                     self.stop()
 
 
-class Stalker(GameEntity):
+class Stalker(Enemy):
     """ follows the player
     """
     def __init__(self, filename):
@@ -114,7 +114,7 @@ class Stalker(GameEntity):
         self._playing_move_sound = False
 
 
-class Rambler(GameEntity):
+class Rambler(Enemy):
     """ random walks
     """
     def __init__(self, filename):
@@ -123,7 +123,7 @@ class Rambler(GameEntity):
         self._playing_move_sound = False
 
 
-class Tosser(GameEntity):
+class Tosser(Enemy):
     """ tosses.
     """
     def __init__(self, filename):
