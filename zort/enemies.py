@@ -34,7 +34,7 @@ class Enemy(GameEntity):
         self.home_position = None
         self.ramble_radius = 2
         self.cells_followed = 0
-        self.follow_persistence = self.ramble_radius + 1
+        self.follow_persistence = round(self.ramble_radius * 1.5)
         self.path = None
         self.cell_snap = .01
         self.accel_speed = .000095
@@ -73,7 +73,7 @@ class Enemy(GameEntity):
                 fsm.seek_player()
         elif fsm.isstate('seeking'):
             if not self.path:
-                if self.cells_followed < self.follow_persistence:
+                if self.cells_followed <= self.follow_persistence:
                     pos = sprites_to_hex(self.position)
                     next = sprites_to_hex(hpos)
                     self.path = list(scene.model.pathfind(pos, next)[0])

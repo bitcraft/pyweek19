@@ -1,5 +1,5 @@
 import pygame
-from euclid import Vector3
+from zort.euclid import Vector3
 from zort import config
 from zort.hex_model import *
 
