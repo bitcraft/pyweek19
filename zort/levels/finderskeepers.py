@@ -26,7 +26,7 @@ def setup_level(level_scene):
     #level_scene.build_button("testDoor", "tileMagic_tile.png", (2, 4))
     #level_scene.build_door("testDoor", (0, 0))
     #level_scene.move_hero((1, 1))
-    button = level_scene.build_button("test-door", "tileMagic_tile.png", (9, 8))
+    button = level_scene.build_button("test-door", "tileMagic_tile.png", (10, 8))
     level_scene.build_door("test-door", (14, 9))
     level_scene.build_door("test-door", (14, 8))
     level_scene.raise_event(button, 'Switch', key="test-door", state=True)
@@ -35,7 +35,7 @@ def setup_level(level_scene):
                  kwargs={"level_name": "shallnotpass"})
     e.scale = .35
     e.update_image()
-    level_scene.add_entity(e, (16, 10))
+    level_scene.add_entity(e, (16, 9))
 
     # # start the silly timer to drop powerups
     # #timer = Task(self.new_powerup, 5000, -1)
