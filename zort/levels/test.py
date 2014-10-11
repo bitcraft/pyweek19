@@ -21,10 +21,16 @@ def setup_level(level_scene):
     """
     Initialize your entities
     """
-    level_scene.add_entity(Saucer, 'shipPink_manned.png', (5, 5))
-    level_scene.add_entity(Enemy, "alienGreen.png", (9, 9))
-    level_scene.add_button("testDoor", "tileRock_tile.png", (2, 4))
-    level_scene.add_door("testDoor", "smallRockStone.png", (0, 0))
+    level_scene.move_hero((1, 1))
+
+    level_scene.build_entity(Saucer, 'shipPink_manned.png', (4, 4))
+    level_scene.build_entity(Enemy, "alienGreen.png", (4, 4))
+
+    level_scene.build_button("testDoor", "tileRock_tile.png", (2, 4))
+    level_scene.build_door("testDoor", (0, 0))
+
+    e = ShipPart('smallRockStone.png', level_scene.load_level)
+    level_scene.add_entity(e, (2, 2))
 
     # # start the silly timer to drop powerups
     # #timer = Task(self.new_powerup, 5000, -1)

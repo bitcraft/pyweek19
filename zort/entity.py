@@ -11,7 +11,8 @@ __all__ = ['PhysicsGroup',
            'GameEntity',
            'Button',
            'Door',
-           'CallbackEntity']
+           'CallbackEntity',
+           'ShipPart']
 
 
 def filter_interested(scene, interested):
@@ -401,3 +402,7 @@ class CallbackEntity(Collider):
 
     def on_collide(self, scene, other):
         self._callback(*self._args, **self._kwargs)
+
+
+class ShipPart(CallbackEntity):
+    pass

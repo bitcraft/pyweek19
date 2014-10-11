@@ -174,7 +174,7 @@ class HexMapView(pygame.sprite.LayeredUpdates):
             self._old_hovered = self._hovered
             self._hovered = cell
 
-    def cell_from_surface(self, point):
+    def coords_from_surface(self, point):
         if self.rect is None:
             return None
 
@@ -183,11 +183,19 @@ class HexMapView(pygame.sprite.LayeredUpdates):
         y -= self.pixel_offset.y
         y *= .45
         x *= .8
+        return pixel_to_axial((x, y), self.hex_radius *.8)
 
-        x, y = pixel_to_axial((x, y), self.hex_radius *.8)
-        x = int(x)
-        y = int(y)
-        return self.data.get_cell((x, y))
+    def cell_from_surface(self, point):
+        if self.rect is None:
+            return None
+
+        coords = self.coords_from_surface(point)
+        if coords is not None:
+            x, y = coords
+            x = int(x)
+            y = int(y)
+            return self.data.get_cell((x, y))
+        return None
 
     def clear(self, surface, bgk=None):
         if self.map_buffer is None:
