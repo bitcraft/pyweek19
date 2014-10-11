@@ -18,7 +18,7 @@ def build_maze_from_hex(model, lower_limit=None, upper_limit=None,
 
     def coord_available(coord):
         return coord not in closed_set and \
-            len(closed_neighbors(coord)) <= num_adjacent
+               len(closed_neighbors(coord)) <= num_adjacent
 
     def closed_neighbors(coord):
         return set(neighbors(coord)) - {current, current} & closed_set

@@ -10,6 +10,7 @@ from zort.dialog import Dialog
 from zort.scenes import Scene
 from zort.euclid import Point2, Vector3
 from zort.hero import Hero
+from zort.physics import PhysicsGroup
 from zort.levels import loader
 from zort.resources import maps
 from zort.modes.editor import EditMode
@@ -71,28 +72,22 @@ class LevelScene(Scene):
     def new_hero(self):
         # adds new hero, but doesn't remove old one
         self.hero = self.build_entity(Hero, 'alienBlue.png', (1, 1))
-        self.add_entity(self.hero, (1, 1))
         self.velocity_updates.collide_walls.add(self.hero)
         self.pygame_event_group.add(self.hero)
 
     def build_entity(self, enemy_class, enemy_sprite_file_name, position):
-        # send position in even r coordinates
-        sx, sy = axial_to_sprites(evenr_to_axial(position))
-        sprite = enemy_class(enemy_sprite_file_name)
-        sprite.position += (sx, sy, 900)
-        if hasattr(sprite, 'home'):
-            sprite.home = sprite.position[:2]
-        sprite.update_image()
-        return sprite
+        entity = enemy_class(enemy_sprite_file_name)
+        self.add_entity(entity, position)
+        return entity
 
     def build_button(self, door_key, door_sprite_file_name,
-                   position, anchor=None):
+                     position, anchor=None):
         # send position in even r coordinates
         if anchor is None:
             anchor = Point2(30, 60)
         sx, sy = axial_to_sprites(evenr_to_axial(position))
         button = Button(door_sprite_file_name, door_key)
-        button.position += (sx, sy, 900)
+        button.position += (sx, sy, 0)
         button.anchor = anchor
         button.update_image()
         self.view.add(button, layer=0)
@@ -102,7 +97,7 @@ class LevelScene(Scene):
 
     def add_entity(self, entity, position):
         sx, sy = axial_to_sprites(evenr_to_axial(position))
-        entity.position += (sx, sy, 900)
+        entity.position = Vector3(sx, sy, 900)
         if hasattr(entity, 'home'):
             entity.home = Vector3(entity.position)
         self.view.add(entity)
@@ -214,8 +209,3 @@ class LevelScene(Scene):
         if level_name is None:
             level_name = next((k for k in maps.keys()))
         self.current_level_module = loader.load_level(level_name, self)
-
-        def f():
-            self.raise_event("scene", "dialog-show", heading="Going Down!")
-        t = Task(f, 1000)
-        self.timers.add(t)

@@ -183,7 +183,7 @@ class HexMapView(pygame.sprite.LayeredUpdates):
         y -= self.pixel_offset.y
         y *= .45
         x *= .8
-        return pixel_to_axial((x, y), self.hex_radius *.8)
+        return pixel_to_axial((x, y), self.hex_radius * .8)
 
     def cell_from_surface(self, point):
         if self.rect is None:

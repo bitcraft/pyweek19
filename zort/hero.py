@@ -6,6 +6,15 @@ from zort import resources, config
 
 
 class Hero(GameEntity):
+    """
+
+    GURUS OF PYTHON:
+
+    game entities now have built in callback for collisions!
+
+    see the on_collide and on_separate methods
+
+    """
 
     def __init__(self, filename):
         super(Hero, self).__init__(filename)

@@ -30,6 +30,13 @@ def setup_level(level_scene):
     e = ShipPart('smallRockStone.png', level_scene.load_level)
     level_scene.add_entity(e, (16, 10))
 
+    # dialog must be called after video is ready, so give it a delay
+    def show_dialog():
+        level_scene.raise_event("scene", "dialog-show",
+                                heading="Going Down!")
+    t = Task(show_dialog, 1000)
+    level_scene.timers.add(t)
+
 
 def handle_internal_events(level_scene):
     """

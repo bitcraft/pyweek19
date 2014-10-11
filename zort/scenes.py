@@ -11,7 +11,6 @@ from zort import config
 
 
 class Game(object):
-
     def __init__(self, target_fps, main_surface):
         self.scenes = dict()
         self.scene_stack = list()
@@ -88,7 +87,6 @@ class Game(object):
 
 
 class Scene(object):
-
     def __init__(self, name, game):
         self.game = game
         self.name = name

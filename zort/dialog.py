@@ -39,7 +39,6 @@ class Dialog(GameEntity):
             self.surface = None
 
         for event in all_events.get('dialog-next', list()):
-            self._dialog = resources.get_text(event['heading'])
             try:
                 text = next(self._dialog)
                 self.render_dialog(text)

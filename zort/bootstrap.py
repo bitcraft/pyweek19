@@ -18,7 +18,7 @@ config.read(filename)
 def bootstrap_game():
     pygame.display.init()
     pygame.mixer.init(frequency=config.getint('sound', 'frequency'),
-                         buffer=config.getint('sound', 'buffer'))
+                      buffer=config.getint('sound', 'buffer'))
     pygame.font.init()
     pygame.init()
 

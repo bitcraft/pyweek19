@@ -6,6 +6,7 @@ from collections import OrderedDict
 import pygame
 import logging
 import glob
+
 logger = logging.getLogger('zort.resources')
 
 import zort.gui
@@ -49,6 +50,7 @@ def get_text(heading):
         if not line:
             continue
         yield line
+
 
 def load():
     pygame.font.init()

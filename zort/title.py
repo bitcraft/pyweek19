@@ -2,7 +2,6 @@ from zort.scenes import Scene
 
 
 class TitleScene(Scene):
-
     def __init__(self, game):
         super(TitleScene, self).__init__("title", game)
 

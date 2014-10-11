@@ -23,10 +23,9 @@ __all__ = ['HexMapModel',
            'dist_axial',
            'dist_axial2']
 
-
-ratio_13 = 1./3.
-ratio_23 = 2./3.
-ratio_32 = 3./2
+ratio_13 = 1. / 3.
+ratio_23 = 2. / 3.
+ratio_32 = 3. / 2
 sqrt_3 = sqrt(3)
 
 
@@ -38,18 +37,18 @@ def hex_round(coords):
     dy = abs(ry - y)
     dz = abs(rz - z)
     if dx > dy and dx > dz:
-        rx = -ry-rz
+        rx = -ry - rz
     elif dy > dz:
-        ry = -rx-rz
+        ry = -rx - rz
     else:
-        rz = -rx-ry
+        rz = -rx - ry
     assert (rx + ry + rz == 0)
     return cube_to_axial((rx, ry, rz))
 
 
 def axial_to_pixel(coords, size):
     return size * sqrt_3 * (coords[0] - 0.5 * (coords[1] & 1)), \
-           size * 3/2 * coords[1]
+           size * 3 / 2 * coords[1]
 
 
 def pixel_to_axial(coords, size):
@@ -87,7 +86,7 @@ def axial_to_evenr(coords):
 
     # cube => evenr
     q = x + (z + (z & 1)) / 2
-    #r = z
+    # r = z
 
     return q, z
 
@@ -110,14 +109,14 @@ def evenr_to_axial(coords):
 # special purpose function for sprites only
 def sprites_to_axial(coords):
     x, y = coords[:2]
-    #return int(ratio_13 * sqrt_3 * x - ratio_13 * y), int(ratio_23 * y)
+    # return int(ratio_13 * sqrt_3 * x - ratio_13 * y), int(ratio_23 * y)
     return ratio_13 * sqrt_3 * x - ratio_13 * y, ratio_23 * y
 
 
 # special purpose function for sprites only
 def axial_to_sprites(coords):
     q, r = coords[:2]
-    return sqrt_3 * (q + r/2.), ratio_32 * r
+    return sqrt_3 * (q + r / 2.), ratio_32 * r
 
 
 # special purpose function for sprites only
@@ -128,7 +127,7 @@ def sprites_to_hex(coords):
 def cube_to_pixel(coords, radius):
     cx, cy, cz = coords
     y = ratio_32 * radius * cz
-    #b = 2/3 * y / s
+    # b = 2/3 * y / s
     #x = sqrt_3 * radius * (cz / 2. + cx)
     x = - sqrt_3 * radius * (cz / 2. + cy)
     #r = (sqrt(3)/3 * x - y/3 ) / s
@@ -327,7 +326,7 @@ class HexMapModel(object):
             neighbors.update(tmp)
 
         neighbors.difference_update(blacklist)
-        #if avoid_raised:
+        # if avoid_raised:
         #    neighbors.difference_update(
         #        {coord for coord in neighbors
         #         if self._data[coord].raised})
@@ -340,13 +339,16 @@ class HexMapModel(object):
         blacklist = {evenr_to_axial(coord) for coord in blacklist}
         return self.pathfind(current, end, blacklist, avoid_raised)
 
-    def pathfind_ramble(self, current, home, radius, blacklist=set(), avoid_raised=True):
-        neighbors = self.neighboring_radius(home, radius, blacklist, avoid_raised)
+    def pathfind_ramble(self, current, home, radius, blacklist=set(),
+                        avoid_raised=True):
+        neighbors = self.neighboring_radius(home, radius, blacklist,
+                                            avoid_raised)
 
         blacklist.update(
             {coord for coord in self._data})
         blacklist.difference_update(neighbors)
-        return self.pathfind(current, random.choice(list(neighbors)), blacklist, avoid_raised)
+        return self.pathfind(current, random.choice(list(neighbors)), blacklist,
+                             avoid_raised)
 
     def pathfind(self, current, end, blacklist=set(), avoid_raised=True):
         def cell_available(cell):

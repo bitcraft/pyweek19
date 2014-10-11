@@ -1,14 +1,11 @@
 import pygame
 from pygame.transform import flip, smoothscale
-
-from zort.hex_model import collide_hex, sprites_to_axial
+from zort.hex_model import *
 from zort import resources
-from zort import config
 from zort.euclid import Vector2, Vector3
+from zort.physics import PhysicsGroup
 
-
-__all__ = ['PhysicsGroup',
-           'GameEntity',
+__all__ = ['GameEntity',
            'Button',
            'Door',
            'Rock',
@@ -38,149 +35,25 @@ def filter_belong(owner, events):
     return retval
 
 
-class PhysicsGroup(pygame.sprite.Group):
-    def __init__(self, data):
-        super(PhysicsGroup, self).__init__()
-        self.data = data
-
-        self.gravity = Vector3(0, 0, config.getfloat('world', 'gravity'))
-        self.timestep = config.getfloat('world', 'physics_tick')
-        self.gravity_delta = None
-        self.ground_friction = None
-        self.sleeping = set()
-        self.wake = set()
-        self.stale = set()
-        self.collide_walls = set()
-
-    def update(self, delta, scene):
-        stale = self.stale
-        delta = self.timestep
-        gravity_delta = self.gravity * delta
-        ground_friction = pow(.9, delta)
-        collide = self.data.collidecircle
-        self.sleeping = self.sleeping - self.wake
-        self.wake = set()
-        all_sprites = self.sprites()
-
-        for sprite in set(self.sprites()) - self.sleeping:
-            sleeping = True
-            sprite.dirty = 1
-            acceleration = sprite.acceleration
-            position = sprite.position
-            velocity = sprite.velocity
-            max_velocity = sprite.max_velocity
-            check_walls = sprite in self.collide_walls
-
-            if not position.z == 0 and sprite.gravity:
-                acceleration += gravity_delta
-
-            velocity += acceleration * delta
-            dv = velocity * delta
-            if dv.z > 100:
-                dv.z = 100
-            x, y, z = dv
-
-            if not z == 0:
-                position.z += z
-                if position.z < 0:
-                    position.z = 0.0
-                    if abs(velocity.z) > .2:
-                        sprite.bounce_sound.play()
-                        sleeping = False
-                        acceleration.z = 0.0
-                        velocity.z = -velocity.z * .05
-                    else:
-                        position.z = 0.0
-                        acceleration.z = 0.0
-                        velocity.z = 0.0
-                else:
-                    sleeping = False
-
-            if not x == 0:
-                if not position.z:
-                    velocity.x *= ground_friction
-
-                _collides = False
-                if check_walls:
-                    new_position = position + (x, 0, 0)
-                    axial = sprites_to_axial(new_position)
-                    _collides = collide(axial, sprite.radius)
-
-                if not _collides:
-                    sleeping = False
-                    position.x += x
-
-                if abs(round(x, 5)) < .005:
-                    acceleration.x = 0.0
-                    velocity.x = 0.0
-
-                if velocity.x > max_velocity[0]:
-                    velocity.x = max_velocity[0]
-                elif velocity.x < -max_velocity[0]:
-                    velocity.x = -max_velocity[0]
-
-            if not y == 0:
-                if not position.z:
-                    velocity.y *= ground_friction
-
-                _collides = False
-                if check_walls:
-                    new_position = position + (0, y, 0)
-                    axial = sprites_to_axial(new_position)
-                    _collides = collide(axial, sprite.radius)
-
-                if not _collides:
-                    sleeping = False
-                    position.y += y
-
-                if abs(round(y, 5)) < .005:
-                    acceleration.y = 0.0
-                    velocity.y = 0.0
-
-                if velocity.y > max_velocity[1]:
-                    velocity.y = max_velocity[1]
-                elif velocity.y < -max_velocity[1]:
-                    velocity.y = -max_velocity[1]
-
-            if sleeping:
-                self.sleeping.add(sprite)
-                continue
-
-            axial = sprites_to_axial(position)
-            for other in all_sprites:
-                if other is sprite:
-                    continue
-
-                collided = collide_hex(axial, sprites_to_axial(other.position),
-                                       sprite.radius, other.radius)
-
-                t = (sprite, other)
-                if collided:
-                    if t not in stale:
-                        stale.add(t)
-                        scene.raise_event("PhysicsGroup", "Collision",
-                                          left=sprite, right=other)
-                else:
-                    if t in stale:
-                        stale.remove(t)
-                        scene.raise_event(self, "Separation",
-                                          left=sprite, right=other)
-
-    def wake_sprite(self, sprite):
-        assert (sprite in self.sprites())
-        self.wake.add(sprite)
-
-
 class GameEntity(pygame.sprite.DirtySprite):
+    """
+
+    GURUS OF PYTHON:
+
+    game entities now have built in callback for collisions!
+
+    see the on_collide and on_separate methods
+
+    """
+
     def __init__(self, filename):
         super(GameEntity, self).__init__()
         self.gravity = True
         self.timers = pygame.sprite.Group()
-        self.position = Vector3(0, 0, 0)
+        self.position = Vector3(-100, -100, 0)
         self.acceleration = Vector3(0, 0, 0)
         self.velocity = Vector3(0, 0, 0)
         self.original_image = resources.tiles[filename]
-        self.original_anchor = Vector2(16, 57)
         self.anchor = None
         self.radius = .4
         self._layer = 1
@@ -188,8 +61,9 @@ class GameEntity(pygame.sprite.DirtySprite):
         self.scale = 1
         self._flipped = False
         self.image = None
+        self.rect = self.original_image.get_rect()
+        self.original_anchor = Vector2(*self.rect.midbottom)
         self.update_image()
-        self.rect = self.image.get_rect()
         self.dirty = 1
         self.move_sound = None
         self.carried = None
@@ -199,7 +73,7 @@ class GameEntity(pygame.sprite.DirtySprite):
         self.bounce_sound = resources.sounds['boing-slow.ogg']
         self.bounce_sound.set_volume(.2)
         # self.drop_sound = resources.sounds['']
-        #self.injure = resources.sounds['']
+        # self.injure = resources.sounds['']
         #self.surprise_sound = resources.sounds['']
         #self.chase_sound = resources.sounds['']
         self._collided = set()
@@ -243,7 +117,10 @@ class GameEntity(pygame.sprite.DirtySprite):
         for g in self.groups():
             g.add(other)
 
-    def attach(self, other, anchor):
+    def attach(self, other, anchor=None):
+        if anchor is None:
+            anchor = (0, 0, 0)
+        anchor = Vector3(*anchor)
         self.wake()
         self._attached = other, anchor
 
@@ -298,6 +175,10 @@ class GameEntity(pygame.sprite.DirtySprite):
             self.position = entity.position + anchor
 
     @property
+    def grounded(self):
+        return self.position.z == self.velocity.z == 0
+
+    @property
     def flipped(self):
         return self._flipped
 
@@ -314,36 +195,28 @@ class GameEntity(pygame.sprite.DirtySprite):
 
     def handle_internal_events(self, scene):
         events = filter_belong(self, filter_interested(scene, ('Collision',)))
-        if events:
-            self._collided = set(i[1] for i in events)
-
-        events = filter_belong(self, filter_interested(scene, ('Separation',)))
-        if events:
-            self._collided = self._collided - set(i[1] for i in events)
-
-
-class Collider(GameEntity):
-    def on_collide(self, scene, other):
-        pass
-
-    def handle_internal_events(self, scene):
-        events = filter_belong(self, filter_interested(scene, ('Collision',)))
         for event, other in events:
             self.on_collide(scene, other)
 
         events = filter_belong(self, filter_interested(scene, ('Separation',)))
         for event, other in events:
-            self.on_seperate(scene, other)
+            self.on_separate(scene, other)
+
+    def on_collide(self, scene, other):
+        pass
+
+    def on_separate(self, scene, other):
+        pass
 
 
-class Button(Collider):
+class Button(GameEntity):
     def __init__(self, filename, key):
         super(Button, self).__init__(filename)
         assert (key is not None)
-        self.anchor = Vector2(0, 32)
+        self.original_anchor = Vector2(32, 35)
         self.update_image()
         self.key = key
-        self.toggle = False   # if true the door will only work when colliding
+        self.toggle = False  # if true the door will only work when colliding
         self._collided = set()
         self.collide_sound = resources.sounds['stoneDragHit3.ogg']
         self.separate_sound = resources.sounds['stoneHit3.ogg']
@@ -364,6 +237,8 @@ class Rock(GameEntity):
     def __init__(self, filename):
         super(Rock, self).__init__(filename)
         self.bounce_sound = resources.sounds['stoneHit3.ogg']
+        self.radius = .5
+        self.update_image()
 
     def handle_internal_events(self, scene):
         pass
@@ -401,7 +276,7 @@ class Door(GameEntity):
                     self.trigger_view_refresh()
 
 
-class CallbackEntity(Collider):
+class CallbackEntity(GameEntity):
     def __init__(self, filename, callback, args=None, kwargs=None):
         super(CallbackEntity, self).__init__(filename)
         self._callback = callback

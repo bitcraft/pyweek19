@@ -5,6 +5,7 @@ from zort.hex_model import *
 class LevelSceneMode(object):
     """ provides various handlers to abstract gameplay into modes
     """
+
     def __init__(self, scene):
         self.scene = scene
 
