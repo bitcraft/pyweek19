@@ -5,6 +5,7 @@ from zort import hex_view
 from zort import config
 from zort import gui
 from zort import resources
+from zort.environ import util
 from zort.hex_model import *
 from zort.entity import *
 from zort.dialog import Dialog

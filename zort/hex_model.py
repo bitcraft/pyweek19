@@ -240,6 +240,14 @@ class HexMapModel(object):
             self._data = dict()
             for key, cell_data in data["data"].items():
                 self._data[eval(key)] = Cell(**cell_data)
+        for cell in sorted(self._data.keys()):
+            if not self._data[cell].raised:
+                neighbors = list(coord for coord in self.surrounding(cell, False)
+                    if coord in self._data and self._data[coord].raised)
+                print(neighbors)
+                if len(neighbors) == 0:
+                    print("dirt")
+                    self._data[cell].filename = 'tileDirt.png'
 
     def get_cell(self, coords):
         return self._data.get(tuple(coords), None)
