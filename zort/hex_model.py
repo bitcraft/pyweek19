@@ -140,6 +140,11 @@ def cube_to_pixel(coords, radius):
 def collide_hex(cell0, cell1, left_radius=1.0, right_radius=1.0):
     x0, y0 = cube_to_pixel(axial_to_cube(cell0), 1)
     x1, y1 = cube_to_pixel(axial_to_cube(cell1), 1)
+
+    print "cell:", cell1
+    if cell1 == (3, 3):
+        import pdb; pdb.set_trace()
+
     dx = x1 - x0
     dy = y1 - y0
     rr = left_radius + right_radius
@@ -203,10 +208,12 @@ class HexMapModel(object):
         retval = list()
         round_coords = [int(i) for i in hex_round(coords)]
         neighbors = list(self.surrounding(round_coords))
+        print "neighbors", [axial_to_evenr(i) for i in neighbors]
         for n in neighbors:
             neigh = tuple([int(i) for i in n])
             cell = self._data.get(neigh, None)
-            if not cell:
+
+            if cell is None:
                 continue
 
             if not cell.raised:
@@ -214,6 +221,7 @@ class HexMapModel(object):
 
             if collide_hex(coords, neigh, radius, .9):
                 retval.append(neigh)
+        print "-------------------------------------------------"
         return retval
 
     def _make_file_data(self):

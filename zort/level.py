@@ -52,7 +52,22 @@ class LevelScene(Scene):
         self.needs_refresh = True
         self.lost_damage = list()
         self.current_level_module = None
-        self.model = maze.new_maze(14, 10)
+        #self.model = maze.new_maze(5, 5)
+
+        #w = config.getint('world', 'width')
+        #h = config.getint('world', 'height')
+        self.model = HexMapModel()
+        import itertools
+        for q, r in itertools.product(range(4), range(4)):
+            coords = evenr_to_axial((q, r))
+            cell = Cell()
+            cell.raised = q == r == 3
+            if cell.raised:
+                cell.height = 2
+            cell.filename = 'tileGrass.png'
+            cell.kind = 'grass'
+            self.model.add_cell(coords, cell)
+
         self.view = hex_view.HexMapView(self, self.model,
                                         config.getint('display', 'hex_radius'))
 
@@ -64,7 +79,7 @@ class LevelScene(Scene):
         #timer = Task(self.new_powerup, 5000, -1)
         #self.timers.add(timer)
 
-        self.hero = self.add_entity(Hero, 'alienBlue.png', (1, 1))
+        self.hero = self.add_entity(Hero, 'alienBlue.png', (0, 0))
         self.velocity_updates.collide_walls.add(self.hero)
         self.add_entity(Enemy, 'alienYellow.png', (1, 8))
 
