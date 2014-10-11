@@ -57,6 +57,7 @@ class LevelScene(Scene):
         self.view = None
 
     def init(self):
+        self.load_level()
         self.movement_accel = config.getfloat('world', 'player_move_accel')
         self.damage = dict()
         self.needs_refresh = True
@@ -188,8 +189,8 @@ class LevelScene(Scene):
     def resume(self):
         print("Resuming level scene")
 
-    def load_level(level_name=None):
+    def load_level(self, level_name=None):
         # teardown whatever needs to be torn down here
         if level_name is None:
             level_name = maps.keys()[0]
-        self.current_level_module = loader.load_level(level_name, level_scene)
+        self.current_level_module = loader.load_level(level_name, self)

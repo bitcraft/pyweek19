@@ -37,8 +37,9 @@ def bootstrap_game():
 
     game = Game(config.getint('display', 'target-fps'), main_surface)
     game.register_scene(TitleScene(game))
-    game.register_scene(LevelScene(game))
-    game.push_scene('level')
+    level_scene = LevelScene(game)
+    game.register_scene(level_scene)
+    level_scene.init()
     #game.scenes["level"].view.data.save_to_disk("/tmp/foo.json")
-    #game.scenes["level"].view.data.load_from_disk("/tmp/foo.json")
+    game.push_scene('level')
     return game
