@@ -15,7 +15,12 @@ class LevelSceneMode(object):
         pass
 
     def get_nearest_cell(self, coords):
+        _coords = self.scene.view.coords_from_surface(coords)
+        if _coords is not None:
+            _coords = hex_round(_coords)
+            print('highlighted cell is (ever): {}'.format(_coords))
         return self.scene.view.cell_from_surface(coords)
+
 
     def update(self, delta, events):
         for event in events:
@@ -26,6 +31,5 @@ class LevelSceneMode(object):
 
             if event.type == MOUSEBUTTONUP:
                 cell = self.get_nearest_cell(event.pos)
-                print cell
                 if cell:
                     self.handle_click(event.button, cell)

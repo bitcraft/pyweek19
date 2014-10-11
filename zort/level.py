@@ -8,7 +8,7 @@ from zort.hex_model import *
 from zort.entity import *
 from zort.environ import maze
 from zort.scenes import Scene
-from zort.euclid import Point2
+from zort.euclid import Point2, Vector3
 from zort.hero import Hero
 from zort.levels import loader
 from zort.resources import maps
@@ -69,11 +69,12 @@ class LevelScene(Scene):
 
     def new_hero(self):
         # adds new hero, but doesn't remove old one
-        self.hero = self.add_entity(Hero, 'alienBlue.png', (1, 1))
+        self.hero = self.build_entity(Hero, 'alienBlue.png', (1, 1))
+        self.add_entity(self.hero, (1, 1))
         self.velocity_updates.collide_walls.add(self.hero)
         self.pygame_event_group.add(self.hero)
 
-    def add_entity(self, enemy_class, enemy_sprite_file_name, position):
+    def build_entity(self, enemy_class, enemy_sprite_file_name, position):
         # send position in even r coordinates
         sx, sy = axial_to_sprites(evenr_to_axial(position))
         sprite = enemy_class(enemy_sprite_file_name)
@@ -81,13 +82,9 @@ class LevelScene(Scene):
         if hasattr(sprite, 'home'):
             sprite.home = sprite.position[:2]
         sprite.update_image()
-        self.view.add(sprite)
-        self.internal_event_group.add(sprite)
-        self.velocity_updates.add(sprite)
-
         return sprite
 
-    def add_button(self, door_key, door_sprite_file_name,
+    def build_button(self, door_key, door_sprite_file_name,
                    position, anchor=None):
         # send position in even r coordinates
         if anchor is None:
@@ -102,14 +99,28 @@ class LevelScene(Scene):
         self.velocity_updates.add(button)
         return button
 
-    def add_door(self, door_key, door_sprite_file_name, position):
+    def add_entity(self, entity, position):
+        sx, sy = axial_to_sprites(evenr_to_axial(position))
+        entity.position += (sx, sy, 900)
+        if hasattr(entity, 'home'):
+            entity.home = Vector3(entity.position)
+        self.view.add(entity)
+        self.internal_event_group.add(entity)
+        self.velocity_updates.add(entity)
+
+    def build_door(self, door_key, position):
         # send position in even r coordinates
+        door_sprite_file_name = 'smallRockStone.png'
         coords = evenr_to_axial(position)
         cell = self.view.data.get_cell(coords)
         door = Door(door_sprite_file_name, door_key, cell)
         self.view.add(door)
         self.internal_event_group.add(door)
         return door
+
+    def move_hero(self, position):
+        sx, sy = axial_to_sprites(evenr_to_axial(position))
+        self.hero.position = Vector3(sx, sy, 900)
 
     def setup(self):
         print("Setting up level scene")
