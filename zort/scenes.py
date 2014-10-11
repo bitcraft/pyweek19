@@ -42,7 +42,6 @@ class Game(object):
         draw_interval = 1 / float(self.target_fps)
         tick_fps = self.target_fps
         draw_timer = 0
-        event_get = event.get
         tick = self.clock.tick
         main_surface = self.main_surface
         fps_display_acc = 0

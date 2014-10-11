@@ -1,23 +1,21 @@
-import random
-
 import pygame
 from pygame.locals import *
 
-from zort import config
 from zort import hex_view
+from zort import config
 from zort import resources
-from zort.enemies import *
+from zort.hex_model import *
 from zort.entity import *
 from zort.environ import maze
+from zort.scenes import Scene
 from zort.euclid import Point2
 from zort.hero import Hero
-from zort.hex_model import *
 from zort.levels import loader
-from zort.modes.editor import EditMode
 from zort.resources import maps
-from zort.scenes import Scene
+from zort.modes.editor import EditMode
 
-__all__ = ['LevelScene']
+
+__all__ = ['LevelScene', 'Task']
 
 
 class Task(pygame.sprite.Sprite):
@@ -47,33 +45,37 @@ class Task(pygame.sprite.Sprite):
 class LevelScene(Scene):
     def __init__(self, game):
         super(LevelScene, self).__init__("level", game)
+        self.movement_accel = None
+        self.damage = None
+        self.needs_refresh = None
+        self.current_level_module = None
+        self.velocity_updates = None
+        self.internal_event_group = None
+        self.timers = None
+        self.mode = None
+        self.view = None
 
+    def init(self):
         self.movement_accel = config.getfloat('world', 'player_move_accel')
         self.damage = dict()
         self.needs_refresh = True
-        self.lost_damage = list()
-        self.current_level_module = None
-        self.model = maze.new_maze(config.getint('world', 'width'),
-                                   config.getint('world', 'height'),
-                                   num_adjacent=2)
-
-        self.view = hex_view.HexMapView(self, self.model,
-                                        config.getint('display', 'hex_radius'))
-
         self.velocity_updates = PhysicsGroup(data=self.model)
         self.internal_event_group = pygame.sprite.Group()
         self.timers = pygame.sprite.Group()
 
-        # start the silly timer to drop powerups
-        #timer = Task(self.new_powerup, 5000, -1)
-        #self.timers.add(timer)
+    def set_model(self, model):
+        self.model = model
+        # self.model = maze.new_maze(config.getint('world', 'width'),
+        #                            config.getint('world', 'height'),
+        #                            num_adjacent=2)
 
+        self.view = hex_view.HexMapView(self, self.model,
+                                        config.getint('display', 'hex_radius'))
+
+    def new_hero(self):
+        # adds new hero, but doesn't remove old one
         self.hero = self.add_entity(Hero, 'alienBlue.png', (1, 1))
         self.velocity_updates.collide_walls.add(self.hero)
-        self.add_entity(Enemy, 'alienYellow.png', (3, 8))
-
-        # this must come last
-        self.mode = EditMode(self)
 
     def add_entity(self, enemy_class, enemy_sprite_file_name, position):
         # send position in even r coordinates
@@ -199,7 +201,9 @@ class LevelScene(Scene):
             if hasattr(sprite, "handle_internal_events"):
                 sprite.handle_internal_events(self)
 
-        self.mode.update(delta, events)
+        if self.mode is not None:
+            self.mode.update(delta, events)
+
         self.velocity_updates.update(delta, self)
 
     def resume(self):
