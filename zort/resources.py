@@ -15,12 +15,12 @@ __all__ = ['load', 'sounds', 'images', 'music', 'maps', 'tiles', 'play_music',
 
 # because i am lazy
 resource_path = None
-sounds = None
-images = None
-music = None
-fonts = None
-maps = None
-tiles = None
+sounds = dict()
+images = dict()
+music = dict()
+fonts = dict()
+maps = OrderedDict()
+tiles = dict()
 border_path = None
 border = None
 
@@ -59,12 +59,12 @@ def load():
     global sounds, images, music, fonts, maps, tiles
     global border, border_path
 
-    tiles = dict()
-    sounds = dict()
-    images = dict()
-    music = dict()
-    fonts = dict()
-    maps = OrderedDict()
+    # tiles = dict()
+    # sounds = dict()
+    # images = dict()
+    # music = dict()
+    # fonts = dict()
+    # maps = OrderedDict()
 
     resource_path = config.get('paths', 'resource-path')
     resource_path = abspath(resource_path)
