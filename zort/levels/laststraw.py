@@ -31,7 +31,8 @@ def setup_level(level_scene):
     level_scene.build_door("test-door", (14, 8))
     level_scene.raise_event(button, 'Switch', key="test-door", state=True)
 
-    e = ShipPart('shipPart5.png', level_scene.load_level)
+    e = ShipPart('shipPart5.png', level_scene.load_level,
+                 kwargs={"level_name": "solong"})
     e.scale = .3
     e.update_image()
     level_scene.add_entity(e, (16, 10))

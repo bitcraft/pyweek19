@@ -28,7 +28,8 @@ def setup_level(level_scene):
     button = level_scene.build_button("door-3", "tileMagic_tile.png", (2, 2))
     button.toggle = True
 
-    e = ShipPart('shipPart1.png', level_scene.load_level)
+    e = ShipPart('shipPart1.png', level_scene.load_level,
+                 kwargs={"level_name": "lostandfound"})
     e.scale = .5
     e.update_image()
     level_scene.add_entity(e, (9, 12))

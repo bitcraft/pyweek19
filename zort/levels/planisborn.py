@@ -17,7 +17,8 @@ def setup_level(level_scene):
     Initialize your entities
     """
 
-    e = ShipPart('shipPart1.png', level_scene.load_level)
+    e = ShipPart('shipPart1.png', level_scene.load_level,
+                 kwargs={"level_name": "evilhexagonians"})
     e.scale = .5
     e.update_image()
     level_scene.add_entity(e, (15, 12))
