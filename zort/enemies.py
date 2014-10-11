@@ -53,6 +53,7 @@ class Enemy(GameEntity):
         hpos = scene.hero.position
         dist = dist_axial(sprites_to_axial(hpos),
                           sprites_to_axial(self.position))
+
         if dist <= self.ramble_radius:
             if not self.path:
                 pos = sprites_to_hex(self.position)
@@ -61,6 +62,16 @@ class Enemy(GameEntity):
                 self.cells_followed = 0
                 fsm.seek_player()
         elif fsm.isstate('seeking'):
+
+            # distance to the player
+            dist = abs(self.position - hpos)
+
+            # set acceleration to move towards the player
+            self.acceleration = dist.normalized() * self.max_accel
+
+            # distance traveld from home
+            dist = abs(self.home_position - self.position)
+
             if not self.path:
                 if self.cells_followed < self.follow_persistence:
                     pos = sprites_to_hex(self.position)
@@ -222,10 +233,13 @@ class Saucer(Enemy):
         self.laser_sound.set_volume(.4)
         self.laser_sound.play()
         g = self.view_group
+
         laser = GameEntity('laserGreen2.png')
         self.spawn(laser)
+
         laser.anchor = Vector2(*laser.rect.midtop)
         laser.update_image()
         laser.attach(self, (0, 0, 0))
+
         t = Task(laser.kill, 10000)
         self.timers.add(t)

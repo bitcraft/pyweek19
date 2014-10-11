@@ -48,7 +48,6 @@ def get_text(heading):
             continue
         yield line
 
-
 def load():
     pygame.font.init()
 
