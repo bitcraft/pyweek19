@@ -31,6 +31,18 @@ def setup_level(level_scene):
     level_scene.build_door("test-door", (14, 8))
     level_scene.raise_event(button, 'Switch', key="test-door", state=True)
 
+    e = level_scene.build_entity(Enemy, "alienGreen.png", (4, 4))
+    e.scale = 1
+    e.update_image()
+
+    e = level_scene.build_entity(Enemy, "alienGreen.png", (6, 12))
+    e.scale = 1.5
+    e.update_image()
+
+    e = level_scene.build_entity(Enemy, "alienGreen.png", (10, 8))
+    e.scale = 1
+    e.update_image()
+
     e = ShipPart('shipPart6.png', level_scene.load_level,
                  kwargs={"level_name": "finderskeepers"})
     e.scale = .5
