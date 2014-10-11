@@ -76,16 +76,14 @@ class Enemy(GameEntity):
         if fsm.isstate('going_home'):
             if self.home_position is None:
                 self.home_position = Vector3(*self.position)
-                fsm.home()
 
             if not self.position == self.home_position:
                 if not self.path:
                     start = sprites_to_hex(self.position)
                     home = sprites_to_hex(self.home_position)
                     self.path = scene.model.pathfind(start, home)[0]
-
             else:
-                fsm.home()
+                fsm.ramble()
 
         if fsm.isstate('rambling'):
             if not self.path:
