@@ -87,7 +87,7 @@ class LevelScene(Scene):
             anchor = Point2(30, 60)
         sx, sy = axial_to_sprites(evenr_to_axial(position))
         button = Button(door_sprite_file_name, door_key)
-        button.position += (sx, sy, 0)
+        button.position = Vector3(sx, sy, 0)
         button.anchor = anchor
         button.update_image()
         self.view.add(button, layer=0)
