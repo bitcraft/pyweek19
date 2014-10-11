@@ -120,3 +120,13 @@ class EditMode(LevelSceneMode):
             refreshed = True
 
         return dirty
+
+
+    def update(self, delta, events):
+        super(EditMode, self).update(delta, events)
+        for event in events:
+            if event.type == KEYDOWN:
+                if event.key == K_F5:
+                    path = config.get('general', 'save_to_map')
+                    self.scene.view.data.save_to_disk(path)
+
