@@ -345,10 +345,10 @@ class Button(Collider):
         self.key = key
 
     def on_collide(self, scene, other):
-        scene.raise_event(self, 'Switch', key=self.key, state=True)
+        scene.raise_event(self, 'Switch', key=self.key, state=False)
 
     def on_seperate(self, scene, other):
-        scene.raise_event(self, 'Switch', key=self.key, state=False)
+        scene.raise_event(self, 'Switch', key=self.key, state=True)
 
 
 class Rock(GameEntity):
@@ -363,8 +363,7 @@ class Rock(GameEntity):
 class Door(GameEntity):
     def __init__(self, filename, key, cell):
         super(Door, self).__init__(filename)
-        assert (key is not None)
-        assert (cell is not None)
+        assert (key is not None and cell is not None)
         self.key = key
         self.cell = cell
         self.visible = False
