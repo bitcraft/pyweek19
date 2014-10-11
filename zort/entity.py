@@ -12,7 +12,9 @@ __all__ = ['PhysicsGroup',
            'Button',
            'Door',
            'CallbackEntity',
-           'ShipPart']
+           'ShipPart',
+           'filter_interested',
+           'filter_belong']
 
 
 def filter_interested(scene, interested):
