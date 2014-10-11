@@ -1,6 +1,8 @@
 from os.path import join as jpath
 from os.path import basename, abspath
 from os.path import isfile
+
+from collections import OrderedDict
 import pygame
 import logging
 import glob
@@ -62,7 +64,7 @@ def load():
     images = dict()
     music = dict()
     fonts = dict()
-    maps = dict()
+    maps = OrderedDict()
 
     resource_path = config.get('paths', 'resource-path')
     resource_path = abspath(resource_path)
