@@ -10,7 +10,7 @@ Make sure there is at least one "=" to signify the end!
 Going Down!
 ===========
 
-You, Zort! The legendary explorer, have been shot down from orbit by a Hexagonian defense platform while surveying the plan Hexus.
+You, Zort! The legendary explorer, have been shot down from orbit by a Hexagonian defense platform while surveying the planet Hexus.
 
 You know your chances of survival are slim. Your ship has crash landed and you don't know where it is. Time to take a look around and get your bearings on this oddly shaped world.
 =
@@ -19,7 +19,7 @@ You know your chances of survival are slim. Your ship has crash landed and you d
 A Plan is Born
 ==============
 
-Thanks to your handy dandy iCost 9000 mobile ship tracker you have located your ship. The damange report is bad. You're going to have to have to find or steal parts to repair it.
+Thanks to your handy dandy iCost 9000 mobile ship tracker you have located your ship. The damage report is bad. You're going to have to have to find or steal parts to repair it.
 
 Better get looking...
 =
