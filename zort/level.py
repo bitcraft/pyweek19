@@ -194,5 +194,5 @@ class LevelScene(Scene):
     def load_level(self, level_name=None):
         # teardown whatever needs to be torn down here
         if level_name is None:
-            level_name = maps.keys()[0]
+            level_name = next((k for k in maps.keys()))
         self.current_level_module = loader.load_level(level_name, self)
