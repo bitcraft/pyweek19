@@ -13,22 +13,24 @@ def setup_level(level_scene):
     """
     Initialize your entities
     """
-    button = level_scene.build_button("door-1", "tileRock_tile.png", (15, 6))
+    button = level_scene.build_button("door-1", "tileMagic_tile.png", (15, 6))
     level_scene.build_door("door-1", (5, 9))
     level_scene.raise_event(button, 'Switch', key="door-1", state=True)
 
-    button = level_scene.build_button("door-2", "tileRock_tile.png", (2, 11))
+    button = level_scene.build_button("door-2", "tileMagic_tile.png", (2, 11))
     level_scene.build_door("door-2", (14, 3))
     level_scene.raise_event(button, 'Switch', key="door-2", state=True)
 
-    button = level_scene.build_button("door-3", "tileRock_tile.png", (10, 1))
+    button = level_scene.build_button("door-3", "tileMagic_tile.png", (10, 1))
     level_scene.build_door("door-3", (18, 9))
     level_scene.raise_event(button, 'Switch', key="door-3", state=True)
 
-    button = level_scene.build_button("door-3", "tileRock_tile.png", (2, 2))
+    button = level_scene.build_button("door-3", "tileMagic_tile.png", (2, 2))
     button.toggle = True
 
-    e = ShipPart('smallRockStone.png', level_scene.load_level)
+    e = ShipPart('shipPart1.png', level_scene.load_level)
+    e.scale = .5
+    e.update_image()
     level_scene.add_entity(e, (9, 12))
 
     e = level_scene.build_entity(Enemy, "alienGreen.png", (4, 4))

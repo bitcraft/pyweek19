@@ -17,7 +17,9 @@ def setup_level(level_scene):
     Initialize your entities
     """
 
-    e = ShipPart('smallRockStone.png', level_scene.load_level)
+    e = ShipPart('shipPart1.png', level_scene.load_level)
+    e.scale = .5
+    e.update_image()
     level_scene.add_entity(e, (15, 12))
 
     # dialog must be called after video is ready, so give it a delay

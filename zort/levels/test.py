@@ -26,7 +26,7 @@ def setup_level(level_scene):
     level_scene.build_entity(Saucer, 'shipPink_manned.png', (4, 4))
     level_scene.build_entity(Enemy, "alienGreen.png", (4, 4))
 
-    level_scene.build_button("testDoor", "tileRock_tile.png", (2, 4))
+    level_scene.build_button("testDoor", "tileMagic_tile.png", (2, 4))
     level_scene.build_door("testDoor", (0, 0))
 
     e = ShipPart('smallRockStone.png', level_scene.load_level)

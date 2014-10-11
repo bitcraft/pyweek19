@@ -108,6 +108,7 @@ class GameEntity(pygame.sprite.DirtySprite):
         if self.carried is not None:
             self.drop_item_sound.play()
             for entity in self.carried:
+                entity._layer = 1
                 entity.acceleration.z = .0025
                 entity.release()
                 entity.wake()
@@ -226,18 +227,15 @@ class Button(GameEntity):
         self.update_image()
         self.key = key
         self.toggle = False  # if true the door will only work when colliding
-        self._collided = set()
         self.collide_sound = resources.sounds['stoneDragHit3.ogg']
         self.separate_sound = resources.sounds['stoneHit3.ogg']
 
     def on_collide(self, scene, other):
         scene.raise_event(self, 'Switch', key=self.key, state=False)
         self.collide_sound.play()
-        self._collided.add(other)
 
     def on_separate(self, scene, other):
         self.separate_sound.play()
-        self._collided.remove(other)
         if len(self._collided) == 0 and self.toggle:
             scene.raise_event(self, 'Switch', key=self.key, state=True)
 
@@ -285,13 +283,19 @@ class Door(GameEntity):
 class CallbackEntity(GameEntity):
     def __init__(self, filename, callback, args=None, kwargs=None):
         super(CallbackEntity, self).__init__(filename)
+        self.activate_sound = resources.sounds['spring-boing.ogg']
         self._callback = callback
         self._args = args if args else list()
         self._kwargs = kwargs if kwargs else dict()
 
     def on_collide(self, scene, other):
+        self.activate_sound.play()
         self._callback(*self._args, **self._kwargs)
 
 
 class ShipPart(CallbackEntity):
-    pass
+    def __init__(self, filename, *args, **kwargs):
+        super(ShipPart, self).__init__(filename, *args, **kwargs)
+        self.bounce_sound = resources.sounds['platesHit5.ogg']
+        self.radius = .5
+        self.update_image()
