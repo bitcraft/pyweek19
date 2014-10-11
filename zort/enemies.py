@@ -50,6 +50,9 @@ class Enemy(GameEntity):
     def update_ai(self, scene, event):
         fsm = self.fsm
 
+        if not hasattr(scene, "hero"):
+            return
+
         hpos = scene.hero
         dist = sprites_to_axial(hpos - self.position)
         if dist <= self.ramble_radius:
