@@ -18,16 +18,13 @@ def setup_level(level_scene):
     level_scene.build_door("door-1", (5, 9))
     level_scene.raise_event(button, 'Switch', key="door-1", state=True)
 
-
     button = level_scene.build_button("door-2", "tileRock_tile.png", (2, 12))
     level_scene.build_door("door-2", (14, 3))
     level_scene.raise_event(button, 'Switch', key="door-2", state=True)
 
-
     button = level_scene.build_button("door-3", "tileRock_tile.png", (9, 2))
     level_scene.build_door("door-3", (18, 9))
     level_scene.raise_event(button, 'Switch', key="door-3", state=True)
-
 
     e = ShipPart('smallRockStone.png', level_scene.load_level)
     level_scene.add_entity(e, (9, 12))

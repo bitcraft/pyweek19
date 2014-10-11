@@ -8,10 +8,10 @@
       "filename": "tileGrass.png"
     }, 
     "(11, 8)": {
-      "height": 0.0, 
-      "raised": false, 
+      "height": 1.0, 
+      "raised": true, 
       "cost": 0, 
-      "filename": "tileGrass.png"
+      "filename": "tileRock_full.png"
     }, 
     "(3, 6)": {
       "height": 0.0, 
@@ -26,16 +26,16 @@
       "filename": "tileRock_full.png"
     }, 
     "(6, 4)": {
-      "height": 1.0, 
-      "raised": true, 
-      "cost": 0, 
-      "filename": "tileRock_full.png"
-    }, 
-    "(9, 11)": {
       "height": 0.0, 
       "raised": false, 
       "cost": 0, 
       "filename": "tileGrass.png"
+    }, 
+    "(9, 11)": {
+      "height": 1.0, 
+      "raised": true, 
+      "cost": 0, 
+      "filename": "tileRock_full.png"
     }, 
     "(-2, 12)": {
       "height": 0.0, 
@@ -44,16 +44,16 @@
       "filename": "tileGrass.png"
     }, 
     "(-3, 11)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(2, 7)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(10, 10)": {
       "height": 0.0, 
@@ -62,10 +62,10 @@
       "filename": "tileGrass.png"
     }, 
     "(0, 12)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(10, 12)": {
       "height": 0.0, 
@@ -74,16 +74,16 @@
       "filename": "tileGrass.png"
     }, 
     "(14, 5)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(11, 10)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(11, 12)": {
       "height": 0.0, 
@@ -92,10 +92,10 @@
       "filename": "tileGrass.png"
     }, 
     "(8, 5)": {
-      "height": 0.0, 
-      "raised": false, 
+      "height": 1.0, 
+      "raised": true, 
       "cost": 0, 
-      "filename": "tileGrass.png"
+      "filename": "tileRock_full.png"
     }, 
     "(17, 0)": {
       "height": 1.0, 
@@ -104,10 +104,10 @@
       "filename": "tileRock_full.png"
     }, 
     "(5, 9)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(2, 4)": {
       "height": 0.0, 
@@ -122,10 +122,10 @@
       "filename": "tileGrass.png"
     }, 
     "(-1, 11)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(16, 2)": {
       "height": 0.0, 
@@ -164,22 +164,22 @@
       "filename": "tileGrass.png"
     }, 
     "(13, 10)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(12, 4)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(-2, 9)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(-1, 2)": {
       "height": 1.0, 
@@ -224,10 +224,10 @@
       "filename": "tileGrass.png"
     }, 
     "(-3, 10)": {
-      "height": 0.0, 
-      "raised": false, 
+      "height": 1.0, 
+      "raised": true, 
       "cost": 0, 
-      "filename": "tileGrass.png"
+      "filename": "tileRock_full.png"
     }, 
     "(16, 6)": {
       "height": 1.0, 
@@ -242,16 +242,16 @@
       "filename": "tileGrass.png"
     }, 
     "(10, 11)": {
-      "height": 1.0, 
-      "raised": true, 
-      "cost": 0, 
-      "filename": "tileRock_full.png"
-    }, 
-    "(12, 2)": {
       "height": 0.0, 
       "raised": false, 
       "cost": 0, 
       "filename": "tileGrass.png"
+    }, 
+    "(12, 2)": {
+      "height": 1.0, 
+      "raised": true, 
+      "cost": 0, 
+      "filename": "tileRock_full.png"
     }, 
     "(14, 4)": {
       "height": 1.0, 
@@ -260,10 +260,10 @@
       "filename": "tileRock_full.png"
     }, 
     "(13, 2)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(9, 5)": {
       "height": 0.0, 
@@ -278,10 +278,10 @@
       "filename": "tileGrass.png"
     }, 
     "(11, 9)": {
-      "height": 0.0, 
-      "raised": false, 
+      "height": 1.0, 
+      "raised": true, 
       "cost": 0, 
-      "filename": "tileGrass.png"
+      "filename": "tileRock_full.png"
     }, 
     "(8, 6)": {
       "height": 1.0, 
@@ -302,10 +302,10 @@
       "filename": "tileGrass.png"
     }, 
     "(-4, 9)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(-1, 10)": {
       "height": 0.0, 
@@ -326,10 +326,10 @@
       "filename": "tileRock_full.png"
     }, 
     "(15, 5)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(-3, 6)": {
       "height": 1.0, 
@@ -344,10 +344,10 @@
       "filename": "tileRock_full.png"
     }, 
     "(4, 5)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(3, 11)": {
       "height": 0.0, 
@@ -356,10 +356,10 @@
       "filename": "tileGrass.png"
     }, 
     "(12, 3)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(10, 2)": {
       "height": 0.0, 
@@ -368,10 +368,10 @@
       "filename": "tileGrass.png"
     }, 
     "(5, 2)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(-5, 13)": {
       "height": 1.0, 
@@ -392,10 +392,10 @@
       "filename": "tileGrass.png"
     }, 
     "(6, 2)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(4, 12)": {
       "height": 0.0, 
@@ -428,10 +428,10 @@
       "filename": "tileRock_full.png"
     }, 
     "(-2, 10)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(0, 11)": {
       "height": 0.0, 
@@ -452,10 +452,10 @@
       "filename": "tileGrass.png"
     }, 
     "(13, 3)": {
-      "height": 0.0, 
-      "raised": false, 
+      "height": 1.0, 
+      "raised": true, 
       "cost": 0, 
-      "filename": "tileGrass.png"
+      "filename": "tileRock_full.png"
     }, 
     "(17, 4)": {
       "height": 1.0, 
@@ -482,10 +482,10 @@
       "filename": "tileRock_full.png"
     }, 
     "(8, 10)": {
-      "height": 0.0, 
-      "raised": false, 
+      "height": 1.0, 
+      "raised": true, 
       "cost": 0, 
-      "filename": "tileGrass.png"
+      "filename": "tileRock_full.png"
     }, 
     "(-4, 8)": {
       "height": 1.0, 
@@ -506,10 +506,10 @@
       "filename": "tileGrass.png"
     }, 
     "(0, 5)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(15, 7)": {
       "height": 1.0, 
@@ -518,10 +518,10 @@
       "filename": "tileRock_full.png"
     }, 
     "(10, 5)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(11, 6)": {
       "height": 0.0, 
@@ -536,10 +536,10 @@
       "filename": "tileGrass.png"
     }, 
     "(3, 12)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(4, 6)": {
       "height": 1.0, 
@@ -578,10 +578,10 @@
       "filename": "tileGrass.png"
     }, 
     "(6, 5)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(-3, 12)": {
       "height": 0.0, 
@@ -590,10 +590,10 @@
       "filename": "tileGrass.png"
     }, 
     "(8, 7)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(-4, 10)": {
       "height": 0.0, 
@@ -656,10 +656,10 @@
       "filename": "tileGrass.png"
     }, 
     "(0, 10)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(-2, 11)": {
       "height": 0.0, 
@@ -692,16 +692,16 @@
       "filename": "tileRock_full.png"
     }, 
     "(-3, 9)": {
-      "height": 0.0, 
-      "raised": false, 
-      "cost": 0, 
-      "filename": "tileGrass.png"
-    }, 
-    "(5, 8)": {
       "height": 1.0, 
       "raised": true, 
       "cost": 0, 
       "filename": "tileRock_full.png"
+    }, 
+    "(5, 8)": {
+      "height": 0.0, 
+      "raised": false, 
+      "cost": 0, 
+      "filename": "tileGrass.png"
     }, 
     "(2, 2)": {
       "height": 0.0, 
@@ -734,10 +734,10 @@
       "filename": "tileGrass.png"
     }, 
     "(2, 5)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(7, 1)": {
       "height": 0.0, 
@@ -752,16 +752,16 @@
       "filename": "tileRock_full.png"
     }, 
     "(10, 4)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(11, 7)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(7, 6)": {
       "height": 0.0, 
@@ -770,10 +770,10 @@
       "filename": "tileGrass.png"
     }, 
     "(14, 6)": {
-      "height": 0.0, 
-      "raised": false, 
+      "height": 1.0, 
+      "raised": true, 
       "cost": 0, 
-      "filename": "tileGrass.png"
+      "filename": "tileRock_full.png"
     }, 
     "(12, 1)": {
       "height": 0.0, 
@@ -806,10 +806,10 @@
       "filename": "tileRock_full.png"
     }, 
     "(13, 8)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(2, 0)": {
       "height": 1.0, 
@@ -824,10 +824,10 @@
       "filename": "tileRock_full.png"
     }, 
     "(14, 3)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(16, 4)": {
       "height": 0.0, 
@@ -836,10 +836,10 @@
       "filename": "tileGrass.png"
     }, 
     "(13, 7)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(14, 1)": {
       "height": 0.0, 
@@ -860,10 +860,10 @@
       "filename": "tileGrass.png"
     }, 
     "(1, 9)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(1, 1)": {
       "height": 0.0, 
@@ -872,10 +872,10 @@
       "filename": "tileGrass.png"
     }, 
     "(11, 11)": {
-      "height": 0.0, 
-      "raised": false, 
+      "height": 1.0, 
+      "raised": true, 
       "cost": 0, 
-      "filename": "tileGrass.png"
+      "filename": "tileRock_full.png"
     }, 
     "(3, 2)": {
       "height": 0.0, 
@@ -908,10 +908,10 @@
       "filename": "tileGrass.png"
     }, 
     "(4, 10)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(6, 10)": {
       "height": 1.0, 
@@ -920,16 +920,16 @@
       "filename": "tileRock_full.png"
     }, 
     "(0, 9)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(-1, 8)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(0, 7)": {
       "height": 0.0, 
@@ -944,10 +944,10 @@
       "filename": "tileRock_full.png"
     }, 
     "(10, 7)": {
-      "height": 0.0, 
-      "raised": false, 
+      "height": 1.0, 
+      "raised": true, 
       "cost": 0, 
-      "filename": "tileGrass.png"
+      "filename": "tileRock_full.png"
     }, 
     "(8, 11)": {
       "height": 0.0, 
@@ -968,10 +968,10 @@
       "filename": "tileGrass.png"
     }, 
     "(3, 3)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(2, 13)": {
       "height": 1.0, 
@@ -980,10 +980,10 @@
       "filename": "tileRock_full.png"
     }, 
     "(-2, 6)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(5, 7)": {
       "height": 0.0, 
@@ -1028,10 +1028,10 @@
       "filename": "tileGrass.png"
     }, 
     "(17, 1)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(4, 9)": {
       "height": 0.0, 
@@ -1052,10 +1052,10 @@
       "filename": "tileRock_full.png"
     }, 
     "(11, 5)": {
-      "height": 0.0, 
-      "raised": false, 
+      "height": 1.0, 
+      "raised": true, 
       "cost": 0, 
-      "filename": "tileGrass.png"
+      "filename": "tileRock_full.png"
     }, 
     "(-2, 5)": {
       "height": 0.0, 
@@ -1064,10 +1064,10 @@
       "filename": "tileGrass.png"
     }, 
     "(6, 12)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(-1, 6)": {
       "height": 0.0, 
@@ -1088,10 +1088,10 @@
       "filename": "tileRock_full.png"
     }, 
     "(0, 3)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(-7, 13)": {
       "height": 1.0, 
@@ -1112,10 +1112,10 @@
       "filename": "tileGrass.png"
     }, 
     "(5, 10)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(3, 10)": {
       "height": 0.0, 
@@ -1130,10 +1130,10 @@
       "filename": "tileGrass.png"
     }, 
     "(15, 2)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(7, 5)": {
       "height": 0.0, 
@@ -1148,16 +1148,16 @@
       "filename": "tileGrass.png"
     }, 
     "(6, 8)": {
-      "height": 0.0, 
-      "raised": false, 
-      "cost": 0, 
-      "filename": "tileGrass.png"
-    }, 
-    "(12, 7)": {
       "height": 1.0, 
       "raised": true, 
       "cost": 0, 
       "filename": "tileRock_full.png"
+    }, 
+    "(12, 7)": {
+      "height": 0.0, 
+      "raised": false, 
+      "cost": 0, 
+      "filename": "tileGrass.png"
     }, 
     "(10, 6)": {
       "height": 0.0, 
@@ -1166,22 +1166,22 @@
       "filename": "tileGrass.png"
     }, 
     "(10, 3)": {
-      "height": 1.0, 
-      "raised": true, 
-      "cost": 0, 
-      "filename": "tileRock_full.png"
-    }, 
-    "(5, 6)": {
       "height": 0.0, 
       "raised": false, 
       "cost": 0, 
       "filename": "tileGrass.png"
     }, 
-    "(7, 7)": {
+    "(5, 6)": {
       "height": 1.0, 
       "raised": true, 
       "cost": 0, 
       "filename": "tileRock_full.png"
+    }, 
+    "(7, 7)": {
+      "height": 0.0, 
+      "raised": false, 
+      "cost": 0, 
+      "filename": "tileGrass.png"
     }, 
     "(8, 8)": {
       "height": 1.0, 
@@ -1196,16 +1196,16 @@
       "filename": "tileGrass.png"
     }, 
     "(8, 2)": {
-      "height": 1.0, 
-      "raised": true, 
-      "cost": 0, 
-      "filename": "tileRock_full.png"
-    }, 
-    "(0, 6)": {
       "height": 0.0, 
       "raised": false, 
       "cost": 0, 
       "filename": "tileGrass.png"
+    }, 
+    "(0, 6)": {
+      "height": 1.0, 
+      "raised": true, 
+      "cost": 0, 
+      "filename": "tileRock_full.png"
     }, 
     "(14, 7)": {
       "height": 0.0, 
@@ -1214,10 +1214,10 @@
       "filename": "tileGrass.png"
     }, 
     "(5, 3)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(6, 13)": {
       "height": 1.0, 
@@ -1256,16 +1256,16 @@
       "filename": "tileRock_full.png"
     }, 
     "(7, 10)": {
-      "height": 1.0, 
-      "raised": true, 
-      "cost": 0, 
-      "filename": "tileRock_full.png"
-    }, 
-    "(1, 7)": {
       "height": 0.0, 
       "raised": false, 
       "cost": 0, 
       "filename": "tileGrass.png"
+    }, 
+    "(1, 7)": {
+      "height": 1.0, 
+      "raised": true, 
+      "cost": 0, 
+      "filename": "tileRock_full.png"
     }, 
     "(-4, 7)": {
       "height": 1.0, 
@@ -1280,10 +1280,10 @@
       "filename": "tileRock_full.png"
     }, 
     "(10, 9)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(-2, 4)": {
       "height": 1.0, 
@@ -1304,16 +1304,16 @@
       "filename": "tileGrass.png"
     }, 
     "(6, 6)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(2, 1)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(16, 1)": {
       "height": 0.0, 
@@ -1364,10 +1364,10 @@
       "filename": "tileGrass.png"
     }, 
     "(7, 3)": {
-      "height": 0.0, 
-      "raised": false, 
+      "height": 1.0, 
+      "raised": true, 
       "cost": 0, 
-      "filename": "tileGrass.png"
+      "filename": "tileRock_full.png"
     }, 
     "(6, 9)": {
       "height": 0.0, 
@@ -1382,16 +1382,16 @@
       "filename": "tileRock_full.png"
     }, 
     "(12, 6)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(-2, 7)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(1, 10)": {
       "height": 0.0, 
@@ -1400,16 +1400,16 @@
       "filename": "tileGrass.png"
     }, 
     "(4, 4)": {
-      "height": 0.0, 
-      "raised": false, 
-      "cost": 0, 
-      "filename": "tileGrass.png"
-    }, 
-    "(8, 3)": {
       "height": 1.0, 
       "raised": true, 
       "cost": 0, 
       "filename": "tileRock_full.png"
+    }, 
+    "(8, 3)": {
+      "height": 0.0, 
+      "raised": false, 
+      "cost": 0, 
+      "filename": "tileGrass.png"
     }, 
     "(3, 13)": {
       "height": 1.0, 
@@ -1418,10 +1418,10 @@
       "filename": "tileRock_full.png"
     }, 
     "(12, 9)": {
-      "height": 0.0, 
-      "raised": false, 
+      "height": 1.0, 
+      "raised": true, 
       "cost": 0, 
-      "filename": "tileGrass.png"
+      "filename": "tileRock_full.png"
     }, 
     "(-4, 11)": {
       "height": 0.0, 
@@ -1442,10 +1442,10 @@
       "filename": "tileRock_full.png"
     }, 
     "(1, 8)": {
-      "height": 0.0, 
-      "raised": false, 
+      "height": 1.0, 
+      "raised": true, 
       "cost": 0, 
-      "filename": "tileGrass.png"
+      "filename": "tileRock_full.png"
     }, 
     "(11, 2)": {
       "height": 1.0, 
@@ -1478,10 +1478,10 @@
       "filename": "tileRock_full.png"
     }, 
     "(0, 8)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(1, 6)": {
       "height": 0.0, 
@@ -1490,16 +1490,16 @@
       "filename": "tileGrass.png"
     }, 
     "(7, 11)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(2, 3)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(2, 8)": {
       "height": 0.0, 
@@ -1514,10 +1514,10 @@
       "filename": "tileGrass.png"
     }, 
     "(10, 8)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(5, 4)": {
       "height": 0.0, 
@@ -1538,16 +1538,16 @@
       "filename": "tileGrass.png"
     }, 
     "(1, 11)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(2, 6)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(16, 0)": {
       "height": 1.0, 
@@ -1556,10 +1556,10 @@
       "filename": "tileRock_full.png"
     }, 
     "(3, 8)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(18, 0)": {
       "height": 1.0, 
@@ -1592,10 +1592,10 @@
       "filename": "tileGrass.png"
     }, 
     "(12, 5)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(10, 0)": {
       "height": 1.0, 
@@ -1640,10 +1640,10 @@
       "filename": "tileRock_full.png"
     }, 
     "(9, 4)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(1, 13)": {
       "height": 1.0, 
@@ -1652,10 +1652,10 @@
       "filename": "tileRock_full.png"
     }, 
     "(-5, 11)": {
-      "height": 1.0, 
-      "raised": true, 
+      "height": 0.0, 
+      "raised": false, 
       "cost": 0, 
-      "filename": "tileRock_full.png"
+      "filename": "tileGrass.png"
     }, 
     "(-4, 12)": {
       "height": 0.0, 
@@ -1676,10 +1676,10 @@
       "filename": "tileGrass.png"
     }, 
     "(7, 2)": {
-      "height": 0.0, 
-      "raised": false, 
+      "height": 1.0, 
+      "raised": true, 
       "cost": 0, 
-      "filename": "tileGrass.png"
+      "filename": "tileRock_full.png"
     }
   }, 
   "height": 14
