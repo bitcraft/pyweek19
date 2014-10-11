@@ -57,6 +57,9 @@ class LevelScene(Scene):
         self.view = None
 
     def init(self):
+        self.model = HexMapModel()
+        self.view = hex_view.HexMapView(
+            self, self.model, config.getint('display', 'hex_radius'))
         self.load_level()
         self.movement_accel = config.getfloat('world', 'player_move_accel')
         self.damage = dict()
@@ -65,15 +68,6 @@ class LevelScene(Scene):
         self.internal_event_group = pygame.sprite.Group()
         self.pygame_event_group = pygame.sprite.Group()
         self.timers = pygame.sprite.Group()
-
-    def set_model(self, model):
-        self.model = model
-        # self.model = maze.new_maze(config.getint('world', 'width'),
-        #                            config.getint('world', 'height'),
-        #                            num_adjacent=2)
-
-        self.view = hex_view.HexMapView(self, self.model,
-                                        config.getint('display', 'hex_radius'))
 
     def new_hero(self):
         # adds new hero, but doesn't remove old one
