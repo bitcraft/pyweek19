@@ -1,11 +1,11 @@
 import random
 
 from fysom import Fysom
-from zort.euclid import Vector2, Vector3
 
-from zort.level import Task
 from zort.entity import GameEntity
+from zort.euclid import Vector2, Vector3
 from zort.hex_model import *
+from zort.level import Task
 from zort import resources
 
 
@@ -32,9 +32,10 @@ class Enemy(GameEntity):
         self.move_sound = resources.sounds['scifidrone.wav']
         self.target_position = None
         self.home_position = None
-        self.ramble_radius = 2
+        self.ramble_radius = 4
         self.cells_followed = 0
         self.follow_persistence = round(self.ramble_radius * 1.5)
+        self.avoid_raised = True
         self.path = None
         self.cell_snap = .01
         self.accel_speed = .000095
@@ -56,64 +57,71 @@ class Enemy(GameEntity):
     def handle_internal_events(self, scene):
         super(Enemy, self).handle_internal_events(scene)
         self.update_ai(scene, None)
-        pass
 
     def update_ai(self, scene, event):
         fsm = self.fsm
 
+        if fsm.isstate('home'):
+            self.home_position = Vector3(*self.position)
+            fsm.ramble()
+            self.path = None
+
+        blacklist = set()
+
         hpos = scene.hero.position
-        dist = abs(self.position - hpos)
+        pos = self.position
+        dist = abs(dist_axial(sprites_to_axial(pos), sprites_to_axial(hpos)))
         if dist <= self.ramble_radius:
-            pos = sprites_to_hex(self.position)
+            pos = sprites_to_hex(pos)
             next = sprites_to_hex(hpos)
-            self.path = list(scene.model.pathfind(pos, next)[0])
-            print("Seeking", self.path)
+            self.path = scene.model.pathfind(
+                pos, next, blacklist, self.avoid_raised)[0]
             self.cells_followed = 0
             if not fsm.isstate('seeking'):
                 fsm.seek_player()
+            if self.path:
+                next = self.path[-1]
+                for node in reversed(self.path[:-1]):
+                    if abs(next[0]-node[0]) > 1 or abs(next[1]-node[1]) > 1:
+                        print(next, node)
+                    next = node
         elif fsm.isstate('seeking'):
-            if not self.path:
-                if self.cells_followed <= self.follow_persistence:
-                    pos = sprites_to_hex(self.position)
+            if self.cells_followed <= self.follow_persistence:
+                if not self.path:
+                    pos = sprites_to_hex(pos)
                     next = sprites_to_hex(hpos)
-                    self.path = list(scene.model.pathfind(pos, next)[0])
-                    print("Seeking", self.path)
+                    self.path = scene.model.pathfind(
+                        pos, next, blacklist, self.avoid_raised)[0]
+                    return
                 else:
                     fsm.go_home()
                     self.path = None
             else:
                 fsm.go_home()
-
-        if fsm.isstate('home'):
-            fsm.ramble()
-            self.path = None
+                self.path = None
 
         if fsm.isstate('going_home'):
-            if self.home_position is None:
-                self.home_position = Vector3(*self.position)
-
-            if not self.position == self.home_position:
+            if abs(self.position - self.home_position) >= self.cell_snap:
                 if not self.path:
                     start = sprites_to_hex(self.position)
                     home = sprites_to_hex(self.home_position)
-                    self.path = list(scene.model.pathfind(start, home)[0])
-                    print("Going home", self.path)
+                    self.path = scene.model.pathfind(
+                        start, home, blacklist, self.avoid_raised)[0]
+                    return
             else:
                 fsm.ramble()
+                self.path = None
 
         if fsm.isstate('rambling'):
             if not self.path:
-                if self.home_position is None:
-                    self.home_position = Vector3(*self.position)
-                    self.home_position.z = 0
-
                 blacklist = {sprites_to_hex(sprite.position)
                              for sprite in scene.internal_event_group}
-
                 pos = sprites_to_hex(self.position)
                 home = sprites_to_hex(self.home_position)
-                self.path = list(scene.model.pathfind_ramble(
-                    pos, home, self.ramble_radius, blacklist)[0])
+                self.path = scene.model.pathfind_ramble(
+                    pos, home, self.ramble_radius,
+                    blacklist, self.avoid_raised)[0]
+                return
 
     def update(self, delta):
         super(Enemy, self).update(delta)
@@ -122,22 +130,21 @@ class Enemy(GameEntity):
         grounded = self.grounded
         moving = self.velocity.x or self.velocity.y or self.velocity.z
 
-        if self.path is not None:
+        if self.path:
             if not moving and self.target_position is None:
-                self.target_position = Vector3(*axial_to_sprites(
-                    self.path.pop(-1)))
+                self.target_position = Vector3(
+                    *axial_to_sprites(self.path.pop(-1)))
                 self.target_position.z = self.position.z
-                if fsm.isstate('seeking'):
-                    self.cells_followed += 1
 
             if grounded and self.target_position is not None:
                 self.wake()
                 self.direction = self.target_position - self.position
                 self.acceleration = self.direction.normalized() * self.max_accel
                 if abs(self.direction) <= self.cell_snap:
-                    self.position = Vector3(*self.target_position)
                     self.target_position = None
                     self.stop()
+                    if fsm.isstate('seeking'):
+                        self.cells_followed += 1
         else:
             self.stop()
 
@@ -179,6 +186,8 @@ class Saucer(Enemy):
         self.laser_sound = resources.sounds['z_laser-gun-2.wav']
         #self.move_sound = resources.sounds['lose7.ogg']
         self.ramble_radius = 20
+        self.follow_persistence = self.ramble_radius
+        self.avoid_raised = False
         self.cell_snap = 1
         self.max_accel = .0009
         self.direction = Vector3(0, 0, 0)
@@ -199,32 +208,28 @@ class Saucer(Enemy):
 
         fsm = self.fsm
         grounded = self.grounded
-        moving = self.velocity.x or self.velocity.y or self.velocity.z
 
         if self.position.z == 100:
             self.stop()
             self._next = True
 
-        if self.path is not None:
+        if self.path:
             if self._next and self.target_position is None:
                 self._next = False
                 self.target_position = Vector3(*axial_to_sprites(
                     self.path.pop(-1)))
                 self.target_position.z = self.position.z
-                if fsm.isstate('seeking'):
-                    self.cells_followed += 1
 
             if grounded and self.target_position is not None:
                 self.wake()
                 direction = self.target_position - self.position
                 self.acceleration += direction.normalized() * self.max_accel
                 if abs(self.direction) <= self.cell_snap:
-                    #self.position = Vector3(*self.target_position)
                     self.target_position = None
                     self._next = True
+                    if fsm.isstate('seeking'):
+                        self.cells_followed += 1
                 self.direction = direction
-        else:
-            self.stop()
 
     @property
     def grounded(self):

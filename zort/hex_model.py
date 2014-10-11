@@ -1,5 +1,5 @@
 from heapq import heappush, heappop
-from math import sqrt, ceil
+from math import sqrt
 from operator import itemgetter
 import random
 import json
@@ -184,9 +184,10 @@ class HexMapModel(object):
         self._dirty = False
 
     def surrounding(self, coords, avoid_raised=True):
-        return (coords for coords in util.surrounding_noclip(coords)
-                if coords in self._data
-                and self._data[coords].raised != avoid_raised)
+        s = (coords for coords in util.surrounding_noclip(coords)
+             if coords in self._data)
+        return s if not avoid_raised else \
+            (coords for coords in s if not self._data[coords].raised)
 
     def collidecircle(self, coords, radius):
         """test if circle overlaps level geometry above layer 0 only
@@ -326,10 +327,6 @@ class HexMapModel(object):
             neighbors.update(tmp)
 
         neighbors.difference_update(blacklist)
-        # if avoid_raised:
-        #    neighbors.difference_update(
-        #        {coord for coord in neighbors
-        #         if self._data[coord].raised})
 
         return neighbors
 
@@ -359,11 +356,10 @@ class HexMapModel(object):
 
         def retrace_path(c):
             path = []
-            path.append(c)
             while parent.get(c, None) is not None:
                 c = parent[c]
                 path.append(c)
-            return path
+            return list(reversed(path)) or None
 
         start_time = time.time()
         parent = {}
@@ -373,13 +369,12 @@ class HexMapModel(object):
         current = current[0], current[1]
         open_set.add(current)
         open_heap.append(current)
-
         while open_set:
             if time.time() - start_time > .0125:
                 try:
                     return retrace_path(current), False
                 except:
-                    return (), True
+                    return None, True
 
             current = heappop(open_heap)
 
@@ -394,9 +389,10 @@ class HexMapModel(object):
                  for coord in self.surrounding(current, avoid_raised)))
             # Push the highest costing tiles first, so we'll check them last
             # Should keep working when there's a dead end
-            for cell in sorted(cells, key=itemgetter(0), reverse=True):
+            for cell in cells:
                 parent[cell[1]] = current
                 if cell[1] not in open_set:
                     open_set.add(cell[1])
                     heappush(open_heap, cell[1])
-        return (), True
+
+        return None, True
