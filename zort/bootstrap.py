@@ -26,7 +26,7 @@ def bootstrap_game():
                              config.getint('display', 'height')))
 
     main_surface.fill((0, 0, 0))
-    gui.draw_text(main_surface, "loading, please wait...", (255,255,255),
+    gui.draw_text(main_surface, "loading, please wait...", (255, 255, 255),
                   main_surface.get_rect())
     pygame.display.flip()
 
@@ -38,7 +38,7 @@ def bootstrap_game():
     game = Game(config.getint('display', 'target-fps'), main_surface)
     game.register_scene(TitleScene(game))
     game.register_scene(LevelScene(game))
-    game.push_scene("level")
+    game.push_scene('level')
     #game.scenes["level"].view.data.save_to_disk("/tmp/foo.json")
     #game.scenes["level"].view.data.load_from_disk("/tmp/foo.json")
     return game

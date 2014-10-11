@@ -11,12 +11,14 @@ from zort import resources
 __all__ = ['Enemy',
            'Stalker',
            'Rambler',
-           'Tosser']
+           'Tosser',
+           'Saucer']
 
 
 class Enemy(GameEntity):
     def __init__(self, filename):
         super(Enemy, self).__init__(filename)
+        self.move_sound = resources.sounds['lose7.ogg']
         self.target_position = None
         self.home_position = None
         self.ramble_radius = 2
@@ -128,3 +130,51 @@ class Tosser(GameEntity):
         super(Tosser, self).__init__(filename)
         self.move_sound = resources.sounds['lose7.ogg']
         self._playing_move_sound = False
+
+
+class Saucer(Enemy):
+    # pours sauce?  idk.
+    def __init__(self, filename):
+        super(Saucer, self).__init__(filename)
+        self.move_sound = resources.sounds['lose7.ogg']
+        self.target_position = None
+        self.home_position = None
+        self.path = None
+        self.ramble_radius = 10
+        self.cell_snap = .01
+        self.accel_speed = .0001
+        self.max_velocity = [.0005, .0005, .0005]
+        self.direction = Vector3(0, 0, 0)
+        self.fsm = Fysom({'initial': 'home',
+                          'events': [
+                              {'name': 'go_home',
+                               'src': 'seeking',
+                               'dst': 'going_home'},
+                              {'name': 'ramble',
+                               'src': ['home', 'seeking'],
+                               'dst': 'rambling'},
+                              {'name': 'seek_player',
+                               'src': ['home', 'going_home', 'rambling'],
+                               'dst': 'seeking'}
+                          ]})
+
+    def update(self, delta):
+        super(GameEntity, self).update(delta)
+
+        fsm = self.fsm
+        grounded = self.position.z == self.velocity.z == 0
+        moving = self.velocity.x or self.velocity.y or self.velocity.z
+
+        if self.path is not None:
+            if not moving and self.target_position is None:
+                self.target_position = Vector3(*axial_to_sprites(
+                    self.path.pop(-1)))
+
+            acc = self.acceleration
+            if self.target_position is not None:
+                self.wake()
+                direction = self.target_position - self.position
+                self.acceleration = direction.normalized() * self.accel_speed
+                if abs(direction) <= self.cell_snap:
+                    self.position = Vector3(*self.target_position)
+                    self.target_position = None

@@ -211,9 +211,12 @@ class GameEntity(pygame.sprite.DirtySprite):
             if not self.carried:
                 self.pickup_item_sound.play()
                 self.carried = set(self._collided)
+                for entity in self.carried:
+                    entity._layer = 3
             else:
                 self.drop_item_sound.play()
                 for entity in self.carried:
+                    entity._layer = 1
                     entity.wake()
                     entity.acceleration.z = .000025
                 self.carried = set()
