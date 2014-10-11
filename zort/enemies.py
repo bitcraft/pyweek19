@@ -72,19 +72,14 @@ class Enemy(GameEntity):
         pos = self.position
         dist = abs(dist_axial(sprites_to_axial(pos), sprites_to_axial(hpos)))
         if dist <= self.ramble_radius:
-            pos = sprites_to_hex(pos)
-            next = sprites_to_hex(hpos)
-            self.path = scene.model.pathfind(
-                pos, next, blacklist, self.avoid_raised)[0]
-            self.cells_followed = 0
-            if not fsm.isstate('seeking'):
-                fsm.seek_player()
-            if self.path:
-                next = self.path[-1]
-                for node in reversed(self.path[:-1]):
-                    if abs(next[0]-node[0]) > 1 or abs(next[1]-node[1]) > 1:
-                        print(next, node)
-                    next = node
+            if not self.path:
+                pos = sprites_to_hex(pos)
+                next = sprites_to_hex(hpos)
+                self.path = scene.model.pathfind(
+                    pos, next, blacklist, self.avoid_raised)[0]
+                self.cells_followed = 0
+                if not fsm.isstate('seeking'):
+                    fsm.seek_player()
         elif fsm.isstate('seeking'):
             if self.cells_followed <= self.follow_persistence:
                 if not self.path:
