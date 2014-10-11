@@ -31,7 +31,6 @@ def setup_level(level_scene):
     # #timer = Task(self.new_powerup, 5000, -1)
     # #self.timers.add(timer)
 
-    level_scene.setup_mode()
     pass
 
 

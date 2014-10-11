@@ -68,6 +68,13 @@ class LevelScene(Scene):
         self.internal_event_group = pygame.sprite.Group()
         self.pygame_event_group = pygame.sprite.Group()
         self.timers = pygame.sprite.Group()
+        self.mode = EditMode(self)
+
+    def set_model(self, model):
+        self.model = model
+        self.view = hex_view.HexMapView(self, self.model,
+                                        config.getint('display', 'hex_radius'))
+        self.velocity_updates = PhysicsGroup(data=self.model)
 
     def new_hero(self):
         # adds new hero, but doesn't remove old one
@@ -86,6 +93,7 @@ class LevelScene(Scene):
         self.view.add(sprite)
         self.internal_event_group.add(sprite)
         self.velocity_updates.add(sprite)
+
         return sprite
 
     def add_button(self, door_key, door_sprite_file_name,
