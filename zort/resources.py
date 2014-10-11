@@ -44,6 +44,8 @@ def get_text(heading):
 
     while 1:
         line = fh.readline().strip()
+        if line.startswith("="):
+            break
         if not line:
             continue
         yield line

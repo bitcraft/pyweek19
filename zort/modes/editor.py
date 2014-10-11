@@ -1,4 +1,5 @@
 import pygame
+from pygame.locals import *
 
 from zort import resources
 from zort import gui
@@ -35,6 +36,7 @@ class EditMode(LevelSceneMode):
     def handle_click(self, button, cell):
         view = self.scene.view
 
+        print 'click'
         # left click
         if button == 1:
             if self.state == 0:
@@ -118,7 +120,3 @@ class EditMode(LevelSceneMode):
             refreshed = True
 
         return dirty
-
-    def update(self, delta, events):
-        super(EditMode, self).update(delta, events)
-        pass
