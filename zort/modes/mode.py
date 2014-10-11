@@ -1,4 +1,5 @@
 from pygame.locals import *
+from zort.hex_model import *
 
 
 class LevelSceneMode(object):
@@ -14,10 +15,7 @@ class LevelSceneMode(object):
         pass
 
     def get_nearest_cell(self, coords):
-        view = self.scene.view
-        point = view.cell_from_surface(coords)
-        if point:
-            return view.data.get_nearest_cell(point)
+        return self.scene.view.cell_from_surface(coords)
 
     def update(self, delta, events):
         for event in events:
@@ -28,5 +26,6 @@ class LevelSceneMode(object):
 
             if event.type == MOUSEBUTTONUP:
                 cell = self.get_nearest_cell(event.pos)
+                print cell
                 if cell:
                     self.handle_click(event.button, cell)

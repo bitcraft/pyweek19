@@ -139,6 +139,9 @@ class HexMapView(pygame.sprite.LayeredUpdates):
         hh = int((rh / 2.) - (mh / 2.))
         hh *= 1.6
 
+        self.__w = pw
+        self.__h = ph
+
         screen_offset = Vector2(hw + pw, hh + ph / 2.)
         map_rect = pygame.Rect((hw, hh), (mw, mh))
 
@@ -178,10 +181,12 @@ class HexMapView(pygame.sprite.LayeredUpdates):
         x, y = point
         x -= self.pixel_offset.x
         y -= self.pixel_offset.y
-        y *= 1.1
+        y *= .45
+        x *= .8
 
-        point = Vector3(x, y, 0)
-        x, y, z = Vector3(*pixel_to_axial(point, self.hex_radius))
+        x, y = pixel_to_axial((x, y), self.hex_radius *.8)
+        x = int(x)
+        y = int(y)
         return self.data.get_cell((x, y))
 
     def clear(self, surface, bgk=None):
@@ -327,6 +332,9 @@ class HexMapView(pygame.sprite.LayeredUpdates):
             spritedict[sprite] = rect
 
             for _sprite, _rect in spritedict.items():
+                if _sprite == "hover":
+                    continue
+
                 if _sprite is sprite or not _rect:
                     continue
 
