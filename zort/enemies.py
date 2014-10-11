@@ -57,8 +57,7 @@ class Enemy(GameEntity):
             if not self.path:
                 pos = sprites_to_hex(self.position)
                 next = sprites_to_hex(hpos)
-                self.path = scene.model.pathfind(
-                    pos, next, self.ramble_radius)[0]
+                self.path = scene.model.pathfind(pos, next)[0]
                 self.cells_followed = 0
                 fsm.seek_player()
         elif fsm.isstate('seeking'):
@@ -66,8 +65,7 @@ class Enemy(GameEntity):
                 if self.cells_followed < self.follow_persistence:
                     pos = sprites_to_hex(self.position)
                     next = sprites_to_hex(hpos)
-                    self.path = scene.model.pathfind(
-                        pos, next, self.ramble_radius)[0]
+                    self.path = scene.model.pathfind(pos, next)[0]
                 else:
                     fsm.go_home()
 
