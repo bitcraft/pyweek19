@@ -52,7 +52,9 @@ class LevelScene(Scene):
         self.needs_refresh = True
         self.lost_damage = list()
         self.current_level_module = None
-        self.model = maze.new_maze(10, 10)
+        self.model = maze.new_maze(config.getint('world', 'width'),
+                                   config.getint('world', 'height'),
+                                   num_adjacent=2)
 
         # #w = config.getint('world', 'width')
         # #h = config.getint('world', 'height')
@@ -81,7 +83,7 @@ class LevelScene(Scene):
 
         self.hero = self.add_entity(Hero, 'alienBlue.png', (1, 1))
         self.velocity_updates.collide_walls.add(self.hero)
-        self.add_entity(Enemy, 'alienYellow.png', (1, 8))
+        self.add_entity(Enemy, 'alienYellow.png', (3, 8))
 
 
         # this must come last

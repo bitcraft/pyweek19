@@ -176,7 +176,7 @@ class GameEntity(pygame.sprite.DirtySprite):
         self.original_image = resources.tiles[filename]
         self.original_anchor = Vector2(16, 57)
         self.anchor = None
-        self.radius = .2
+        self.radius = .4
         self._layer = 1
         self.event_handlers = list()
         self.max_velocity = [.15, .15, 100]
