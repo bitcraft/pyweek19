@@ -354,26 +354,29 @@ class HexMapView(pygame.sprite.LayeredUpdates):
                     #                 surface_blit(up.surface, up.rect)
                     #                 surface.set_clip(None)
 
-        # coords = sprites_to_axial(self.scene.hero.position)
-        # for n in self.data.collidecircle(coords, self.scene.hero.radius):
-        #     pos = project(n)
-        #     rect = pygame.Rect((0, 0), (20, 20))
-        #     rect.center = pos
-        #     rect = pygame.draw.ellipse(surface, (255, 128, 128), rect, 0)
-        #     dirty.append(rect)
-        #
-        # for pos, cell in self.data._data.items():
-        #     if cell.height < 1:
-        #         continue
-        #     pos = project(pos)
-        #     rect = pygame.Rect((0, 0), (35, 35))
-        #     rect.center = pos
-        #     rect = pygame.draw.ellipse(surface, (255, 0, 0), rect, 2)
-        #     dirty.append(rect)
-        #
-        # coords = sprites_to_hex(self.scene.hero.position)
-        # pos = Vector3(*project(coords))
-        # rect = draw_hex(surface, pos, self.border_color, (0,0,0,128))
-        # dirty.append(rect)
+        # draw circles that appox. the wall collision boundry
+        coords = sprites_to_axial(self.scene.hero.position)
+        for n in self.data.collidecircle(coords, self.scene.hero.radius):
+            pos = project(n)
+            rect = pygame.Rect((0, 0), (20, 20))
+            rect.center = pos
+            rect = pygame.draw.ellipse(surface, (255, 128, 128), rect, 0)
+            dirty.append(rect)
+
+        # draw circles that show a collision (broken?)
+        for pos, cell in self.data._data.items():
+            if cell.height < 1:
+                continue
+            pos = project(pos)
+            rect = pygame.Rect((0, 0), (35, 35))
+            rect.center = pos
+            rect = pygame.draw.ellipse(surface, (255, 0, 0), rect, 2)
+            dirty.append(rect)
+
+        # draw hex tile of the cell player is in
+        coords = sprites_to_hex(self.scene.hero.position)
+        pos = Vector3(*project(coords))
+        rect = draw_hex(surface, pos, self.border_color, (0,0,0,128))
+        dirty.append(rect)
 
         return dirty

@@ -46,6 +46,7 @@ class PhysicsGroup(pygame.sprite.Group):
         self.sleeping = set()
         self.wake = set()
         self.stale = set()
+        self.collide_walls = set()
 
     def update(self, delta, scene):
         stale = self.stale
@@ -64,6 +65,7 @@ class PhysicsGroup(pygame.sprite.Group):
             position = sprite.position
             velocity = sprite.velocity
             max_velocity = sprite.max_velocity
+            check_walls = sprite in self.collide_walls
 
             if not position.z == 0:
                 acceleration += gravity_delta
@@ -94,9 +96,13 @@ class PhysicsGroup(pygame.sprite.Group):
                 if not position.z:
                     velocity.x *= ground_friction
 
-                new_position = position + (x, 0, 0)
-                axial = sprites_to_axial(new_position)
-                if not collide(axial, sprite.radius):
+                _collides = False
+                if check_walls:
+                    new_position = position + (x, 0, 0)
+                    axial = sprites_to_axial(new_position)
+                    _collides = collide(axial, sprite.radius)
+
+                if not _collides:
                     sleeping = False
                     position.x += x
 
@@ -113,9 +119,13 @@ class PhysicsGroup(pygame.sprite.Group):
                 if not position.z:
                     velocity.y *= ground_friction
 
-                new_position = position + (0, y, 0)
-                axial = sprites_to_axial(new_position)
-                if not collide(axial, sprite.radius):
+                _collides = False
+                if check_walls:
+                    new_position = position + (0, y, 0)
+                    axial = sprites_to_axial(new_position)
+                    _collides = collide(axial, sprite.radius)
+
+                if not _collides:
                     sleeping = False
                     position.y += y
 
@@ -130,7 +140,7 @@ class PhysicsGroup(pygame.sprite.Group):
 
             if sleeping:
                 self.sleeping.add(sprite)
-                return
+                continue
 
             axial = sprites_to_axial(position)
             for other in all_sprites:

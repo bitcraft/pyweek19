@@ -65,6 +65,7 @@ class LevelScene(Scene):
         #self.timers.add(timer)
 
         self.hero = self.add_entity(Hero, 'alienBlue.png', (1, 1))
+        self.velocity_updates.collide_walls.add(self.hero)
         self.add_entity(Enemy, 'alienYellow.png', (1, 8))
 
 

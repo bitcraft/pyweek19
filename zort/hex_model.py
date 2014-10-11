@@ -200,7 +200,6 @@ class HexMapModel(object):
         :param radius: axial coords
         :return: list of coords
         """
-        return []
         retval = list()
         round_coords = [int(i) for i in hex_round(coords)]
         neighbors = list(self.surrounding(round_coords))
