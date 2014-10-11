@@ -140,11 +140,6 @@ def cube_to_pixel(coords, radius):
 def collide_hex(cell0, cell1, left_radius=1.0, right_radius=1.0):
     x0, y0 = cube_to_pixel(axial_to_cube(cell0), 1)
     x1, y1 = cube_to_pixel(axial_to_cube(cell1), 1)
-
-    print "cell:", cell1
-    if cell1 == (3, 3):
-        import pdb; pdb.set_trace()
-
     dx = x1 - x0
     dy = y1 - y0
     rr = left_radius + right_radius
@@ -191,7 +186,7 @@ class HexMapModel(object):
 
     def surrounding(self, coords):
         # this is some gigantic hack
-        #s = util.surrounding_noclip(coord)
+        #s = util.surrounding_noclip(coords)
         s = util.surrounding_clip(coords, (0, 0), (self.width-1, self.height-1))
         for coords in s:
             coords = [int(i) for i in coords]
@@ -205,10 +200,14 @@ class HexMapModel(object):
         :param radius: axial coords
         :return: list of coords
         """
+        wall_offset = [0, .1]
         retval = list()
         round_coords = [int(i) for i in hex_round(coords)]
-        neighbors = list(self.surrounding(round_coords))
-        print "neighbors", [axial_to_evenr(i) for i in neighbors]
+        neighbors = list(util.surrounding_noclip(round_coords))
+
+        if not len(set(neighbors)) == 6:
+            pass
+
         for n in neighbors:
             neigh = tuple([int(i) for i in n])
             cell = self._data.get(neigh, None)
@@ -219,9 +218,9 @@ class HexMapModel(object):
             if not cell.raised:
                 continue
 
-            if collide_hex(coords, neigh, radius, .9):
+            new = coords[0] - wall_offset[0], coords[1] - wall_offset[1]
+            if collide_hex(new, neigh, radius, .9):
                 retval.append(neigh)
-        print "-------------------------------------------------"
         return retval
 
     def _make_file_data(self):
