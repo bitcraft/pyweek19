@@ -22,12 +22,17 @@ def setup_level(level_scene):
     """
     Initialize your entities
     """
-    button = level_scene.build_button("test-door", "tileRock_tile.png", (9, 8))
+    button = level_scene.build_button("test-door", "tileMagic_tile.png", (9, 8))
     level_scene.build_door("test-door", (14, 9))
     level_scene.build_door("test-door", (14, 8))
     level_scene.raise_event(button, 'Switch', key="test-door", state=True)
 
-    e = ShipPart('smallRockStone.png', level_scene.load_level)
+    e = ShipPart(
+        'shipPart4.png',
+        level_scene.load_level,
+        kwargs={"level_name": "planisborn"})
+    e.scale = .35
+    e.update_image()
     level_scene.add_entity(e, (16, 10))
 
     # dialog must be called after video is ready, so give it a delay

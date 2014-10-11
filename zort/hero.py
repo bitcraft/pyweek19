@@ -21,6 +21,7 @@ class Hero(GameEntity):
         self.movement_accel = config.getfloat('world', 'player_move_accel')
         self.move_sound = resources.sounds['scifidrone.wav']
         self._playing_move_sound = False
+        self._layer = 2
 
     def handle_pygame_events(self, events):
         moved = False
@@ -29,6 +30,7 @@ class Hero(GameEntity):
         moving = self.velocity.x or self.velocity.y or self.velocity.z
 
         if not grounded:
+            self.wake()
             return
 
         if pressed[K_DOWN]:

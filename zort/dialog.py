@@ -20,12 +20,6 @@ class Dialog(GameEntity):
         self.needs_refresh = False
         self._listen = ['dialog-show', 'dialog-hidden', 'dialog-next']
 
-    def change_state(self, state):
-        self.state = state
-        self._dialog = resources.get_text('editor mode intro')
-        text = next(self._dialog)
-        self.render_dialog(text)
-
     def handle_internal_events(self, scene):
         all_events = scene.state['events']
         for event in all_events.get('dialog-show', list()):

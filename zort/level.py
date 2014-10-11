@@ -3,6 +3,7 @@ from pygame.locals import *
 
 from zort import hex_view
 from zort import config
+from zort import gui
 from zort import resources
 from zort.hex_model import *
 from zort.entity import *
@@ -43,6 +44,48 @@ class Task(pygame.sprite.Sprite):
                     self.kill()
 
 
+class Hud(GameEntity):
+    def __init__(self):
+        super(Hud, self).__init__('smallRockStone.png')
+        self.border = gui.GraphicBox(resources.border_path, False)
+        self.font = pygame.font.Font(resources.fonts['rez'], 32)
+        self.state = None
+        self.surface = None
+        self.rect = None
+        self._dialog = None
+        self.needs_refresh = False
+        self._listen = ['dialog-show', 'dialog-hidden', 'dialog-next']
+
+    def handle_internal_events(self, scene):
+        all_events = scene.state['events']
+        for event in all_events.get('dialog-show', list()):
+            self._dialog = resources.get_text(event['heading'])
+            text = next(self._dialog)
+            self.render_dialog(text)
+
+        for event in all_events.get('dialog-hide', list()):
+            scene.needs_refresh = True
+            self._dialog = None
+            self.surface = None
+
+        for event in all_events.get('dialog-next', list()):
+            try:
+                text = next(self._dialog)
+                self.render_dialog(text)
+            except StopIteration:
+                scene.raise_event('dialog', 'dialog-hidden')
+
+    def draw(self, surface):
+        self.rect = surface.get_rect()
+
+        if self.needs_refresh:
+            self.needs_refresh = False
+            if self.surface:
+                return [surface.blit(self.surface, (0, 0))]
+            else:
+                return [self.rect]
+
+
 class LevelScene(Scene):
     def __init__(self, game):
         super(LevelScene, self).__init__("level", game)
@@ -59,6 +102,8 @@ class LevelScene(Scene):
         self.view = None
         self.model = None
         self.hero = None
+        self.hud = None
+        self.time = None
 
     def init(self):
         self.load_level()
@@ -72,6 +117,14 @@ class LevelScene(Scene):
     def new_hero(self):
         # adds new hero, but doesn't remove old one
         self.hero = self.build_entity(Hero, 'alienBlue.png', (1, 1))
+        self.velocity_updates.collide_walls.add(self.hero)
+        self.pygame_event_group.add(self.hero)
+
+    def reset_hero(self):
+        self.hero.position = Vector3(0, 0, 0)
+        self.hero.acceleration = Vector3(0, 0, 0)
+        self.hero.velocity = Vector3(0, 0, 0)
+        self.add_entity(self.hero, (1, 1))
         self.velocity_updates.collide_walls.add(self.hero)
         self.pygame_event_group.add(self.hero)
 
@@ -158,6 +211,13 @@ class LevelScene(Scene):
             if not refreshed:
                 dirty.extend(_dirty)
 
+        _dirty = self.hud.draw(surface)
+        if _dirty:
+            _damage = _dirty[0].unionall(_dirty)
+            damage[self.hud] = _damage
+            if not refreshed:
+                dirty.extend(_dirty)
+
         self.damage = damage
         return dirty
 
@@ -189,6 +249,9 @@ class LevelScene(Scene):
     def resume(self):
         print("Resuming level scene")
 
+    def build_hud(self):
+        self.hud = Hud()
+
     def load_level(self, level_name=None):
         # teardown whatever needs to be torn down here
         self.model = HexMapModel()
@@ -204,8 +267,11 @@ class LevelScene(Scene):
         self.mode = EditMode(self)
         self.dialog = Dialog()
         self.internal_event_group.add(self.dialog)
+        self.build_hud()
         if self.hero is None:
             self.new_hero()
+        else:
+            self.reset_hero()
         if level_name is None:
             level_name = next((k for k in maps.keys()))
         self.current_level_module = loader.load_level(level_name, self)
