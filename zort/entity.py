@@ -11,6 +11,7 @@ __all__ = ['PhysicsGroup',
            'GameEntity',
            'Button',
            'Door',
+           'Rock',
            'CallbackEntity',
            'ShipPart',
            'filter_interested',
@@ -220,11 +221,12 @@ class GameEntity(pygame.sprite.DirtySprite):
         if not self._pickup_cooldown:
             self._pickup_cooldown = 200
             if self.carried is None:
-                self.pickup_item_sound.play()
-                self.carried = set(self._collided)
-                for entity in self.carried:
-                    entity._layer = 3
-                    entity.attach(self, (0, 0, -20))
+                if self._collided:
+                    self.carried = set(self._collided)
+                    self.pickup_item_sound.play()
+                    for entity in self.carried:
+                        entity._layer = 3
+                        entity.attach(self, (0, 0, 40))
             else:
                 self.drop()
 
@@ -232,9 +234,9 @@ class GameEntity(pygame.sprite.DirtySprite):
         if self.carried is not None:
             self.drop_item_sound.play()
             for entity in self.carried:
-                entity._layer = 1
+                entity.acceleration.z = .0025
+                entity.release()
                 entity.wake()
-                entity.acceleration.z = .000025
             self.carried = None
 
     def spawn(self, other):
@@ -325,32 +327,37 @@ class Collider(GameEntity):
         pass
 
     def handle_internal_events(self, scene):
-        interested = scene.state['events'].get('Collision', None)
-        if not interested:
-            return
-
-        for event in interested:
-            try:
-                members = [event['left'], event['right']]
-                members.remove(self)
-                other = members[0]
-            except ValueError:
-                continue
-
+        events = filter_belong(self, filter_interested(scene, ('Collision',)))
+        for event, other in events:
             self.on_collide(scene, other)
+
+        events = filter_belong(self, filter_interested(scene, ('Separation',)))
+        for event, other in events:
+            self.on_seperate(scene, other)
 
 
 class Button(Collider):
     def __init__(self, filename, key):
         super(Button, self).__init__(filename)
         assert (key is not None)
+        self.anchor = Vector2(0, 32)
+        self.update_image()
         self.key = key
+        self.toggle = False   # if true the door will only work when colliding
+        self._collided = set()
+        self.collide_sound = resources.sounds['stoneDragHit3.ogg']
+        self.separate_sound = resources.sounds['stoneHit3.ogg']
 
     def on_collide(self, scene, other):
         scene.raise_event(self, 'Switch', key=self.key, state=False)
+        self.collide_sound.play()
+        self._collided.add(other)
 
     def on_seperate(self, scene, other):
-        scene.raise_event(self, 'Switch', key=self.key, state=True)
+        self.separate_sound.play()
+        self._collided.remove(other)
+        if len(self._collided) == 0 and self.toggle:
+            scene.raise_event(self, 'Switch', key=self.key, state=True)
 
 
 class Rock(GameEntity):
