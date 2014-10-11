@@ -1,14 +1,7 @@
 """
-Going Down!
-
-This is the first level. Zort has been shot out of orbit and
-crashlanded here. This level should be relatively straight forward and
-take no more than 2 minutes to complete. There should be no monsters,
-an obvious path, one door and one switch to go through.
+Evil Hexagonians!
 """
 
-# import your game entities here
-# implement any level specific enemies here
 
 from zort.entity import *
 from zort.enemies import *
@@ -21,22 +14,24 @@ def setup_level(level_scene):
     """
     Initialize your entities
     """
-    #level_scene.build_entity(Saucer, 'shipPink_manned.png', (4, 4))
-    #level_scene.build_entity(Enemy, "alienGreen.png", (4, 4))
-    #level_scene.build_button("testDoor", "tileRock_tile.png", (2, 4))
-    #level_scene.build_door("testDoor", (0, 0))
-    #level_scene.move_hero((1, 1))
-    button = level_scene.build_button("test-door", "tileRock_tile.png", (9, 8))
-    level_scene.build_door("test-door", (14, 9))
-    level_scene.build_door("test-door", (14, 8))
-    level_scene.raise_event(button, 'Switch', key="test-door", state=True)
+    button = level_scene.build_button("door-1", "tileRock_tile.png", (16, 7))
+    level_scene.build_door("door-1", (5, 9))
+    level_scene.raise_event(button, 'Switch', key="door-1", state=True)
+
+
+    button = level_scene.build_button("door-2", "tileRock_tile.png", (2, 12))
+    level_scene.build_door("door-2", (14, 3))
+    level_scene.raise_event(button, 'Switch', key="door-2", state=True)
+
+
+    button = level_scene.build_button("door-3", "tileRock_tile.png", (9, 2))
+    level_scene.build_door("door-3", (18, 9))
+    level_scene.raise_event(button, 'Switch', key="door-3", state=True)
+
 
     e = ShipPart('smallRockStone.png', level_scene.load_level)
-    level_scene.add_entity(e, (16, 10))
+    level_scene.add_entity(e, (9, 12))
 
-    # # start the silly timer to drop powerups
-    # #timer = Task(self.new_powerup, 5000, -1)
-    # #self.timers.add(timer)
 
 
 def handle_internal_events(level_scene):
