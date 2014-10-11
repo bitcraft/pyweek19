@@ -56,20 +56,6 @@ class LevelScene(Scene):
                                    config.getint('world', 'height'),
                                    num_adjacent=2)
 
-        # #w = config.getint('world', 'width')
-        # #h = config.getint('world', 'height')
-        # self.model = HexMapModel()
-        # import itertools
-        # for q, r in itertools.product(range(4), range(4)):
-        #     coords = evenr_to_axial((q, r))
-        #     cell = Cell()
-        #     cell.raised = q == r == 3
-        #     if cell.raised:
-        #         cell.height = 2
-        #     cell.filename = 'tileGrass.png'
-        #     cell.kind = 'grass'
-        #     self.model.add_cell(coords, cell)
-
         self.view = hex_view.HexMapView(self, self.model,
                                         config.getint('display', 'hex_radius'))
 
@@ -84,7 +70,6 @@ class LevelScene(Scene):
         self.hero = self.add_entity(Hero, 'alienBlue.png', (1, 1))
         self.velocity_updates.collide_walls.add(self.hero)
         self.add_entity(Enemy, 'alienYellow.png', (3, 8))
-
 
         # this must come last
         self.mode = EditMode(self)
