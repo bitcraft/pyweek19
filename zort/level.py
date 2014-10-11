@@ -3,18 +3,19 @@ import random
 import pygame
 from pygame.locals import *
 
-from zort import hex_view
 from zort import config
+from zort import hex_view
 from zort import resources
-from zort.hex_model import *
 from zort.enemies import *
 from zort.entity import *
 from zort.environ import maze
-from zort.scenes import Scene
 from zort.euclid import Point2
 from zort.hero import Hero
+from zort.hex_model import *
 from zort.levels import loader
 from zort.modes.editor import EditMode
+from zort.resources import maps
+from zort.scenes import Scene
 
 __all__ = ['LevelScene']
 
@@ -204,6 +205,8 @@ class LevelScene(Scene):
     def resume(self):
         print("Resuming level scene")
 
-    def load_level(level_name):
+    def load_level(level_name=None):
         # teardown whatever needs to be torn down here
+        if level_name is None:
+            level_name = maps.keys()[0]
         self.current_level_module = loader.load_level(level_name, level_scene)
