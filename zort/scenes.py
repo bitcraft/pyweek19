@@ -116,7 +116,7 @@ class Scene(object):
     def raise_event(self, originator, event_name, **kwargs):
         event = dict(kwargs)
         event["originator"] = originator
-        event["frames_left"] = config.getint('general', 'event_life')
+        event["frames_left"] = 2
         try:
             events = self.state["events"][event_name]
         except KeyError:
