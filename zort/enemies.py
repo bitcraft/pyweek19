@@ -50,10 +50,7 @@ class Enemy(GameEntity):
     def update_ai(self, scene, event):
         fsm = self.fsm
 
-        if not hasattr(scene, "hero"):
-            return
-
-        hpos = scene.hero
+        hpos = scene.hero.position
         dist = sprites_to_axial(hpos - self.position)
         if dist <= self.ramble_radius:
             if not self.path:
@@ -79,12 +76,14 @@ class Enemy(GameEntity):
         if fsm.isstate('going_home'):
             if self.home_position is None:
                 self.home_position = Vector3(*self.position)
+                fsm.home()
 
             if not self.position == self.home_position:
                 if not self.path:
                     start = sprites_to_hex(self.position)
                     home = sprites_to_hex(self.home_position)
                     self.path = scene.model.pathfind(start, home)[0]
+
             else:
                 fsm.ramble()
 

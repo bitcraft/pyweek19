@@ -56,6 +56,7 @@ class LevelScene(Scene):
         self.mode = None
         self.view = None
         self.model = None
+        self.hero = None
 
     def init(self):
         self.load_level()
@@ -193,6 +194,8 @@ class LevelScene(Scene):
         self.pygame_event_group = pygame.sprite.Group()
         self.timers = pygame.sprite.Group()
         self.mode = EditMode(self)
+        if self.hero is None:
+            self.new_hero()
         # teardown whatever needs to be torn down here
         if level_name is None:
             level_name = next((k for k in maps.keys()))
