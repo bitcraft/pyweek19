@@ -51,7 +51,8 @@ class Enemy(GameEntity):
         fsm = self.fsm
 
         hpos = scene.hero.position
-        dist = sprites_to_axial(hpos - self.position)
+        dist = dist_axial(sprites_to_axial(hpos),
+                          sprites_to_axial(self.position))
         if dist <= self.ramble_radius:
             if not self.path:
                 pos = sprites_to_hex(self.position)
