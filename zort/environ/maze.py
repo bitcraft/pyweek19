@@ -42,7 +42,7 @@ def build_maze_from_hex(model, lower_limit=None, upper_limit=None,
             if cell[0] not in closed_set:
                 raise_cell(cell[1])
 
-    open_heap = []
+    open_heap = set()
     if lower_limit is None:
         lower_limit = (1, 1)
 
@@ -54,7 +54,7 @@ def build_maze_from_hex(model, lower_limit=None, upper_limit=None,
     surrounding = util.surrounding(lower_limit, upper_limit)
 
     current = start
-    heappush(open_heap, start)
+    open_heap.add(start)
     closed_set.add(start)
     lower_cell(model.get_cell(evenr_to_axial(start)))
 
@@ -63,11 +63,11 @@ def build_maze_from_hex(model, lower_limit=None, upper_limit=None,
     while open_heap or open_neighbors:
         try:
             current = random.choice(open_neighbors)
-            heappush(open_heap, current)
+            open_heap.add(current)
             closed_set.add(current)
             lower_cell(model.get_cell(evenr_to_axial(current)))
         except IndexError:
-            current = heappop(open_heap)
+            current = open_heap.pop()
         open_neighbors = available_neighbors(current)
     return
 
