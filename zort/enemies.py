@@ -24,7 +24,7 @@ class Enemy(GameEntity):
         self.home_position = None
         self.ramble_radius = 2
         self.cells_followed = 0
-        self.follow_persistence = self.ramble_radius*2
+        self.follow_persistence = self.ramble_radius+1
         self.path = None
         self.cell_snap = .01
         self.accel_speed = .000095
@@ -36,7 +36,7 @@ class Enemy(GameEntity):
                                'src': 'seeking',
                                'dst': 'going_home'},
                               {'name': 'ramble',
-                               'src': ['home', 'seeking'],
+                               'src': ['home', 'seeking', 'going_home'],
                                'dst': 'rambling'},
                               {'name': 'seek_player',
                                'src': ['home', 'going_home', 'rambling'],
@@ -51,49 +51,42 @@ class Enemy(GameEntity):
         fsm = self.fsm
 
         hpos = scene.hero.position
-        dist = dist_axial(sprites_to_axial(hpos),
-                          sprites_to_axial(self.position))
-
+        dist = abs(self.position - hpos)
         if dist <= self.ramble_radius:
-            if not self.path:
-                pos = sprites_to_hex(self.position)
-                next = sprites_to_hex(hpos)
-                self.path = scene.model.pathfind(pos, next)[0]
-                self.cells_followed = 0
+            pos = sprites_to_hex(self.position)
+            next = sprites_to_hex(hpos)
+            self.path = scene.model.pathfind(pos, next)[0]
+            print("Seeking", self.path)
+            self.cells_followed = 0
+            if not fsm.isstate('seeking'):
                 fsm.seek_player()
         elif fsm.isstate('seeking'):
-
-            # distance to the player
-            dist = abs(self.position - hpos)
-
-            # set acceleration to move towards the player
-            self.acceleration = dist.normalized() * self.max_accel
-
-            # distance traveld from home
-            dist = abs(self.home_position - self.position)
-
             if not self.path:
                 if self.cells_followed < self.follow_persistence:
                     pos = sprites_to_hex(self.position)
                     next = sprites_to_hex(hpos)
                     self.path = scene.model.pathfind(pos, next)[0]
+                    print("Seeking", self.path)
                 else:
                     fsm.go_home()
+                    self.path = None
+            else:
+                fsm.go_home()
 
         if fsm.isstate('home'):
             fsm.ramble()
+            self.path = None
 
         if fsm.isstate('going_home'):
             if self.home_position is None:
                 self.home_position = Vector3(*self.position)
-                fsm.home()
 
             if not self.position == self.home_position:
                 if not self.path:
                     start = sprites_to_hex(self.position)
                     home = sprites_to_hex(self.home_position)
                     self.path = scene.model.pathfind(start, home)[0]
-
+                    print("Going home", self.path)
             else:
                 fsm.ramble()
 
@@ -126,6 +119,7 @@ class Enemy(GameEntity):
                     self.cells_followed += 1
 
 
+
             acc = self.acceleration
             if grounded and self.target_position is not None:
                 self.wake()
@@ -139,6 +133,8 @@ class Enemy(GameEntity):
                     self.position = Vector3(*self.target_position)
                     self.target_position = None
                     self.stop()
+        else:
+            self.stop()
 
 
 class Stalker(Enemy):

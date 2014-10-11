@@ -184,9 +184,10 @@ class HexMapModel(object):
         self._height = None
         self._dirty = False
 
-    def surrounding(self, coords):
+    def surrounding(self, coords, avoid_raised=True):
         return (coords for coords in util.surrounding_noclip(coords)
-                if coords in self._data)
+                if coords in self._data
+                and self._data[coords].raised != avoid_raised)
 
     def collidecircle(self, coords, radius):
         """test if circle overlaps level geometry above layer 0 only
@@ -322,32 +323,32 @@ class HexMapModel(object):
         for i in range(radius):
             tmp = set()
             for n in neighbors:
-                tmp.update(set(self.surrounding(n)))
+                tmp.update(set(self.surrounding(n, avoid_raised)))
             neighbors.update(tmp)
 
         neighbors.difference_update(blacklist)
-        if avoid_raised:
-            neighbors.difference_update(
-                {coord for coord in neighbors
-                 if self._data[coord].raised})
+        #if avoid_raised:
+        #    neighbors.difference_update(
+        #        {coord for coord in neighbors
+        #         if self._data[coord].raised})
 
         return neighbors
 
-    def pathfind_evenr(self, current, end, blacklist=set()):
+    def pathfind_evenr(self, current, end, blacklist=set(), avoid_raised=True):
         current = evenr_to_axial(current)
         end = evenr_to_axial(end)
         blacklist = {evenr_to_axial(coord) for coord in blacklist}
-        return self.pathfind(current, end, blacklist)
+        return self.pathfind(current, end, blacklist, avoid_raised)
 
-    def pathfind_ramble(self, current, home, radius, blacklist=set()):
-        neighbors = self.neighboring_radius(home, radius, blacklist)
+    def pathfind_ramble(self, current, home, radius, blacklist=set(), avoid_raised=True):
+        neighbors = self.neighboring_radius(home, radius, blacklist, avoid_raised)
 
         blacklist.update(
             {coord for coord in self._data})
         blacklist.difference_update(neighbors)
-        return self.pathfind(current, random.choice(list(neighbors)), blacklist)
+        return self.pathfind(current, random.choice(list(neighbors)), blacklist, avoid_raised)
 
-    def pathfind(self, current, end, blacklist=set()):
+    def pathfind(self, current, end, blacklist=set(), avoid_raised=True):
         def cell_available(cell):
             return coord_available(cell[1])
 
@@ -388,7 +389,7 @@ class HexMapModel(object):
             cells = filter(
                 cell_available,
                 ((self.dist(coord, end) + self.get_cell(coord).cost, coord)
-                 for coord in self.surrounding(current)))
+                 for coord in self.surrounding(current, avoid_raised)))
             # Push the highest costing tiles first, so we'll check them last
             # Should keep working when there's a dead end
             for cell in sorted(cells, key=itemgetter(0), reverse=True):
