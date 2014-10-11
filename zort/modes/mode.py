@@ -22,7 +22,6 @@ class LevelSceneMode(object):
             print('highlighted cell is (ever): {}'.format(_coords))
         return self.scene.view.cell_from_surface(coords)
 
-
     def update(self, delta, events):
         for event in events:
             if event.type == MOUSEMOTION:
