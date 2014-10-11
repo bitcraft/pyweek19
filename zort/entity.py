@@ -140,7 +140,10 @@ class GameEntity(pygame.sprite.DirtySprite):
                 return g
 
     def wake(self):
-        self.physics_group.wake_sprite(self)
+        try:
+            self.physics_group.wake_sprite(self)
+        except AttributeError:
+            pass
 
     def update_image(self):
         w, h = self.original_image.get_size()
@@ -197,10 +200,15 @@ class GameEntity(pygame.sprite.DirtySprite):
         events = filter_belong(self, filter_interested(scene, ('Collision',)))
         for event, other in events:
             self.on_collide(scene, other)
+            self._collided.add(other)
 
         events = filter_belong(self, filter_interested(scene, ('Separation',)))
         for event, other in events:
             self.on_separate(scene, other)
+            try:
+                self._collided.remove(other)
+            except KeyError:
+                pass
 
     def on_collide(self, scene, other):
         pass
@@ -213,6 +221,7 @@ class Button(GameEntity):
     def __init__(self, filename, key):
         super(Button, self).__init__(filename)
         assert (key is not None)
+        self.radius = .8
         self.original_anchor = Vector2(32, 35)
         self.update_image()
         self.key = key
@@ -226,7 +235,7 @@ class Button(GameEntity):
         self.collide_sound.play()
         self._collided.add(other)
 
-    def on_seperate(self, scene, other):
+    def on_separate(self, scene, other):
         self.separate_sound.play()
         self._collided.remove(other)
         if len(self._collided) == 0 and self.toggle:
@@ -239,9 +248,6 @@ class Rock(GameEntity):
         self.bounce_sound = resources.sounds['stoneHit3.ogg']
         self.radius = .5
         self.update_image()
-
-    def handle_internal_events(self, scene):
-        pass
 
 
 class Door(GameEntity):

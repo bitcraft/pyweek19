@@ -66,7 +66,7 @@ class Enemy(GameEntity):
         if dist <= self.ramble_radius:
             pos = sprites_to_hex(self.position)
             next = sprites_to_hex(hpos)
-            self.path = scene.model.pathfind(pos, next)[0]
+            self.path = list(scene.model.pathfind(pos, next)[0])
             print("Seeking", self.path)
             self.cells_followed = 0
             if not fsm.isstate('seeking'):
@@ -76,7 +76,7 @@ class Enemy(GameEntity):
                 if self.cells_followed < self.follow_persistence:
                     pos = sprites_to_hex(self.position)
                     next = sprites_to_hex(hpos)
-                    self.path = scene.model.pathfind(pos, next)[0]
+                    self.path = list(scene.model.pathfind(pos, next)[0])
                     print("Seeking", self.path)
                 else:
                     fsm.go_home()
@@ -96,7 +96,7 @@ class Enemy(GameEntity):
                 if not self.path:
                     start = sprites_to_hex(self.position)
                     home = sprites_to_hex(self.home_position)
-                    self.path = scene.model.pathfind(start, home)[0]
+                    self.path = list(scene.model.pathfind(start, home)[0])
                     print("Going home", self.path)
             else:
                 fsm.ramble()
@@ -112,8 +112,8 @@ class Enemy(GameEntity):
 
                 pos = sprites_to_hex(self.position)
                 home = sprites_to_hex(self.home_position)
-                self.path = scene.model.pathfind_ramble(
-                    pos, home, self.ramble_radius, blacklist)[0]
+                self.path = list(scene.model.pathfind_ramble(
+                    pos, home, self.ramble_radius, blacklist)[0])
 
     def update(self, delta):
         super(Enemy, self).update(delta)
