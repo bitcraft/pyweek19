@@ -22,6 +22,8 @@ class Enemy(GameEntity):
         self.target_position = None
         self.home_position = None
         self.ramble_radius = 2
+        self.cells_followed = 0
+        self.follow_persistence = self.ramble_radius*2
         self.path = None
         self.cell_snap = .01
         self.accel_speed = .000095
@@ -46,6 +48,27 @@ class Enemy(GameEntity):
 
     def update_ai(self, scene, event):
         fsm = self.fsm
+
+        hpos = scene.hero
+        dist = sprites_to_axial(hpos - self.position)
+        if dist <= self.ramble_radius:
+            if not self.path:
+                pos = sprites_to_hex(self.position)
+                next = sprites_to_hex(hpos)
+                self.path = scene.model.pathfind(
+                    pos, next, self.ramble_radius)[0]
+                self.cells_followed = 0
+                fsm.seek_player()
+        elif fsm.isstate('seeking'):
+            if not self.path:
+                if self.cells_followed < self.follow_persistence:
+                    pos = sprites_to_hex(self.position)
+                    next = sprites_to_hex(hpos)
+                    self.path = scene.model.pathfind(
+                        pos, next, self.ramble_radius)[0]
+                else:
+                    fsm.go_home()
+
         if fsm.isstate('home'):
             fsm.ramble()
 
@@ -88,6 +111,8 @@ class Enemy(GameEntity):
             if not moving and self.target_position is None:
                 self.target_position = Vector3(*axial_to_sprites(
                     self.path.pop(-1)))
+                if fsm.isstate('seeking'):
+                    self.cells_followed += 1
 
 
             acc = self.acceleration
