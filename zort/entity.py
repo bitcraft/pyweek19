@@ -234,7 +234,12 @@ class GameEntity(pygame.sprite.DirtySprite):
                 entity.acceleration.z = .000025
             self.carried = None
 
+    def spawn(self, other):
+        for g in self.groups():
+            g.add(other)
+
     def attach(self, other, anchor):
+        self.wake()
         self._attached = other, anchor
 
     def release(self):

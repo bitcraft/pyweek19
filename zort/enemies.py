@@ -184,11 +184,11 @@ class Saucer(Enemy):
                                'dst': 'seeking'}
                           ]})
 
-        t = Task(self.shoot, random.randint(3000, 6000))
+        t = Task(self.shoot, random.randint(100, 100))
         self.timers.add(t)
 
     def update(self, delta):
-        super(GameEntity, self).update(delta)
+        super(Saucer, self).update(delta)
 
         fsm = self.fsm
         grounded = self.position.z == self.velocity.z == 0
@@ -219,9 +219,13 @@ class Saucer(Enemy):
         t = Task(self.shoot, random.randint(3000, 6000))
         self.timers.add(t)
 
+        self.laser_sound.set_volume(.4)
         self.laser_sound.play()
         g = self.view_group
-        laser = GameEntity('greenLaser2.png')
+        laser = GameEntity('laserGreen2.png')
+        self.spawn(laser)
+        laser.anchor = Vector2(*laser.rect.midtop)
+        laser.update_image()
         laser.attach(self, (0, 0, 0))
-        t = Task(laser.kill, 100)
+        t = Task(laser.kill, 10000)
         self.timers.add(t)
