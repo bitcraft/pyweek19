@@ -14,5 +14,10 @@ if __name__ == "__main__":
         p.sort_stats('cumulative').print_stats(50)
 
     else:
-        game = bootstrap_game()
-        game.loop()
+        try:
+            game = bootstrap_game()
+            game.loop()
+        except:
+            import pygame
+            pygame.quit()
+            raise
