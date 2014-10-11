@@ -51,6 +51,7 @@ class LevelScene(Scene):
         self.current_level_module = None
         self.velocity_updates = None
         self.internal_event_group = None
+        self.pygame_event_group = None
         self.timers = None
         self.mode = None
         self.view = None
@@ -61,6 +62,7 @@ class LevelScene(Scene):
         self.needs_refresh = True
         self.velocity_updates = PhysicsGroup(data=self.model)
         self.internal_event_group = pygame.sprite.Group()
+        self.pygame_event_group = pygame.sprite.Group()
         self.timers = pygame.sprite.Group()
 
     def set_model(self, model):
@@ -76,6 +78,7 @@ class LevelScene(Scene):
         # adds new hero, but doesn't remove old one
         self.hero = self.add_entity(Hero, 'alienBlue.png', (1, 1))
         self.velocity_updates.collide_walls.add(self.hero)
+        self.pygame_event_group.add(self.hero)
 
     def add_entity(self, enemy_class, enemy_sprite_file_name, position):
         # send position in even r coordinates
@@ -161,42 +164,18 @@ class LevelScene(Scene):
         self.view.clear(surface)
 
     def update(self, delta, events):
-        moved = False
-        pressed = pygame.key.get_pressed()
-
-        if pressed[K_DOWN]:
-            self.hero.acceleration.y = self.movement_accel
-            moved = True
-        elif pressed[K_UP]:
-            self.hero.acceleration.y = -self.movement_accel
-            moved = True
-        else:
-            self.hero.acceleration.y = 0
-
-        if pressed[K_LEFT]:
-            self.hero.acceleration.x = -self.movement_accel
-            self.hero.flipped = True
-            moved = True
-        elif pressed[K_RIGHT]:
-            self.hero.acceleration.x = self.movement_accel
-            self.hero.flipped = False
-            moved = True
-        else:
-            self.hero.acceleration.x = 0
-
-        for e in events:
-            if e.type == KEYDOWN:
-                if e.key == K_SPACE:
-                    self.hero.pickup()
-
-        if moved:
-            self.hero.wake()
-
         self.timers.update(delta)
 
         self.internal_event_group.update(delta)
+
+        if len(events):
+            for entity in self.pygame_event_group:
+                if hasattr(entity, "handle_pygame_events"):
+                    entity.handle_pygame_events(events)
+
         if self.current_level_module:
             self.current_level_module.handle_internal_events(self)
+
         for sprite in self.internal_event_group:
             if hasattr(sprite, "handle_internal_events"):
                 sprite.handle_internal_events(self)
