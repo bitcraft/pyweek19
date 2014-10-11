@@ -1,3 +1,5 @@
+import random
+
 from fysom import Fysom
 from zort.euclid import Vector2, Vector3
 
@@ -19,9 +21,9 @@ class Enemy(GameEntity):
         self.home_position = None
         self.ramble_radius = 2
         self.path = None
-        self.cell_snap = .05
-        self.accel_speed = .0001
-        self.max_accel = .0004
+        self.cell_snap = .01
+        self.accel_speed = .000095
+        self.max_accel = .000375
         self.direction = Vector3(0, 0, 0)
         self.fsm = Fysom({'initial': 'home',
                           'events': [
@@ -90,7 +92,9 @@ class Enemy(GameEntity):
             if grounded and self.target_position is not None:
                 self.wake()
                 self.direction = self.target_position - self.position
-                acc += self.direction.normalized() * self.accel_speed
+                #acc *= .1
+                #acc += self.direction.normalized() * self.accel_speed
+                self.acceleration = self.direction.normalized() * self.max_accel
                 if abs(acc) > self.max_accel:
                     self.acceleration = acc.normalized() * self.max_accel
                 if abs(self.direction) <= self.cell_snap:

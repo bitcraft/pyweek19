@@ -330,7 +330,6 @@ class HexMapModel(object):
             neighbors.difference_update(
                 {coord for coord in neighbors
                  if self._data[coord].raised})
-        neighbors.add(center)
 
         return neighbors
 
