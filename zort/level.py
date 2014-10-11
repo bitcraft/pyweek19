@@ -55,20 +55,10 @@ class LevelScene(Scene):
         self.timers = None
         self.mode = None
         self.view = None
+        self.model = None
 
     def init(self):
-        self.model = HexMapModel()
-        self.view = hex_view.HexMapView(
-            self, self.model, config.getint('display', 'hex_radius'))
         self.load_level()
-        self.movement_accel = config.getfloat('world', 'player_move_accel')
-        self.damage = dict()
-        self.needs_refresh = True
-        self.velocity_updates = PhysicsGroup(data=self.model)
-        self.internal_event_group = pygame.sprite.Group()
-        self.pygame_event_group = pygame.sprite.Group()
-        self.timers = pygame.sprite.Group()
-        self.mode = EditMode(self)
 
     def set_model(self, model):
         self.model = model
@@ -192,6 +182,17 @@ class LevelScene(Scene):
         print("Resuming level scene")
 
     def load_level(self, level_name=None):
+        self.model = HexMapModel()
+        self.view = hex_view.HexMapView(
+            self, self.model, config.getint('display', 'hex_radius'))
+        self.movement_accel = config.getfloat('world', 'player_move_accel')
+        self.damage = dict()
+        self.needs_refresh = True
+        self.velocity_updates = PhysicsGroup(data=self.model)
+        self.internal_event_group = pygame.sprite.Group()
+        self.pygame_event_group = pygame.sprite.Group()
+        self.timers = pygame.sprite.Group()
+        self.mode = EditMode(self)
         # teardown whatever needs to be torn down here
         if level_name is None:
             level_name = next((k for k in maps.keys()))

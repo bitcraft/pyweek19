@@ -3,6 +3,7 @@ import random
 from fysom import Fysom
 from zort.euclid import Vector2, Vector3
 
+from zort.level import Task
 from zort.entity import GameEntity
 from zort.hex_model import *
 from zort import resources
@@ -161,13 +162,14 @@ class Saucer(Enemy):
     # pours sauce?  idk.
     def __init__(self, filename):
         super(Saucer, self).__init__(filename)
+        self.laser_sound = resources.sounds['z_laser-gun-2.wav']
         self.move_sound = resources.sounds['lose7.ogg']
         self.target_position = None
         self.home_position = None
         self.path = None
-        self.ramble_radius = 10
+        self.ramble_radius = 5
         self.cell_snap = .01
-        self.accel_speed = .0001
+        self.accel_speed = .0005
         self.max_velocity = [.0005, .0005, .0005]
         self.direction = Vector3(0, 0, 0)
         self.fsm = Fysom({'initial': 'home',
@@ -183,12 +185,22 @@ class Saucer(Enemy):
                                'dst': 'seeking'}
                           ]})
 
+        t = Task(self.shoot, random.randint(1000, 3000))
+        self.timers.add(t)
+
     def update(self, delta):
         super(GameEntity, self).update(delta)
 
         fsm = self.fsm
         grounded = self.position.z == self.velocity.z == 0
         moving = self.velocity.x or self.velocity.y or self.velocity.z
+
+        if self.position.z < 2:
+            self.velocity.z = 0
+            self.acceleration.z = 0
+            self.position.z = 2
+            self.gravity = False
+            self._layer = 3
 
         if self.path is not None:
             if not moving and self.target_position is None:
@@ -203,3 +215,14 @@ class Saucer(Enemy):
                 if abs(direction) <= self.cell_snap:
                     self.position = Vector3(*self.target_position)
                     self.target_position = None
+
+    def shoot(self):
+        t = Task(self.shoot, random.randint(1000, 3000))
+        self.timers.add(t)
+
+        self.laser_sound.play()
+        g = self.view_group
+        laser = GameEntity('greenLaser2.png')
+        laser.attach(self, (0, 0, 0))
+        t = Task(laser.kill, 100)
+        self.timers.add(t)

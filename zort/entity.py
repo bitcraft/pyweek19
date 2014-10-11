@@ -67,7 +67,7 @@ class PhysicsGroup(pygame.sprite.Group):
             max_velocity = sprite.max_velocity
             check_walls = sprite in self.collide_walls
 
-            if not position.z == 0:
+            if not position.z == 0 and sprite.gravity:
                 acceleration += gravity_delta
 
             velocity += acceleration * delta
@@ -170,6 +170,8 @@ class PhysicsGroup(pygame.sprite.Group):
 class GameEntity(pygame.sprite.DirtySprite):
     def __init__(self, filename):
         super(GameEntity, self).__init__()
+        self.gravity = True
+        self.timers = pygame.sprite.Group()
         self.position = Vector3(0, 0, 0)
         self.acceleration = Vector3(0, 0, 0)
         self.velocity = Vector3(0, 0, 0)
@@ -178,7 +180,6 @@ class GameEntity(pygame.sprite.DirtySprite):
         self.anchor = None
         self.radius = .4
         self._layer = 1
-        self.event_handlers = list()
         self.max_velocity = [.15, .15, 100]
         self.scale = 1
         self._flipped = False
@@ -199,6 +200,13 @@ class GameEntity(pygame.sprite.DirtySprite):
         #self.chase_sound = resources.sounds['']
         self._collided = set()
         self._pickup_cooldown = 0
+        self._attached = None
+
+    def kill(self):
+        self._attached = None
+        if self.carried is not None:
+            self.drop()
+        super(GameEntity, self).kill()
 
     def stop(self):
         self.velocity = Vector3(0, 0, 0)
@@ -208,23 +216,40 @@ class GameEntity(pygame.sprite.DirtySprite):
     def pickup(self):
         if not self._pickup_cooldown:
             self._pickup_cooldown = 200
-            if not self.carried:
+            if self.carried is None:
                 self.pickup_item_sound.play()
                 self.carried = set(self._collided)
                 for entity in self.carried:
                     entity._layer = 3
+                    entity.attach(self, (0, 0, -.3))
             else:
-                self.drop_item_sound.play()
-                for entity in self.carried:
-                    entity._layer = 1
-                    entity.wake()
-                    entity.acceleration.z = .000025
-                self.carried = set()
+                self.drop()
+
+    def drop(self):
+        if self.carried is not None:
+            self.drop_item_sound.play()
+            for entity in self.carried:
+                entity._layer = 1
+                entity.wake()
+                entity.acceleration.z = .000025
+            self.carried = None
+
+    def attach(self, other, anchor):
+        self._attached = other, anchor
+
+    def release(self):
+        self._attached = None
 
     @property
     def physics_group(self):
         for g in self.groups():
             if isinstance(g, PhysicsGroup):
+                return g
+
+    @property
+    def view_group(self):
+        for g in self.groups():
+            if hasattr(g, 'map_buffer'):
                 return g
 
     def wake(self):
@@ -238,15 +263,12 @@ class GameEntity(pygame.sprite.DirtySprite):
         self.image = self.image.convert_alpha()
 
     def update(self, delta):
+        self.timers.update(delta)
+
         if self._pickup_cooldown:
             self._pickup_cooldown -= delta
             if self._pickup_cooldown < 0:
                 self._pickup_cooldown = 0
-
-        for entity in self.carried:
-            entity.dirty = 1
-            entity.position = self.position + (0, 0, self.rect.height)
-            entity.stop()
 
         if self.move_sound:
             if abs(self.acceleration) > 0:
@@ -258,6 +280,12 @@ class GameEntity(pygame.sprite.DirtySprite):
                 if self._playing_move_sound:
                     self.move_sound.fadeout(200)
                     self._playing_move_sound = False
+
+        if self._attached is not None:
+            self.stop()
+            self.dirty = 1
+            entity, anchor = self._attached
+            self.position = entity.position + anchor
 
     @property
     def flipped(self):
