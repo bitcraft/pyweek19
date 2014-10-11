@@ -13,12 +13,14 @@ class Hero(GameEntity):
         self.move_sound = resources.sounds['scifidrone.wav']
         self._playing_move_sound = False
 
-    def handle_internal_events(self, scene):
-        pass
-
     def handle_pygame_events(self, events):
         moved = False
         pressed = pygame.key.get_pressed()
+        grounded = self.position.z == self.velocity.z == 0
+        moving = self.velocity.x or self.velocity.y or self.velocity.z
+
+        if not grounded:
+            return
 
         if pressed[K_DOWN]:
             self.acceleration.y = self.movement_accel

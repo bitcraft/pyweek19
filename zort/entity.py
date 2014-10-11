@@ -188,8 +188,8 @@ class GameEntity(pygame.sprite.DirtySprite):
         self.rect = self.image.get_rect()
         self.dirty = 1
         self.move_sound = None
+        self.carried = None
         self._playing_move_sound = False
-        self.carried = set()
         self.pickup_item_sound = resources.sounds['woosh1.ogg']
         self.drop_item_sound = resources.sounds['woosh2.ogg']
         self.bounce_sound = resources.sounds['boing-slow.ogg']
@@ -221,7 +221,7 @@ class GameEntity(pygame.sprite.DirtySprite):
                 self.carried = set(self._collided)
                 for entity in self.carried:
                     entity._layer = 3
-                    entity.attach(self, (0, 0, -.3))
+                    entity.attach(self, (0, 0, -20))
             else:
                 self.drop()
 

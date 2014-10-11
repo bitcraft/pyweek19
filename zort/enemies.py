@@ -19,7 +19,7 @@ __all__ = ['Enemy',
 class Enemy(GameEntity):
     def __init__(self, filename):
         super(Enemy, self).__init__(filename)
-        self.move_sound = resources.sounds['lose7.ogg']
+        self.move_sound = resources.sounds['scifidrone.wav']
         self.target_position = None
         self.home_position = None
         self.ramble_radius = 2
@@ -57,8 +57,7 @@ class Enemy(GameEntity):
             if not self.path:
                 pos = sprites_to_hex(self.position)
                 next = sprites_to_hex(hpos)
-                self.path = scene.model.pathfind(
-                    pos, next, self.ramble_radius)[0]
+                self.path = scene.model.pathfind(pos, next)[0]
                 self.cells_followed = 0
                 fsm.seek_player()
         elif fsm.isstate('seeking'):
@@ -66,8 +65,7 @@ class Enemy(GameEntity):
                 if self.cells_followed < self.follow_persistence:
                     pos = sprites_to_hex(self.position)
                     next = sprites_to_hex(hpos)
-                    self.path = scene.model.pathfind(
-                        pos, next, self.ramble_radius)[0]
+                    self.path = scene.model.pathfind(pos, next)[0]
                 else:
                     fsm.go_home()
 
@@ -103,7 +101,7 @@ class Enemy(GameEntity):
                     pos, home, self.ramble_radius, blacklist)[0]
 
     def update(self, delta):
-        super(GameEntity, self).update(delta)
+        super(Enemy, self).update(delta)
 
         fsm = self.fsm
         grounded = self.position.z == self.velocity.z == 0
@@ -186,7 +184,7 @@ class Saucer(Enemy):
                                'dst': 'seeking'}
                           ]})
 
-        t = Task(self.shoot, random.randint(1000, 3000))
+        t = Task(self.shoot, random.randint(3000, 6000))
         self.timers.add(t)
 
     def update(self, delta):
@@ -218,7 +216,7 @@ class Saucer(Enemy):
                     self.target_position = None
 
     def shoot(self):
-        t = Task(self.shoot, random.randint(1000, 3000))
+        t = Task(self.shoot, random.randint(3000, 6000))
         self.timers.add(t)
 
         self.laser_sound.play()
