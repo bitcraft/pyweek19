@@ -6,7 +6,7 @@ from zort import config
 from zort import resources
 from zort.hex_model import *
 from zort.entity import *
-from zort.environ import maze
+from zort.dialog import Dialog
 from zort.scenes import Scene
 from zort.euclid import Point2, Vector3
 from zort.hero import Hero
@@ -52,8 +52,9 @@ class LevelScene(Scene):
         self.velocity_updates = None
         self.internal_event_group = None
         self.pygame_event_group = None
-        self.timers = None
         self.mode = None
+        self.timers = None
+        self.dialog = None
         self.view = None
         self.model = None
         self.hero = None
@@ -138,7 +139,7 @@ class LevelScene(Scene):
         if self.needs_refresh:
             dirty = [surface.get_rect()]
             self.view.needs_refresh = True
-            self.mode.needs_refresh = True
+            self.dialog.needs_refresh = True
             self.needs_refresh = False
             refreshed = True
 
@@ -155,10 +156,10 @@ class LevelScene(Scene):
             if not refreshed:
                 dirty.extend(_dirty)
 
-        _dirty = self.mode.draw(surface)
+        _dirty = self.dialog.draw(surface)
         if _dirty:
             _damage = _dirty[0].unionall(_dirty)
-            damage[self.mode] = _damage
+            damage[self.dialog] = _damage
             if not refreshed:
                 dirty.extend(_dirty)
 
@@ -194,6 +195,7 @@ class LevelScene(Scene):
         print("Resuming level scene")
 
     def load_level(self, level_name=None):
+        # teardown whatever needs to be torn down here
         self.model = HexMapModel()
         self.view = hex_view.HexMapView(
             self, self.model, config.getint('display', 'hex_radius'))
@@ -205,9 +207,15 @@ class LevelScene(Scene):
         self.pygame_event_group = pygame.sprite.Group()
         self.timers = pygame.sprite.Group()
         self.mode = EditMode(self)
+        self.dialog = Dialog()
+        self.internal_event_group.add(self.dialog)
         if self.hero is None:
             self.new_hero()
-        # teardown whatever needs to be torn down here
         if level_name is None:
             level_name = next((k for k in maps.keys()))
         self.current_level_module = loader.load_level(level_name, self)
+
+        def f():
+            self.raise_event("scene", "dialog-show", heading="Going Down!")
+        t = Task(f, 1000)
+        self.timers.add(t)
