@@ -195,19 +195,26 @@ class HexMapModel(object):
         :param radius: axial coords
         :return: list of coords
         """
+        wall_offset = [0, .1]
         retval = list()
         round_coords = [int(i) for i in hex_round(coords)]
-        neighbors = list(self.surrounding(round_coords))
+        neighbors = list(util.surrounding_noclip(round_coords))
+
+        if not len(set(neighbors)) == 6:
+            pass
+
         for n in neighbors:
             neigh = tuple([int(i) for i in n])
             cell = self._data.get(neigh, None)
-            if not cell:
+
+            if cell is None:
                 continue
 
             if not cell.raised:
                 continue
 
-            if collide_hex(coords, neigh, radius, .9):
+            new = coords[0] - wall_offset[0], coords[1] - wall_offset[1]
+            if collide_hex(new, neigh, radius, .9):
                 retval.append(neigh)
         return retval
 
@@ -379,8 +386,6 @@ class HexMapModel(object):
 
             open_set.remove(current)
             closed_set.add(current)
-            for coord in self.surrounding(current):
-                print(coord, end)
             cells = filter(
                 cell_available,
                 ((self.dist(coord, end) + self.get_cell(coord).cost, coord)

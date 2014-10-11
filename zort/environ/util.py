@@ -20,7 +20,7 @@ def surrounding_clip(coord, lower, upper):
 
 
 def surrounding_noclip(coord):
-    return ((coord[0]+n[0], coord[1]+n[1]) for n in neighbor_mat)
+    return [(coord[0]+n[0], coord[1]+n[1]) for n in neighbor_mat]
 
 
 def surrounding(lower=None, upper=None):
