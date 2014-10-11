@@ -27,7 +27,11 @@ def setup_level(level_scene):
     level_scene.build_door("test-door", (14, 8))
     level_scene.raise_event(button, 'Switch', key="test-door", state=True)
 
-    e = ShipPart('smallRockStone.png', level_scene.load_level)
+    e = ShipPart(
+        'smallRockStone.png',
+        level_scene.load_level,
+        kwargs={"level_name": "planisborn"})
+
     level_scene.add_entity(e, (16, 10))
 
     # dialog must be called after video is ready, so give it a delay
