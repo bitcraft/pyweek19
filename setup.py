@@ -98,7 +98,7 @@ import shutil
 try:
     cmd = sys.argv[1]
 except IndexError:
-    print 'Usage: setup.py install|py2exe|py2app|cx_freeze'
+    print('Usage: setup.py install|py2exe|py2app|cx_freeze')
     raise SystemExit
 
 # utility for adding subdirectories
@@ -153,6 +153,7 @@ if cmd not in "py2exe py2app cx_freeze".split():
 
 # build the py2exe target
 if cmd in ('py2exe',):
+    import numpy
     dist_dir = os.path.join('dist',METADATA['py2exe.target'])
     data_dir = dist_dir
 
@@ -204,10 +205,10 @@ if cmd == 'cx_freeze':
     dist_dir = os.path.join('dist', app_dist_dir)
     data_dir = dist_dir
 
-    modules_exclude = "tcl,tk"
+    modules_exclude = "tk, tcl"
     cmd_args = (METADATA['cx_freeze.cmd'], dist_dir, METADATA['cx_freeze.binary'], modules_exclude)
     sys_cmd = '%s --install-dir=%s --target-name=%s --exclude-modules=%s run_game.py' % cmd_args
-    print sys_cmd
+    print(sys_cmd)
     os.system(sys_cmd)
 
     import shutil
