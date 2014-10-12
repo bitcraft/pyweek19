@@ -17,12 +17,13 @@ class LevelSceneMode(object):
 
     def get_nearest_cell(self, coords):
         _coords = self.scene.view.coords_from_surface(coords)
-        if _coords is not None:
-            _coords = hex_round(_coords)
-            print('highlighted cell is (ever): {}'.format(_coords))
+        #if _coords is not None:
+        #    _coords = hex_round(_coords)
         return self.scene.view.cell_from_surface(coords)
 
     def update(self, delta, events):
+        return
+
         for event in events:
             if event.type == MOUSEMOTION:
                 cell = self.get_nearest_cell(event.pos)

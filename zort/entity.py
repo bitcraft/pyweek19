@@ -297,5 +297,6 @@ class ShipPart(CallbackEntity):
     def __init__(self, filename, *args, **kwargs):
         super(ShipPart, self).__init__(filename, *args, **kwargs)
         self.bounce_sound = resources.sounds['platesHit5.ogg']
+        self.bounce_sound.set_volume(.2)
         self.radius = .5
         self.update_image()

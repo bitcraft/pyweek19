@@ -19,7 +19,7 @@ class Hero(GameEntity):
     def __init__(self, filename):
         super(Hero, self).__init__(filename)
         self.movement_accel = config.getfloat('world', 'player_move_accel')
-        self.move_sound = resources.sounds['scifidrone.wav']
+        self.move_sound = resources.sounds['scifidrone.ogg']
         self._playing_move_sound = False
         self._layer = 2
 
@@ -29,8 +29,8 @@ class Hero(GameEntity):
         grounded = self.position.z == self.velocity.z == 0
         moving = self.velocity.x or self.velocity.y or self.velocity.z
 
+        self.wake()
         if not grounded:
-            self.wake()
             return
 
         if pressed[K_DOWN]:

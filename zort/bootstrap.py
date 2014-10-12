@@ -31,7 +31,6 @@ def bootstrap_game():
     pygame.display.flip()
 
     for path, thing in resources.load():
-        print(path, thing)
         logger.info('loaded %s', path)
         pygame.event.pump()
 

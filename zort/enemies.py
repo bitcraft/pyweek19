@@ -29,7 +29,7 @@ class Enemy(GameEntity):
 
     def __init__(self, filename):
         super(Enemy, self).__init__(filename)
-        self.move_sound = resources.sounds['scifidrone.wav']
+        self.move_sound = resources.sounds['scifidrone.ogg']
         self.target_position = None
         self.home_position = None
         self.ramble_radius = 4
@@ -178,7 +178,7 @@ class Saucer(Enemy):
     # pours sauce?  idk.
     def __init__(self, filename):
         super(Saucer, self).__init__(filename)
-        self.laser_sound = resources.sounds['z_laser-gun-2.wav']
+        self.laser_sound = resources.sounds['z_laser-gun-2.ogg']
         #self.move_sound = resources.sounds['lose7.ogg']
         self.ramble_radius = 20
         self.follow_persistence = self.ramble_radius
