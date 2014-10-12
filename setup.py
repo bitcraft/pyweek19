@@ -20,11 +20,10 @@ TODO = open('TODO.txt').read()
 METADATA = {
     'name':APP_NAME,
     'version':          '0.0.1',
-    'license':          'short_licence',
-    'description':      'yourgamedescription',
-    'author':           'yourgameauthors',
-    #'author_email':     '',
-    'url':              'yourgameurl',
+    'license':          'BSD License',
+    'description':      'Zort the Explorer',
+    'author':           'bitcraft, wkmanire, AlecksG',
+    'url':              'https://github.com/bitcraft/pyweek19',
     'classifiers':      [
             'Development Status :: 4 - Beta',
             'Intended Audience :: End Users/Desktop',

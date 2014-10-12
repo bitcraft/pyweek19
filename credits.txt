@@ -1,3 +1,5 @@
+
+All images in “tiles” folder:
 ###############################################################################
 
 	Hexagon tiles by Kenney Vleugels (www.kenney.nl)
@@ -37,9 +39,6 @@ bart
 warp.wav
 http://opengameart.org/content/warp-engine-engage-sound
 
-various voices
-http://opengameart.org/content/24-cute-fighting-game-voice-recordings
-
 
 Tim Mortimer
 space gui sounds
@@ -48,19 +47,6 @@ http://opengameart.org/content/4-sci-fi-menu-sounds
 Blender Foundation
 bounce
 http://opengameart.org/content/funny-comic-cartoon-bounce-sound
-
-applause
-http://opengameart.org/content/applause
-
--Hero_of_the_Winds-
-spring00.wav
-http://www.freesound.org/people/-Hero_of_the_Winds-/sounds/221875/
-
-
-zandernoriega
-http://www.freesound.org/people/zandernoriega/packs/10063/
-all sounds with 'z_' prefix
-attribution not required, but given anyway
 
 
 MODULAR SPACESHIPS
