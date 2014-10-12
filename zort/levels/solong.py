@@ -10,6 +10,7 @@ an obvious path, one door and one switch to go through.
 # import your game entities here
 # implement any level specific enemies here
 
+import pygame, sys
 from zort.entity import *
 from zort.enemies import *
 from zort.hero import Hero
@@ -31,7 +32,11 @@ def setup_level(level_scene):
     level_scene.build_door("test-door", (14, 8))
     level_scene.raise_event(button, 'Switch', key="test-door", state=True)
 
-    e = ShipPart('shipPart4.png', level_scene.load_level)
+    def end():
+        pygame.quit()
+        sys.exit()
+
+    e = ShipPart('shipPart4.png', end)
     e.scale = .25
     e.update_image()
     level_scene.add_entity(e, (16, 10))
