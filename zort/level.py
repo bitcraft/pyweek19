@@ -102,7 +102,7 @@ class LevelScene(Scene):
         self.dialog = None
         self.view = None
         self.model = None
-        self.hero = None
+        self._hero = None
         self.hud = None
         self.time = None
 
@@ -117,17 +117,9 @@ class LevelScene(Scene):
 
     def new_hero(self):
         # adds new hero, but doesn't remove old one
-        self.hero = self.build_entity(Hero, 'alienBlue.png', (1, 1))
+        self._hero = self.build_entity(Hero, 'alienBlue.png', (1, 1))
         self.velocity_updates.collide_walls.add(self.hero)
-        self.pygame_event_group.add(self.hero)
-
-    def reset_hero(self):
-        self.hero.position = Vector3(0, 0, 0)
-        self.hero.acceleration = Vector3(0, 0, 0)
-        self.hero.velocity = Vector3(0, 0, 0)
-        self.add_entity(self.hero, (1, 1))
-        self.velocity_updates.collide_walls.add(self.hero)
-        self.pygame_event_group.add(self.hero)
+        self.pygame_event_group.add(self._hero)
 
     def build_entity(self, enemy_class, enemy_sprite_file_name, position):
         entity = enemy_class(enemy_sprite_file_name)
@@ -222,6 +214,10 @@ class LevelScene(Scene):
         self.damage = damage
         return dirty
 
+    @property
+    def hero(self):
+        return self._hero
+
     def clear(self, surface):
         self.view.clear(surface)
 
@@ -269,10 +265,7 @@ class LevelScene(Scene):
         self.dialog = Dialog()
         self.internal_event_group.add(self.dialog)
         self.build_hud()
-        if self.hero is None:
-            self.new_hero()
-        else:
-            self.reset_hero()
+        self.new_hero()
         if level_name is None:
             level_name = next((k for k in maps.keys()))
         self.current_level_module = loader.load_level(level_name, self)
