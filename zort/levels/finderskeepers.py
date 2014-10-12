@@ -32,7 +32,7 @@ def setup_level(level_scene):
     level_scene.raise_event(button, 'Switch', key="test-door", state=True)
 
     e = ShipPart('shipPart2.png', level_scene.load_level,
-                 kwargs={"level_name": "shallnotpass"})
+                 kwargs={"level_name": "solong"})
     e.scale = .35
     e.update_image()
     level_scene.add_entity(e, (16, 9))

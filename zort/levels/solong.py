@@ -36,10 +36,13 @@ def setup_level(level_scene):
     e.update_image()
     level_scene.add_entity(e, (16, 10))
 
-    # # start the silly timer to drop powerups
-    # #timer = Task(self.new_powerup, 5000, -1)
-    # #self.timers.add(timer)
+    # dialog must be called after video is ready, so give it a delay
+    def show_dialog():
+        level_scene.raise_event("scene", "dialog-show",
+                                heading="So Long")
 
+    t = Task(show_dialog, 1000)
+    level_scene.timers.add(t)
 
 def handle_internal_events(level_scene):
     """

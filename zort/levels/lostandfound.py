@@ -44,7 +44,7 @@ def setup_level(level_scene):
     e.update_image()
 
     e = ShipPart('shipPart6.png', level_scene.load_level,
-                 kwargs={"level_name": "finderskeepers"})
+                 kwargs={"level_name": "solong"})
     e.scale = .5
     e.update_image()
     level_scene.add_entity(e, (16, 10))

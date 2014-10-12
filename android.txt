@@ -1,4 +1,4 @@
 title=zort
-author=the_python_gurus
+author=the_pygame_gurus
 api=1
 orientation=landscape

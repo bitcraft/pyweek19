@@ -3,8 +3,8 @@ Zort the Explorer
 
 Entry in PyWeek #19  <http://www.pyweek.org/12/>
 URL: https://github.com/bitcraft/pyweek19
-Team: The Python Gurus (leave the "Team: bit")
-Members: bitcraft, wkmanire, AlecksG (leave the "Members: bit")
+Team: The Pygame Gurus
+Members: bitcraft, wkmanire, AlecksG
 License: see LICENSE.txt
 
 

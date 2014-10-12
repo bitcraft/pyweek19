@@ -31,3 +31,10 @@ placeholder
 placeholder2
 
 =
+
+So Long
+=======
+
+Thank you for playing 'Zort the Explorer!  We ran out of time and couldnt complete the game.  The fact that are reading this dialog means that miracles really do happen.  We look forward to participating next pyweek!  --The pygame Gurus
+
+=
